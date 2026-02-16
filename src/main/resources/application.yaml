@@ -1,0 +1,29 @@
+spring:
+  config:
+    import: optional:file:.env[.properties]
+  application:
+    name: HitsClass
+  datasource:
+    url: jdbc:postgresql://localhost:5433/hits_class_db
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+      ddl-auto: update
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+jwt:
+  secret:
+    access: dmVyeS1zdHJvbmctc2VjcmV0LWZvci1hY2Nlc3MtdG9rZW4tMDAx
+    refresh: dmVyeS1zdHJvbmctc2VjcmV0LWZvci1yZWZyZXNoLXRva2VuLTAwMg==
+  lifetime:
+    access-minutes: 50
+    refresh-days: 30

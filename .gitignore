@@ -1,6 +1,5 @@
 .aiassistant
 .env
-/src/main/resources/application.yaml
 target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
