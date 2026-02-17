@@ -8,7 +8,6 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface UserMapper {
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "role", ignore = true)
     @Mapping(target = "passwordHash", ignore = true)
     @Mapping(target = "refreshToken", ignore = true)
     @Mapping(target = "refreshTokenExpiryDate", ignore = true)

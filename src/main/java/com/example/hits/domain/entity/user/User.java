@@ -1,5 +1,6 @@
 package com.example.hits.domain.entity.user;
 
+import com.example.hits.domain.entity.usercourse.UserCourse;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
@@ -9,34 +10,48 @@ import org.hibernate.validator.constraints.Length;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "users")
+@Table(name = "user")
 @Data
 @Accessors(chain = true)
 public class User {
+
     @Id
     private UUID id;
+
     @NotNull
-    @Length(min = 2, max = 255)
-    public String firstName;
+    @Length(min = 2, max = 128)
+    private String firstName;
+
     @NotNull
-    @Length(min = 2, max = 255)
-    public String lastName;
+    @Length(min = 2, max = 128)
+    private String lastName;
+
     @NotNull
     @Email
-    public String email;
+    private String email;
+
+    @OneToMany(mappedBy = "user")
+    private List<UserCourse> userCourses;
+
     @NotNull
-    public LocalDate birthday;
+    private LocalDate birthday;
+
     @NotNull
-    public String city;
-    @Enumerated(EnumType.STRING)
-    @NotNull
-    public UserRole role;
+    private String city;
+
     @Column(length = 400)
-    public String refreshToken;
-    public Instant refreshTokenExpiryDate;
+    private String refreshToken;
+
+    private Instant refreshTokenExpiryDate;
+
     @NotNull
-    public String passwordHash;
+    private String passwordHash;
+
+    @NotNull
+    private LocalDateTime createdAt;
 }

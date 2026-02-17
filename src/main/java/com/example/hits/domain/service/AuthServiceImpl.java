@@ -8,7 +8,6 @@ import com.example.hits.application.repository.UserRepository;
 import com.example.hits.application.service.AuthService;
 import com.example.hits.application.service.LoggedOutTokenService;
 import com.example.hits.application.util.JwtUtil;
-import com.example.hits.domain.entity.user.UserRole;
 import com.example.hits.domain.mapper.UserMapper;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +15,7 @@ import org.apache.coyote.BadRequestException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.UUID;
 
@@ -39,7 +39,7 @@ public class AuthServiceImpl implements AuthService {
         var user = userMapper.toEntity(userRegisterModel);
         user.setId(UUID.randomUUID())
                 .setPasswordHash(passwordEncoder.encode(userRegisterModel.getPassword()))
-                .setRole(UserRole.USER);
+                .setCreatedAt(LocalDateTime.now());
         var accessToken = jwtUtil.generateAccessToken(user);
         var refreshToken = jwtUtil.generateRefreshToken(user);
         user.setRefreshToken(refreshToken);

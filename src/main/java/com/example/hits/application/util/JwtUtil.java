@@ -4,9 +4,6 @@ import com.example.hits.application.handler.ExceptionWrapper;
 import com.example.hits.domain.entity.user.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.Keys;
-import jakarta.annotation.PostConstruct;
 import jakarta.security.auth.message.AuthException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -39,7 +36,6 @@ public class JwtUtil {
                 .signWith(jwtAccessSecret)
                 .claim("user_id", user.getId().toString())
                 .claim("token_id", UUID.randomUUID().toString())
-                .claim("role", user.getRole())
                 .compact();
     }
 

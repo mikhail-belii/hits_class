@@ -2,7 +2,7 @@ package com.example.hits.application.util;
 
 import com.example.hits.application.handler.ExceptionWrapper;
 import com.example.hits.domain.entity.user.User;
-import com.example.hits.domain.entity.user.UserRole;
+import com.example.hits.domain.entity.user.UserCourseRole;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -38,8 +38,7 @@ public class JwtUtilTest {
                 "refreshLifetimeDays", refreshLifetimeDays);
 
         testUser = new User()
-                .setId(UUID.randomUUID())
-                .setRole(UserRole.USER);
+                .setId(UUID.randomUUID());
     }
 
     @Test
@@ -59,7 +58,6 @@ public class JwtUtilTest {
         var tokenId = claims.get("token_id", String.class);
 
         Assertions.assertEquals(testUser.getId().toString(), userId);
-        Assertions.assertEquals(UserRole.USER.toString(), userRole);
         Assertions.assertNotNull(tokenId);
     }
 
@@ -87,7 +85,6 @@ public class JwtUtilTest {
         Claims claims = jwtUtil.parseAccessClaims(token);
 
         Assertions.assertEquals(testUser.getId().toString(), claims.get("user_id", String.class));
-        Assertions.assertEquals(UserRole.USER.toString(), claims.get("role", String.class));
     }
 
     @Test
