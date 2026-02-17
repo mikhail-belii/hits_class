@@ -1,0 +1,35 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="CreatePostCommentTable" author="KBelovodchenko">
+        <createTable tableName="post_comment">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_post_comment"/>
+            </column>
+            <column name="text" type="VARCHAR(2048)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="DATETIME"/>
+            <column name="post_id" type="UUID"/>
+            <column name="author_id" type="UUID"/>
+            <column name="created_at" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseColumnNames="author_id"
+                                 baseTableName="post_comment"
+                                 constraintName="FK_POST_COMMENT_ON_AUTHOR"
+                                 referencedColumnNames="id"
+                                 referencedTableName="user"/>
+
+        <addForeignKeyConstraint baseColumnNames="post_id"
+                                 baseTableName="post_comment"
+                                 constraintName="FK_POST_COMMENT_ON_POST"
+                                 referencedColumnNames="id"
+                                 referencedTableName="post"/>
+    </changeSet>
+
+</databaseChangeLog>

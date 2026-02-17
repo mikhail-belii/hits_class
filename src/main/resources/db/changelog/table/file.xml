@@ -1,0 +1,34 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="CreateFileTable" author="KBelovodchenko">
+        <createTable tableName="file">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_file"/>
+            </column>
+            <column name="path" type="VARCHAR(256)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="post_id" type="UUID"/>
+            <column name="task_answer_id" type="UUID"/>
+            <column name="created_at" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseColumnNames="post_id"
+                                 baseTableName="file"
+                                 constraintName="FK_FILE_ON_POST"
+                                 referencedColumnNames="id"
+                                 referencedTableName="post"/>
+
+        <addForeignKeyConstraint baseColumnNames="task_answer_id"
+                                 baseTableName="file"
+                                 constraintName="FK_FILE_ON_TASK_ANSWER"
+                                 referencedColumnNames="id"
+                                 referencedTableName="task_answer"/>
+    </changeSet>
+
+</databaseChangeLog>

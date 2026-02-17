@@ -1,0 +1,33 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="CreateTaskAnswerTable" author="KBelovodchenko">
+        <createTable tableName="task_answer">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_task_answer"/>
+            </column>
+            <column name="score" type="INT"/>
+            <column name="submitted_at" type="DATETIME"/>
+            <column name="status" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="UUID"/>
+            <column name="post_id" type="UUID"/>
+        </createTable>
+
+        <addForeignKeyConstraint baseColumnNames="user_id"
+                                 baseTableName="task_answer"
+                                 constraintName="FK_TASK_ANSWER_ON_USER"
+                                 referencedColumnNames="id"
+                                 referencedTableName="user"/>
+
+        <addForeignKeyConstraint baseColumnNames="post_id"
+                                 baseTableName="task_answer"
+                                 constraintName="FK_TASK_ANSWER_ON_POST"
+                                 referencedColumnNames="id"
+                                 referencedTableName="post"/>
+    </changeSet>
+
+</databaseChangeLog>

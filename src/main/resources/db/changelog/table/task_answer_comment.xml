@@ -1,0 +1,34 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="CreateTaskAnswerCommentTable" author="KBelovodchenko">
+        <createTable tableName="task_answer_comment">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_task_answer_comment"/>
+            </column>
+            <column name="text" type="VARCHAR(2048)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="task_answer_id" type="UUID"/>
+            <column name="author_id" type="UUID"/>
+            <column name="created_at" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseColumnNames="author_id"
+                                 baseTableName="task_answer_comment"
+                                 constraintName="FK_TASK_ANSWER_COMMENT_ON_AUTHOR"
+                                 referencedColumnNames="id"
+                                 referencedTableName="user"/>
+
+        <addForeignKeyConstraint baseColumnNames="task_answer_id"
+                                 baseTableName="task_answer_comment"
+                                 constraintName="FK_TASK_ANSWER_COMMENT_ON_TASK_ANSWER"
+                                 referencedColumnNames="id"
+                                 referencedTableName="task_answer"/>
+    </changeSet>
+
+</databaseChangeLog>
