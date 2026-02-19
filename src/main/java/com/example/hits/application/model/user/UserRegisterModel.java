@@ -19,9 +19,11 @@ public class UserRegisterModel {
     public String password;
     @NotNull
     @Size(min = 2, max = 255)
+    @Pattern(regexp = "^[\\u0410-\\u042F\\u0430-\\u044F\\u0401\\u0451]+$", message = "firstName must contain only Russian letters")
     public String firstName;
     @NotNull
     @Size(min = 2, max = 255)
+    @Pattern(regexp = "^[\\u0410-\\u042F\\u0430-\\u044F\\u0401\\u0451]+$", message = "lastName must contain only Russian letters")
     public String lastName;
     @NotNull
     public LocalDate birthday;
@@ -30,3 +32,4 @@ public class UserRegisterModel {
     @Size(min = 2, max = 255)
     public String city;
 }
+
