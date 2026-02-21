@@ -32,7 +32,7 @@ public class PostController {
     }
 
     @GetMapping("/{postId}")
-    public PostModel getPost(@PathVariable UUID courseId, @PathVariable UUID postId, @RequestAttribute("userId") UUID userId) {
+    public PostModel getPost(@PathVariable UUID courseId, @PathVariable UUID postId, @RequestAttribute("userId") UUID userId) throws ExceptionWrapper {
         return postService.getPostInfo(courseId, postId, userId);
     }
 

@@ -13,8 +13,10 @@ import com.example.hits.application.util.PostUtility;
 import com.example.hits.domain.entity.course.Course;
 import com.example.hits.domain.entity.post.Post;
 import com.example.hits.domain.entity.user.User;
+import com.example.hits.domain.mapper.PostMapper;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.ExtensionMethod;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -24,6 +26,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@ExtensionMethod(PostMapper.class)
 public class PostService {
 
     private final CourseRepository courseRepository;
@@ -49,8 +52,8 @@ public class PostService {
         return new ArrayList<>();
     }
 
-    public PostModel getPostInfo(UUID courseId, UUID postId, UUID userId) {
-        return new PostModel();
+    public PostModel getPostInfo(UUID courseId, UUID postId, UUID userId) throws ExceptionWrapper {
+        return null;
     }
 
     public void updatePost(UUID courseId, UUID userId, PostUpdateModel postUpdateModel) {
@@ -80,5 +83,10 @@ public class PostService {
     private User findUserById(UUID userId) throws ExceptionWrapper {
         return userRepository.findById(userId)
                 .orElseThrow(ExceptionUtility::userNotFoundException);
+    }
+
+    private Post findPostById(UUID userId) throws ExceptionWrapper {
+        return postRepository.findById(userId)
+                .orElseThrow(ExceptionUtility::postNotFoundException);
     }
 }

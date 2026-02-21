@@ -1,0 +1,208 @@
+package com.example.hits.domain.service.post;
+
+import com.example.hits.application.handler.ExceptionWrapper;
+import com.example.hits.application.model.post.PostModel;
+import com.example.hits.application.repository.CourseRepository;
+import com.example.hits.application.repository.PostRepository;
+import com.example.hits.application.repository.UserRepository;
+import com.example.hits.domain.entity.course.Course;
+import com.example.hits.domain.entity.post.Post;
+import com.example.hits.domain.entity.post.PostType;
+import com.example.hits.domain.entity.user.User;
+import com.example.hits.domain.entity.user.UserCourseRole;
+import jakarta.persistence.EntityNotFoundException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import static com.example.hits.domain.service.post.PostServiceTestUtils.createCourseWithUserRole;
+import static com.example.hits.domain.service.post.PostServiceTestUtils.createUser;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+public class PostServiceGetPostsTests {
+    @Mock
+    private CourseRepository courseRepository;
+    @Mock
+    private PostRepository postRepository;
+    @Mock
+    private UserRepository userRepository;
+
+    @InjectMocks
+    private PostService postService;
+
+    @Test
+    void getClassPosts_validUserInCourse_returnsOnlyCoursePostsAsModels() {
+        UUID courseId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        User user = createUser(userId);
+        Course course = createCourseWithUserRole(user, UserCourseRole.STUDENT);
+        Course anotherCourse = createCourseWithUserRole(createUser(UUID.randomUUID()), UserCourseRole.STUDENT);
+        course.setId(courseId);
+
+        when(courseRepository.findById(courseId)).thenReturn(Optional.of(course));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(postRepository.findAll()).thenReturn(List.of(
+                createPost(UUID.randomUUID(), course, user, "post-1"),
+                createPost(UUID.randomUUID(), course, user, "post-2"),
+                createPost(UUID.randomUUID(), anotherCourse, user, "post-3")
+        ));
+
+        List<PostModel> posts = postService.getClassPosts(courseId, userId);
+
+        Assertions.assertEquals(2, posts.size());
+        Assertions.assertEquals("post-1", posts.get(0).getText());
+        Assertions.assertEquals("post-2", posts.get(1).getText());
+    }
+
+    @Test
+    void getClassPosts_courseNotFound_throwsEntityNotFoundException() {
+        UUID courseId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+
+        when(courseRepository.findById(courseId)).thenReturn(Optional.empty());
+
+        ExceptionWrapper exception = Assertions.assertThrows(
+                ExceptionWrapper.class,
+                () -> postService.getClassPosts(courseId, userId)
+        );
+
+        Assertions.assertEquals(EntityNotFoundException.class, exception.getExceptionClass());
+        Assertions.assertEquals("Course not found", exception.getErrors().get("courseId"));
+        verifyNoInteractions(userRepository, postRepository);
+    }
+
+    @Test
+    void getClassPosts_userNotFound_throwsEntityNotFoundException() {
+        UUID courseId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        User user = createUser(UUID.randomUUID());
+        Course course = createCourseWithUserRole(user, UserCourseRole.TEACHER);
+        course.setId(courseId);
+
+        when(courseRepository.findById(courseId)).thenReturn(Optional.of(course));
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        ExceptionWrapper exception = Assertions.assertThrows(
+                ExceptionWrapper.class,
+                () -> postService.getClassPosts(courseId, userId)
+        );
+
+        Assertions.assertEquals(EntityNotFoundException.class, exception.getExceptionClass());
+        Assertions.assertEquals("User not found", exception.getErrors().get("userId"));
+        verifyNoInteractions(postRepository);
+    }
+
+    @Test
+    void getClassPosts_userNotInCourse_throwsForbiddenStatusException() {
+        UUID courseId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+
+        User anotherUser = createUser(UUID.randomUUID());
+        Course course = createCourseWithUserRole(anotherUser, UserCourseRole.STUDENT);
+        course.setId(courseId);
+
+        when(courseRepository.findById(courseId)).thenReturn(Optional.of(course));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(createUser(userId)));
+
+        ExceptionWrapper exception = Assertions.assertThrows(
+                ExceptionWrapper.class,
+                () -> postService.getClassPosts(courseId, userId)
+        );
+
+        Assertions.assertEquals(ResponseStatusException.class, exception.getExceptionClass());
+        Assertions.assertEquals("User has no rights to this action", exception.getErrors().get("forbidden"));
+        verifyNoInteractions(postRepository);
+    }
+
+    @Test
+    void getPostInfo_validUserAndPost_returnsPostModel() throws ExceptionWrapper {
+        UUID courseId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        UUID postId = UUID.randomUUID();
+
+        User user = createUser(userId);
+        Course course = createCourseWithUserRole(user, UserCourseRole.STUDENT);
+        course.setId(courseId);
+        Post post = createPost(postId, course, user, "Бебебе");
+
+        when(courseRepository.findById(courseId)).thenReturn(Optional.of(course));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(postRepository.findById(postId)).thenReturn(Optional.of(post));
+
+        PostModel postModel = postService.getPostInfo(courseId, postId, userId);
+
+        Assertions.assertEquals(postId, postModel.getId());
+        Assertions.assertEquals("Бебебе", postModel.getText());
+    }
+
+    @Test
+    void getPostInfo_postNotFound_throwsEntityNotFoundException() {
+        UUID courseId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        UUID postId = UUID.randomUUID();
+
+        User user = createUser(userId);
+        Course course = createCourseWithUserRole(user, UserCourseRole.STUDENT);
+        course.setId(courseId);
+
+        when(courseRepository.findById(courseId)).thenReturn(Optional.of(course));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(postRepository.findById(postId)).thenReturn(Optional.empty());
+
+        ExceptionWrapper exception = Assertions.assertThrows(
+                ExceptionWrapper.class,
+                () -> postService.getPostInfo(courseId, postId, userId)
+        );
+
+        Assertions.assertEquals(EntityNotFoundException.class, exception.getExceptionClass());
+        Assertions.assertEquals("PostNotFound", exception.getErrors().get("postId"));
+    }
+
+    @Test
+    void getPostInfo_userHasNoAccess_throwsForbiddenStatusException() {
+        UUID courseId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        UUID postId = UUID.randomUUID();
+
+        User user = createUser(userId);
+        User anotherUser = createUser(UUID.randomUUID());
+
+        Course course = createCourseWithUserRole(anotherUser, UserCourseRole.STUDENT);
+        course.setId(courseId);
+        Post post = createPost(postId, course, anotherUser, "Всем привет");
+
+        when(courseRepository.findById(courseId)).thenReturn(Optional.of(course));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(postRepository.findById(postId)).thenReturn(Optional.of(post));
+
+        ExceptionWrapper exception = Assertions.assertThrows(
+                ExceptionWrapper.class,
+                () -> postService.getPostInfo(courseId, postId, userId)
+        );
+
+        Assertions.assertEquals(ResponseStatusException.class, exception.getExceptionClass());
+        Assertions.assertEquals("User has no rights to this action", exception.getErrors().get("forbidden"));
+    }
+
+    private static Post createPost(UUID postId, Course course, User author, String text) {
+        Post post = new Post();
+        post.setId(postId);
+        post.setCourse(course);
+        post.setAuthor(author);
+        post.setText(text);
+        post.setPostType(PostType.ANNOUNCEMENT);
+        post.setCreatedAt(LocalDateTime.now());
+        return post;
+    }
+}
