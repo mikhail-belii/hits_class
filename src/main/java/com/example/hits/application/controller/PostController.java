@@ -27,7 +27,7 @@ public class PostController {
     }
 
     @GetMapping
-    public List<PostModel> getCoursePosts(@PathVariable UUID courseId, @RequestAttribute("userId") UUID userId) {
+    public List<PostModel> getCoursePosts(@PathVariable UUID courseId, @RequestAttribute("userId") UUID userId) throws ExceptionWrapper {
         return postService.getClassPosts(courseId, userId);
     }
 

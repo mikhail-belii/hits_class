@@ -48,12 +48,30 @@ public class PostService {
         return new IdResponseModel(post.getId());
     }
 
-    public List<PostModel> getClassPosts(UUID courseId, UUID userId) {
-        return new ArrayList<>();
+    public List<PostModel> getClassPosts(UUID courseId, UUID userId) throws ExceptionWrapper {
+        Course course = getCourseById(courseId);
+        User user = findUserById(userId);
+
+        if (!PostUtility.isUserInCourse(course, user)) {
+            throw ExceptionUtility.forbiddenRightsException();
+        }
+
+        return postRepository.findAll().stream()
+                .filter(post -> post.getCourse() != null && post.getCourse().equals(course))
+                .map(PostMapper::toModel)
+                .toList();
     }
 
     public PostModel getPostInfo(UUID courseId, UUID postId, UUID userId) throws ExceptionWrapper {
-        return null;
+        Course course = getCourseById(courseId);
+        User user = findUserById(userId);
+        Post post = findPostById(postId);
+
+        if (!PostUtility.isPostAvailableForReading(course, post, user)) {
+            throw ExceptionUtility.badRequestException("You can't read this post");
+        }
+
+        return post.toModel();
     }
 
     public void updatePost(UUID courseId, UUID userId, PostUpdateModel postUpdateModel) {

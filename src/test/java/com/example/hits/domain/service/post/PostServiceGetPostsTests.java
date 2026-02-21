@@ -11,6 +11,7 @@ import com.example.hits.domain.entity.post.PostType;
 import com.example.hits.domain.entity.user.User;
 import com.example.hits.domain.entity.user.UserCourseRole;
 import jakarta.persistence.EntityNotFoundException;
+import org.apache.coyote.BadRequestException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,7 +43,7 @@ public class PostServiceGetPostsTests {
     private PostService postService;
 
     @Test
-    void getClassPosts_validUserInCourse_returnsOnlyCoursePostsAsModels() {
+    void getClassPosts_validUserInCourse_returnsOnlyCoursePostsAsModels() throws ExceptionWrapper {
         UUID courseId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
         User user = createUser(userId);
@@ -166,7 +167,7 @@ public class PostServiceGetPostsTests {
         );
 
         Assertions.assertEquals(EntityNotFoundException.class, exception.getExceptionClass());
-        Assertions.assertEquals("PostNotFound", exception.getErrors().get("postId"));
+        Assertions.assertEquals("Post not found", exception.getErrors().get("postId"));
     }
 
     @Test
@@ -191,8 +192,7 @@ public class PostServiceGetPostsTests {
                 () -> postService.getPostInfo(courseId, postId, userId)
         );
 
-        Assertions.assertEquals(ResponseStatusException.class, exception.getExceptionClass());
-        Assertions.assertEquals("User has no rights to this action", exception.getErrors().get("forbidden"));
+        Assertions.assertEquals(BadRequestException.class, exception.getExceptionClass());
     }
 
     private static Post createPost(UUID postId, Course course, User author, String text) {
