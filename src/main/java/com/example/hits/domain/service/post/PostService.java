@@ -41,7 +41,7 @@ public class PostService {
             throw ExceptionUtility.forbiddenRightsException();
         }
 
-        Post post = createPost(postCreateModel, user, course);
+        Post post = createPostFromModel(postCreateModel, user, course);
 
         postRepository.save(post);
 
@@ -82,7 +82,7 @@ public class PostService {
 
     }
 
-    private Post createPost(PostCreateModel postCreateModel, User author, Course course) {
+    private Post createPostFromModel(PostCreateModel postCreateModel, User author, Course course) {
         return new Post()
                 .setId(UUID.randomUUID())
                 .setText(postCreateModel.getText())
