@@ -14,13 +14,11 @@ import com.example.hits.domain.entity.course.Course;
 import com.example.hits.domain.entity.post.Post;
 import com.example.hits.domain.entity.user.User;
 import com.example.hits.domain.mapper.PostMapper;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.ExtensionMethod;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -74,12 +72,38 @@ public class PostService {
         return post.toModel();
     }
 
-    public void updatePost(UUID courseId, UUID userId, PostUpdateModel postUpdateModel) {
+    public void updatePost(UUID courseId, UUID postId, UUID userId, PostUpdateModel postUpdateModel) throws ExceptionWrapper {
+        Course course = getCourseById(courseId);
+        User user = findUserById(userId);
+        Post post = findPostById(postId);
 
+        if (!PostUtility.isAvailableForEditing(course, user)) {
+            throw ExceptionUtility.forbiddenRightsException();
+        }
+
+        if (post.getCourse() == null || !post.getCourse().equals(course)) {
+            throw ExceptionUtility.badRequestException("You can't edit this post");
+        }
+
+        post.setText(postUpdateModel.getText());
+        post.setUpdatedAt(LocalDateTime.now());
+        postRepository.save(post);
     }
 
-    public void deletePost(UUID courseId, UUID postId, UUID userId) {
+    public void deletePost(UUID courseId, UUID postId, UUID userId) throws ExceptionWrapper {
+        Course course = getCourseById(courseId);
+        User user = findUserById(userId);
+        Post post = findPostById(postId);
 
+        if (!PostUtility.isAvailableForEditing(course, user)) {
+            throw ExceptionUtility.forbiddenRightsException();
+        }
+
+        if (post.getCourse() == null || !post.getCourse().equals(course)) {
+            throw ExceptionUtility.badRequestException("You can't delete this post");
+        }
+
+        postRepository.delete(post);
     }
 
     private Post createPostFromModel(PostCreateModel postCreateModel, User author, Course course) {

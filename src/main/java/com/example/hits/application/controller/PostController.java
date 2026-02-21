@@ -40,12 +40,12 @@ public class PostController {
     public void updatePost(@PathVariable UUID courseId,
                            @PathVariable UUID postId,
                            @RequestBody PostUpdateModel postUpdateModel,
-                           @RequestAttribute("userId") String userId) {
-        postService.updatePost(courseId, postId, postUpdateModel);
+                           @RequestAttribute("userId") UUID userId) throws ExceptionWrapper {
+        postService.updatePost(courseId, postId, userId, postUpdateModel);
     }
 
     @DeleteMapping("/{postId}")
-    public void deletePost(@PathVariable UUID courseId, @PathVariable UUID postId, @RequestAttribute("userId") UUID userId) {
+    public void deletePost(@PathVariable UUID courseId, @PathVariable UUID postId, @RequestAttribute("userId") UUID userId) throws ExceptionWrapper {
         postService.deletePost(courseId, postId, userId);
     }
 }
