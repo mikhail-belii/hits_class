@@ -4,7 +4,9 @@ import com.example.hits.application.model.common.IdResponseModel;
 import com.example.hits.application.model.post.PostCreateModel;
 import com.example.hits.application.model.post.PostModel;
 import com.example.hits.application.model.post.PostUpdateModel;
+import com.example.hits.application.repository.CourseRepository;
 import com.example.hits.application.repository.PostRepository;
+import com.example.hits.application.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +18,9 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class PostService {
 
+    private final CourseRepository courseRepository;
     private final PostRepository postRepository;
+    private final UserRepository userRepository;
 
     public IdResponseModel createPost(UUID courseId, UUID userId, PostCreateModel postCreateModel) {
         return new IdResponseModel();
