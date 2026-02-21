@@ -1,5 +1,6 @@
 package com.example.hits.application.controller;
 
+import com.example.hits.application.handler.ExceptionWrapper;
 import com.example.hits.application.model.common.IdResponseModel;
 import com.example.hits.application.model.post.PostCreateModel;
 import com.example.hits.application.model.post.PostModel;
@@ -21,7 +22,7 @@ public class PostController {
     @PostMapping
     public IdResponseModel createPost(@PathVariable UUID courseId,
                                       @RequestBody PostCreateModel postCreateModel,
-                                      @RequestAttribute("userId") UUID userId) {
+                                      @RequestAttribute("userId") UUID userId) throws ExceptionWrapper {
         return postService.createPost(courseId, userId, postCreateModel);
     }
 
