@@ -1,5 +1,6 @@
 package com.example.hits.domain.entity.taskanswer;
 
+import com.example.hits.domain.entity.attachment.Attachment;
 import com.example.hits.domain.entity.course.Course;
 import com.example.hits.domain.entity.file.File;
 import com.example.hits.domain.entity.post.Post;
@@ -35,7 +36,7 @@ public class TaskAnswer {
     private TaskAnswerStatus status;
 
     @OneToMany(mappedBy = "taskAnswer")
-    private List<File> files;
+    private List<Attachment> attachments;
 
     @OneToMany(mappedBy = "taskAnswer")
     private List<TaskAnswerComment> comments;
