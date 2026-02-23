@@ -2,10 +2,14 @@ package com.example.hits.domain.service.post;
 
 import com.example.hits.application.handler.ExceptionWrapper;
 import com.example.hits.application.model.common.IdResponseModel;
+import com.example.hits.application.model.file.FileModel;
+import com.example.hits.application.repository.AttachmentRepository;
 import com.example.hits.application.model.post.PostCreateModel;
 import com.example.hits.application.repository.CourseRepository;
+import com.example.hits.application.repository.FileRepository;
 import com.example.hits.application.repository.PostRepository;
 import com.example.hits.application.repository.UserRepository;
+import com.example.hits.domain.entity.file.File;
 import com.example.hits.domain.entity.course.Course;
 import com.example.hits.domain.entity.post.Post;
 import com.example.hits.domain.entity.post.PostType;
@@ -42,6 +46,10 @@ public class PostServiceCreatePostTests {
     private PostRepository postRepository;
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private FileRepository fileRepository;
+    @Mock
+    private AttachmentRepository attachmentRepository;
 
     @InjectMocks
     private PostService postService;
@@ -78,6 +86,46 @@ public class PostServiceCreatePostTests {
         Assertions.assertEquals(course, savedPost.getCourse());
         Assertions.assertEquals(user, savedPost.getAuthor());
         Assertions.assertNotNull(savedPost.getCreatedAt());
+    }
+
+    @Test
+    void createPost_withFiles_createsAttachments() throws ExceptionWrapper {
+        UUID courseId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        UUID firstFileId = UUID.randomUUID();
+        UUID secondFileId = UUID.randomUUID();
+
+        User teacher = createUser(userId);
+        Course course = createCourseWithUserRole(teacher, UserCourseRole.TEACHER);
+        PostCreateModel postCreateModel = new PostCreateModel(
+                "text",
+                List.of(new FileModel(firstFileId), new FileModel(secondFileId)),
+                PostType.ANNOUNCEMENT,
+                null
+        );
+
+        File firstFile = new File().setId(firstFileId).setUploader(teacher).setPath("files/uploads/a.txt").setOriginalName("a.txt").setCreatedAt(LocalDateTime.now());
+        File secondFile = new File().setId(secondFileId).setUploader(teacher).setPath("files/uploads/b.txt").setOriginalName("b.txt").setCreatedAt(LocalDateTime.now());
+
+        when(courseRepository.findById(courseId)).thenReturn(Optional.of(course));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(teacher));
+        when(fileRepository.findAllById(List.of(firstFileId, secondFileId))).thenReturn(List.of(firstFile, secondFile));
+        when(attachmentRepository.existsByFile_Id(firstFileId)).thenReturn(false);
+        when(attachmentRepository.existsByFile_Id(secondFileId)).thenReturn(false);
+        when(postRepository.save(any(Post.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        postService.createPost(courseId, userId, postCreateModel);
+
+        ArgumentCaptor<Post> postCaptor = ArgumentCaptor.forClass(Post.class);
+        verify(postRepository).save(postCaptor.capture());
+
+        Post savedPost = postCaptor.getValue();
+        Assertions.assertNotNull(savedPost.getAttachments());
+        Assertions.assertEquals(2, savedPost.getAttachments().size());
+        Assertions.assertEquals(firstFileId, savedPost.getAttachments().get(0).getFile().getId());
+        Assertions.assertEquals(secondFileId, savedPost.getAttachments().get(1).getFile().getId());
+        Assertions.assertEquals(savedPost, savedPost.getAttachments().get(0).getPost());
+        Assertions.assertEquals(savedPost, savedPost.getAttachments().get(1).getPost());
     }
 
     @Test

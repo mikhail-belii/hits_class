@@ -2,7 +2,7 @@ package com.example.hits.domain.mapper;
 
 import com.example.hits.application.model.comment.PostCommentModel;
 import com.example.hits.application.model.post.PostModel;
-import com.example.hits.domain.entity.file.File;
+import com.example.hits.domain.entity.attachment.Attachment;
 import com.example.hits.domain.entity.post.Post;
 import com.example.hits.domain.entity.post.PostType;
 import com.example.hits.domain.entity.postcomment.PostComment;
@@ -51,14 +51,14 @@ public class PostMapperTests {
         LocalDateTime createdAt = LocalDateTime.now().minusDays(1);
         LocalDateTime deadline = LocalDateTime.now().plusDays(7);
 
-        List<File> files = new ArrayList<>();
+        List<Attachment> attachments = new ArrayList<>();
         PostType postType = PostType.TASK;
 
         Post post = new Post();
         post.setId(postId);
         post.setText("Всем привет! Начинаем перекличку");
         post.setAuthor(author);
-        post.setFiles(files);
+        post.setAttachments(attachments);
         post.setPostType(postType);
         post.setCreatedAt(createdAt);
         post.setDeadline(deadline);
