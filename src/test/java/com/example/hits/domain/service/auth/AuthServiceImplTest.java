@@ -1,4 +1,4 @@
-package com.example.hits.domain.service;
+package com.example.hits.domain.service.auth;
 
 import com.example.hits.application.handler.ExceptionWrapper;
 import com.example.hits.application.model.user.UserLoginModel;

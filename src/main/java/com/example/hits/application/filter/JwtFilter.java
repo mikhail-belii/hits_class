@@ -44,10 +44,11 @@ public class JwtFilter implements Filter {
             request.setAttribute("userId", claims.get("user_id", String.class));
             request.setAttribute("role", claims.get("role", String.class));
             request.setAttribute("accessToken", token);
-            filterChain.doFilter(request, response);
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
         }
+        filterChain.doFilter(request, response);
     }
 
     private Boolean isPublicEndpoint(String uri) {
