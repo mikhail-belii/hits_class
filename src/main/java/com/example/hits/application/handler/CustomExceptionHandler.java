@@ -13,6 +13,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.nio.file.AccessDeniedException;
@@ -30,7 +31,8 @@ public class CustomExceptionHandler {
                 exceptionClass.equals(NoResourceFoundException.class) ||
                 exceptionClass.equals(ValidationException.class) ||
                 exceptionClass.equals(HttpMessageNotReadableException.class) ||
-                exceptionClass.equals(BadRequestException.class)) {
+                exceptionClass.equals(BadRequestException.class) ||
+                exceptionClass.equals(MaxUploadSizeExceededException.class)) {
             return new Pair<>(400, HttpStatus.BAD_REQUEST);
         }
         else if(exceptionClass.equals(AuthException.class)) {
@@ -109,6 +111,17 @@ public class CustomExceptionHandler {
         Pair<Integer, HttpStatus> statusCodeAndHttpStatus = getStatusCodeAndHttpStatusByExceptionClass(e.getClass());
         Dictionary<String, String> errors = new Hashtable<>();
         errors.put("url", e.getMessage());
+        ResponseModel response = new ResponseModel(statusCodeAndHttpStatus.first(), errors);
+        return new ResponseEntity<>(response, statusCodeAndHttpStatus.second());
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ResponseModel> handleMaxUploadSizeExceededException(
+            MaxUploadSizeExceededException e
+    ) {
+        Pair<Integer, HttpStatus> statusCodeAndHttpStatus = getStatusCodeAndHttpStatusByExceptionClass(e.getClass());
+        Dictionary<String, String> errors = new Hashtable<>();
+        errors.put("file", "File size must be less than or equal to 10 MB");
         ResponseModel response = new ResponseModel(statusCodeAndHttpStatus.first(), errors);
         return new ResponseEntity<>(response, statusCodeAndHttpStatus.second());
     }

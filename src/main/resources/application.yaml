@@ -25,6 +25,11 @@ spring:
     enabled: true
     change-log: classpath:db/changelog/db.changelog-master.xml
 
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 12MB
+
 jwt:
   secret:
     access: dmVyeS1zdHJvbmctc2VjcmV0LWZvci1hY2Nlc3MtdG9rZW4tMDAx
@@ -32,3 +37,5 @@ jwt:
   lifetime:
     access-minutes: 50
     refresh-days: 30
+
+file-storage-root: files/uploads
