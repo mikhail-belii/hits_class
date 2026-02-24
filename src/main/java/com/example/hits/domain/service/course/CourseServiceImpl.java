@@ -14,10 +14,11 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class CourseServiceImpl implements CourseService {
 
-    private CourseRepository courseRepository;
-    private CourseMapper courseMapper;
+    private final CourseRepository courseRepository;
+    private final CourseCodeGenerator courseCodeGenerator;
 
     public void createCourse(UUID requestingUserId, CourseCreateModel courseCreateModel) {
 
