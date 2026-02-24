@@ -1,0 +1,37 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="CreateAttachmentTable" author="MSidorov">
+        <createTable tableName="attachment">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_attachment"/>
+            </column>
+            <column name="file_id" type="UUID"/>
+            <column name="post_id" type="UUID"/>
+            <column name="task_answer_id" type="UUID"/>
+            <column name="created_at" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseColumnNames="file_id"
+                                 baseTableName="attachment"
+                                 constraintName="FK_ATTACHMENT_ON_FILE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="file"/>
+
+        <addForeignKeyConstraint baseColumnNames="post_id"
+                                 baseTableName="attachment"
+                                 constraintName="FK_ATTACHMENT_ON_POST"
+                                 referencedColumnNames="id"
+                                 referencedTableName="post"/>
+        <addForeignKeyConstraint baseColumnNames="task_answer_id"
+                                 baseTableName="attachment"
+                                 constraintName="FK_ATTACHMENT_ON_TASK_ANSWER"
+                                 referencedColumnNames="id"
+                                 referencedTableName="task_answer"/>
+    </changeSet>
+
+</databaseChangeLog>

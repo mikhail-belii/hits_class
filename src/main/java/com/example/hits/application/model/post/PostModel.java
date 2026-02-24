@@ -1,5 +1,6 @@
 package com.example.hits.application.model.post;
 
+import com.example.hits.application.model.attachment.AttachmentModel;
 import com.example.hits.application.model.comment.PostCommentModel;
 import com.example.hits.application.model.file.FileModel;
 import com.example.hits.application.model.user.UserModel;
@@ -25,7 +26,7 @@ public class PostModel {
 
     private UserModel author;
 
-    private List<FileModel> files;
+    private List<AttachmentModel> attachments;
 
     private PostType postType;
 

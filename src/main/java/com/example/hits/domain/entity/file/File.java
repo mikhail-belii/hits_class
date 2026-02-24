@@ -1,7 +1,6 @@
 package com.example.hits.domain.entity.file;
 
-import com.example.hits.domain.entity.post.Post;
-import com.example.hits.domain.entity.taskanswer.TaskAnswer;
+import com.example.hits.domain.entity.user.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -18,19 +17,14 @@ import java.util.UUID;
 public class File {
     @Id
     private UUID id;
-
     @NotNull
     @Length(max = 256)
     private String path;
-
+    @NotNull
+    private String originalName;
     @ManyToOne
-    @JoinColumn(name = "post_id")
-    private Post post;
-
-    @ManyToOne
-    @JoinColumn(name = "task_answer_id")
-    private TaskAnswer taskAnswer;
-
+    @JoinColumn(name = "uploader_id")
+    private User uploader;
     @NotNull
     private LocalDateTime createdAt;
 }

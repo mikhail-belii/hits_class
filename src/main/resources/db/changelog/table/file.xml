@@ -11,24 +11,20 @@
             <column name="path" type="VARCHAR(256)">
                 <constraints nullable="false"/>
             </column>
-            <column name="post_id" type="UUID"/>
-            <column name="task_answer_id" type="UUID"/>
+            <column name="original_name" type="VARCHAR(256)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="uploader_id" type="UUID"/>
             <column name="created_at" type="DATETIME">
                 <constraints nullable="false"/>
             </column>
         </createTable>
 
-        <addForeignKeyConstraint baseColumnNames="post_id"
+        <addForeignKeyConstraint baseColumnNames="uploader_id"
                                  baseTableName="file"
-                                 constraintName="FK_FILE_ON_POST"
+                                 constraintName="FK_FILE_ON_USER"
                                  referencedColumnNames="id"
-                                 referencedTableName="post"/>
-
-        <addForeignKeyConstraint baseColumnNames="task_answer_id"
-                                 baseTableName="file"
-                                 constraintName="FK_FILE_ON_TASK_ANSWER"
-                                 referencedColumnNames="id"
-                                 referencedTableName="task_answer"/>
+                                 referencedTableName="user"/>
     </changeSet>
 
 </databaseChangeLog>
