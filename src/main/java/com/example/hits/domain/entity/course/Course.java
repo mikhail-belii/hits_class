@@ -26,6 +26,7 @@ public class Course {
 
     @NotNull
     @Length(min = 8, max = 8)
+    @Column(unique = true)
     private String joinCode;
 
     @NotNull

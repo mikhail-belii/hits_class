@@ -8,7 +8,9 @@
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_attachment"/>
             </column>
-            <column name="file_id" type="UUID"/>
+            <column name="file_id" type="UUID">
+                <constraints unique="true"/>
+            </column>
             <column name="post_id" type="UUID"/>
             <column name="task_answer_id" type="UUID"/>
             <column name="created_at" type="DATETIME">

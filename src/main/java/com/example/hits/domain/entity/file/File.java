@@ -21,6 +21,7 @@ public class File {
     @Length(max = 256)
     private String path;
     @NotNull
+    @Length(max = 256)
     private String originalName;
     @ManyToOne
     @JoinColumn(name = "uploader_id")

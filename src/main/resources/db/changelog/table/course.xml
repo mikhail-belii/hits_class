@@ -12,7 +12,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="join_code" type="VARCHAR(8)">
-                <constraints nullable="false"/>
+                <constraints nullable="false" unique="true"/>
             </column>
             <column name="description" type="VARCHAR(512)">
                 <constraints nullable="false"/>
