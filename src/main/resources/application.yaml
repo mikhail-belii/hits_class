@@ -4,7 +4,7 @@ spring:
   application:
     name: HitsClass
   datasource:
-    url: jdbc:postgresql://localhost:5433/hits_class_db
+    url: jdbc:postgresql://localhost:5432/hits_class_db
     username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
     driver-class-name: org.postgresql.Driver
