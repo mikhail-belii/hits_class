@@ -30,7 +30,6 @@ public class CourseUtility {
     public boolean isUserAvailableToRemoveOtherUserFromCourse(
             Course course,
             User user,
-            UserCourseRole newUserCourseRole,
             User requestingUser
     ) {
         return false;
