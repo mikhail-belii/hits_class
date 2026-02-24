@@ -16,10 +16,19 @@ import java.util.List;
 public class CourseMapper {
 
     public CourseModel toModel(Course courseEntity) {
-        return new CourseModel();
+        return new CourseModel()
+                .setId(courseEntity.getId())
+                .setName(courseEntity.getName())
+                .setDescription(courseEntity.getDescription())
+                .setCreatedAt(courseEntity.getCreatedAt())
+                .setJoinCode(courseEntity.getJoinCode())
+                .setIsArchived(courseEntity.getIsArchived());
     }
 
     public CourseShortModel toShortModel(Course courseEntity) {
-        return new CourseShortModel();
+        return new CourseShortModel()
+                .setId(courseEntity.getId())
+                .setName(courseEntity.getName())
+                .setDescription(courseEntity.getDescription());
     }
 }

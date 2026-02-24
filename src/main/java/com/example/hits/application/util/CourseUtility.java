@@ -11,11 +11,12 @@ import java.util.Optional;
 @UtilityClass
 public class CourseUtility {
     public boolean isCourseAvailableForEditing(Course course, User user) {
-        return false;
+        var userCourse = getUserCourse(course, user);
+        return userCourse.isPresent() && userCourse.get().getUserRole() == UserCourseRole.HEAD_TEACHER;
     }
 
     public boolean isCourseAvailableForArchiving(Course course, User user) {
-        return false;
+        return isCourseAvailableForEditing(course, user);
     }
 
     public boolean isUserAvailableToChangeOtherUserRoleOnCourse(
@@ -24,7 +25,15 @@ public class CourseUtility {
             UserCourseRole newUserCourseRole,
             User requestingUser
     ) {
-        return false;
+        var requestingUserCourse = getUserCourse(course, requestingUser);
+        var userCourse = getUserCourse(course, user);
+
+        if (userCourse.isEmpty() || requestingUserCourse.isEmpty()) {
+            return false;
+        }
+
+        return UserCourseRole.isUserHigherThan(requestingUserCourse.get().getUserRole(), newUserCourseRole)
+                && UserCourseRole.isUserHigherThan(requestingUserCourse.get().getUserRole(), userCourse.get().getUserRole());
     }
 
     public boolean isUserAvailableToRemoveOtherUserFromCourse(
@@ -32,7 +41,14 @@ public class CourseUtility {
             User user,
             User requestingUser
     ) {
-        return false;
+        var requestingUserCourse = getUserCourse(course, requestingUser);
+        var userCourse = getUserCourse(course, user);
+
+        if (userCourse.isEmpty() || requestingUserCourse.isEmpty()) {
+            return false;
+        }
+
+        return UserCourseRole.isUserHigherThan(requestingUserCourse.get().getUserRole(), userCourse.get().getUserRole());
     }
 
     private Optional<UserCourse> getUserCourse(Course course, User user) {
