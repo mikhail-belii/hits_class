@@ -8,10 +8,18 @@ import com.example.hits.application.repository.CourseRepository;
 import com.example.hits.application.repository.UserCourseRepository;
 import com.example.hits.application.repository.UserRepository;
 import com.example.hits.application.service.CourseService;
+import com.example.hits.application.util.CourseUtility;
+import com.example.hits.application.util.ExceptionUtility;
+import com.example.hits.domain.entity.course.Course;
+import com.example.hits.domain.entity.user.User;
 import com.example.hits.domain.entity.user.UserCourseRole;
-import com.example.hits.domain.mapper.CourseMapper;
+import com.example.hits.domain.entity.usercourse.UserCourse;
+import lombok.RequiredArgsConstructor;
+import org.apache.coyote.BadRequestException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -24,12 +32,34 @@ public class CourseServiceImpl implements CourseService {
     private final UserCourseRepository userCourseRepository;
     private final CourseCodeGenerator courseCodeGenerator;
 
+    @Transactional
     public void createCourse(UUID requestingUserId, CourseCreateModel courseCreateModel) {
+        User requestingUser = userRepository.findById(requestingUserId)
+                .orElseThrow(ExceptionUtility::userNotFoundException);
+        Course course = createCourseFromModel(courseCreateModel);
+        UserCourse userCourse = createUserCourseOnCourseCreation(course, requestingUser);
 
+        courseRepository.save(course);
+        userCourseRepository.save(userCourse);
+
+        courseRepository.flush();
     }
 
     public void editCourse(UUID requestingUserId, UUID courseId, CourseEditModel courseEditModel) {
+        User requestingUser = userRepository.findById(requestingUserId)
+                .orElseThrow(ExceptionUtility::userNotFoundException);
+        Course editingCourse = courseRepository.findById(courseId)
+                .orElseThrow(ExceptionUtility::courseNotFoundException);
 
+        if (!CourseUtility.isCourseAvailableForEditing(editingCourse, requestingUser)) {
+            throw ExceptionUtility.forbiddenRightsException();
+        }
+
+        editingCourse
+            .setName(courseEditModel.getName())
+            .setDescription(courseEditModel.getDescription());
+
+        courseRepository.saveAndFlush(editingCourse);
     }
 
     public void archiveCourse(UUID requestingUserId, boolean isArchived, UUID courseId){
@@ -63,6 +93,25 @@ public class CourseServiceImpl implements CourseService {
             UUID userId
     ) {
 
+    }
+
+    private Course createCourseFromModel(CourseCreateModel courseCreateModel) {
+        return new Course()
+                .setId(UUID.randomUUID())
+                .setName(courseCreateModel.getName())
+                .setDescription(courseCreateModel.getDescription())
+                .setIsArchived(false)
+                .setJoinCode(courseCodeGenerator.generateNewCode())
+                .setCreatedAt(LocalDateTime.now());
+    }
+
+    private UserCourse createUserCourseOnCourseCreation(Course newCourse, User creator) {
+        return new UserCourse()
+                .setId(UUID.randomUUID())
+                .setCourse(newCourse)
+                .setUser(creator)
+                .setUserRole(UserCourseRole.HEAD_TEACHER)
+                .setCreatedAt(LocalDateTime.now());
     }
 
 }
