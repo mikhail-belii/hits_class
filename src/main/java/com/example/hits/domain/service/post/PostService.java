@@ -1,6 +1,5 @@
 package com.example.hits.domain.service.post;
 
-import com.example.hits.application.handler.ExceptionWrapper;
 import com.example.hits.application.model.common.IdResponseModel;
 import com.example.hits.application.model.file.FileModel;
 import com.example.hits.application.model.post.PostCreateModel;
@@ -45,7 +44,7 @@ public class PostService {
     private final AttachmentRepository attachmentRepository;
 
     @Transactional
-    public IdResponseModel createPost(UUID courseId, UUID userId, PostCreateModel postCreateModel) throws ExceptionWrapper {
+    public IdResponseModel createPost(UUID courseId, UUID userId, PostCreateModel postCreateModel) {
         Course course = getCourseById(courseId);
         User user = findUserById(userId);
 
@@ -61,7 +60,7 @@ public class PostService {
         return new IdResponseModel(post.getId());
     }
 
-    public List<PostModel> getClassPosts(UUID courseId, UUID userId) throws ExceptionWrapper {
+    public List<PostModel> getClassPosts(UUID courseId, UUID userId) {
         Course course = getCourseById(courseId);
         User user = findUserById(userId);
 
@@ -75,7 +74,7 @@ public class PostService {
                 .toList();
     }
 
-    public PostModel getPostInfo(UUID courseId, UUID postId, UUID userId) throws ExceptionWrapper {
+    public PostModel getPostInfo(UUID courseId, UUID postId, UUID userId) {
         Course course = getCourseById(courseId);
         User user = findUserById(userId);
         Post post = findPostById(postId);
@@ -88,7 +87,7 @@ public class PostService {
     }
 
     @Transactional
-    public void updatePost(UUID courseId, UUID postId, UUID userId, PostUpdateModel postUpdateModel) throws ExceptionWrapper {
+    public void updatePost(UUID courseId, UUID postId, UUID userId, PostUpdateModel postUpdateModel) {
         Course course = getCourseById(courseId);
         User user = findUserById(userId);
         Post post = findPostById(postId);
@@ -107,7 +106,7 @@ public class PostService {
         postRepository.save(post);
     }
 
-    public void deletePost(UUID courseId, UUID postId, UUID userId) throws ExceptionWrapper {
+    public void deletePost(UUID courseId, UUID postId, UUID userId) {
         Course course = getCourseById(courseId);
         User user = findUserById(userId);
         Post post = findPostById(postId);
@@ -137,7 +136,7 @@ public class PostService {
     private List<Attachment> buildPostAttachments(List<FileModel> fileModels,
                                                   Post post,
                                                   User user,
-                                                  UUID currentPostId) throws ExceptionWrapper {
+                                                  UUID currentPostId) {
         var fileIds = extractFileIds(fileModels);
         if (fileIds.isEmpty()) {
             return new ArrayList<>();
@@ -178,7 +177,7 @@ public class PostService {
         return attachments;
     }
 
-    private List<UUID> extractFileIds(List<FileModel> fileModels) throws ExceptionWrapper {
+    private List<UUID> extractFileIds(List<FileModel> fileModels) {
         if (fileModels == null || fileModels.isEmpty()) {
             return List.of();
         }
@@ -194,17 +193,17 @@ public class PostService {
         return new ArrayList<>(uniqueIds);
     }
 
-    private Course getCourseById(UUID courseId) throws ExceptionWrapper {
+    private Course getCourseById(UUID courseId) {
         return courseRepository.findById(courseId)
                 .orElseThrow(ExceptionUtility::courseNotFoundException);
     }
 
-    private User findUserById(UUID userId) throws ExceptionWrapper {
+    private User findUserById(UUID userId) {
         return userRepository.findById(userId)
                 .orElseThrow(ExceptionUtility::userNotFoundException);
     }
 
-    private Post findPostById(UUID userId) throws ExceptionWrapper {
+    private Post findPostById(UUID userId) {
         return postRepository.findById(userId)
                 .orElseThrow(ExceptionUtility::postNotFoundException);
     }

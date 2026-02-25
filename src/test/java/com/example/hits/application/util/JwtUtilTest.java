@@ -2,7 +2,6 @@ package com.example.hits.application.util;
 
 import com.example.hits.application.handler.ExceptionWrapper;
 import com.example.hits.domain.entity.user.User;
-import com.example.hits.domain.entity.user.UserCourseRole;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -123,7 +122,7 @@ public class JwtUtilTest {
     }
 
     @Test
-    public void getUserIdFromRefreshToken_validToken_returnsUserId() throws ExceptionWrapper {
+    public void getUserIdFromRefreshToken_validToken_returnsUserId() {
         var refreshToken = jwtUtil.generateRefreshToken(testUser);
 
         UUID userId = jwtUtil.getUserIdFromRefreshToken(refreshToken);

@@ -22,18 +22,18 @@ public class LoggedOutTokenServiceImpl implements LoggedOutTokenService {
 
 
     @Override
-    public void addLoggedOutToken(String token) throws ExceptionWrapper {
+    public void addLoggedOutToken(String token) {
         var tokenId = getTokenId(token);
         loggedOutTokens.put(tokenId, token);
     }
 
     @Override
-    public Boolean isTokenLoggedOut(String token) throws ExceptionWrapper {
+    public Boolean isTokenLoggedOut(String token) {
         var tokenId = getTokenId(token);
         return loggedOutTokens.getIfPresent(tokenId) != null;
     }
 
-    private String getTokenId(String token) throws ExceptionWrapper {
+    private String getTokenId(String token) {
         var claims = jwtUtil.parseAccessClaims(token);
 
         var tokenId = claims.get("token_id",  String.class);

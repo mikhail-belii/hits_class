@@ -1,6 +1,5 @@
 package com.example.hits.application.controller;
 
-import com.example.hits.application.handler.ExceptionWrapper;
 import com.example.hits.application.model.common.IdResponseModel;
 import com.example.hits.application.model.post.PostCreateModel;
 import com.example.hits.application.model.post.PostModel;
@@ -22,17 +21,17 @@ public class PostController {
     @PostMapping
     public IdResponseModel createPost(@PathVariable UUID courseId,
                                       @RequestBody PostCreateModel postCreateModel,
-                                      @RequestAttribute("userId") UUID userId) throws ExceptionWrapper {
+                                      @RequestAttribute("userId") UUID userId) {
         return postService.createPost(courseId, userId, postCreateModel);
     }
 
     @GetMapping
-    public List<PostModel> getCoursePosts(@PathVariable UUID courseId, @RequestAttribute("userId") UUID userId) throws ExceptionWrapper {
+    public List<PostModel> getCoursePosts(@PathVariable UUID courseId, @RequestAttribute("userId") UUID userId) {
         return postService.getClassPosts(courseId, userId);
     }
 
     @GetMapping("/{postId}")
-    public PostModel getPost(@PathVariable UUID courseId, @PathVariable UUID postId, @RequestAttribute("userId") UUID userId) throws ExceptionWrapper {
+    public PostModel getPost(@PathVariable UUID courseId, @PathVariable UUID postId, @RequestAttribute("userId") UUID userId) {
         return postService.getPostInfo(courseId, postId, userId);
     }
 
@@ -40,12 +39,12 @@ public class PostController {
     public void updatePost(@PathVariable UUID courseId,
                            @PathVariable UUID postId,
                            @RequestBody PostUpdateModel postUpdateModel,
-                           @RequestAttribute("userId") UUID userId) throws ExceptionWrapper {
+                           @RequestAttribute("userId") UUID userId) {
         postService.updatePost(courseId, postId, userId, postUpdateModel);
     }
 
     @DeleteMapping("/{postId}")
-    public void deletePost(@PathVariable UUID courseId, @PathVariable UUID postId, @RequestAttribute("userId") UUID userId) throws ExceptionWrapper {
+    public void deletePost(@PathVariable UUID courseId, @PathVariable UUID postId, @RequestAttribute("userId") UUID userId) {
         postService.deletePost(courseId, postId, userId);
     }
 }

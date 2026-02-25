@@ -38,7 +38,7 @@ public class PostServiceDeletePostTests {
     private PostService postService;
 
     @Test
-    void deletePost_validTeacherAndPostInCourse_deletesPost() throws ExceptionWrapper {
+    void deletePost_validTeacherAndPostInCourse_deletesPost() {
         UUID courseId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
         UUID postId = UUID.randomUUID();

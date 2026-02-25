@@ -1,6 +1,5 @@
 package com.example.hits.application.controller;
 
-import com.example.hits.application.handler.ExceptionWrapper;
 import com.example.hits.application.model.auth.RefreshTokenRequestModel;
 import com.example.hits.application.model.auth.TokenResponseModel;
 import com.example.hits.application.model.common.ResponseModel;
@@ -41,7 +40,7 @@ public class AuthController {
                             schema = @Schema(implementation = ResponseModel.class)
                     )})
     })
-    public TokenResponseModel register(@Valid @RequestBody UserRegisterModel userRegisterModel) throws ExceptionWrapper {
+    public TokenResponseModel register(@Valid @RequestBody UserRegisterModel userRegisterModel) {
         return authService.register(userRegisterModel);
     }
 
@@ -61,7 +60,7 @@ public class AuthController {
                             schema = @Schema(implementation = ResponseModel.class)
                     )})
     })
-    public TokenResponseModel login(@Valid @RequestBody UserLoginModel userLoginModel) throws ExceptionWrapper {
+    public TokenResponseModel login(@Valid @RequestBody UserLoginModel userLoginModel) {
         return  authService.login(userLoginModel);
     }
 
@@ -81,7 +80,7 @@ public class AuthController {
                             schema = @Schema(implementation = ResponseModel.class)
                     )})
     })
-    public TokenResponseModel refreshTokens(@Valid @RequestBody RefreshTokenRequestModel model) throws ExceptionWrapper {
+    public TokenResponseModel refreshTokens(@Valid @RequestBody RefreshTokenRequestModel model) {
         return authService.refreshTokens(model.getRefreshToken());
     }
 
@@ -93,7 +92,7 @@ public class AuthController {
                     description = "Logout succeed")
     })
     public void logout(@RequestAttribute("userId") String userId,
-                       @RequestAttribute("accessToken") String accessToken) throws ExceptionWrapper {
+                       @RequestAttribute("accessToken") String accessToken) {
         authService.logout(UUID.fromString(userId), accessToken);
     }
 }

@@ -41,7 +41,7 @@ public class AuthServiceImplTest {
     private AuthServiceImpl authServiceImpl;
 
     @Test
-    public void register_freeEmail_returnsTokenResponse() throws ExceptionWrapper {
+    public void register_freeEmail_returnsTokenResponse() {
         var userRegisterModel = new UserRegisterModel();
         userRegisterModel.setEmail("email@mail.ru");
         userRegisterModel.setPassword("password");
@@ -83,7 +83,7 @@ public class AuthServiceImplTest {
     }
 
     @Test
-    public void login_correctEmailAndPassword_returnsTokenResponse() throws ExceptionWrapper {
+    public void login_correctEmailAndPassword_returnsTokenResponse() {
         var userLoginModel = new UserLoginModel();
         userLoginModel.setEmail("email@mail.ru");
         userLoginModel.setPassword("password");
@@ -167,7 +167,7 @@ public class AuthServiceImplTest {
     }
 
     @Test
-    public void refreshTokens_userNotFound_throwsExceptionWrapper() throws ExceptionWrapper {
+    public void refreshTokens_userNotFound_throwsExceptionWrapper() {
         var refreshToken = "refresh_token";
         var userId = UUID.randomUUID();
 
@@ -189,7 +189,7 @@ public class AuthServiceImplTest {
     }
 
     @Test
-    public void refreshTokens_refreshTokenMismatch_throwsExceptionWrapper() throws ExceptionWrapper {
+    public void refreshTokens_refreshTokenMismatch_throwsExceptionWrapper() {
         var refreshToken = "refresh_token";
         var userId = UUID.randomUUID();
         var user = new User()
@@ -217,7 +217,7 @@ public class AuthServiceImplTest {
     }
 
     @Test
-    public void refreshTokens_expiredRefreshToken_throwsExceptionWrapper() throws ExceptionWrapper {
+    public void refreshTokens_expiredRefreshToken_throwsExceptionWrapper() {
         var refreshToken = "refresh_token";
         var userId = UUID.randomUUID();
         var user = new User()
@@ -245,7 +245,7 @@ public class AuthServiceImplTest {
     }
 
     @Test
-    public void refreshTokens_validRefreshToken_returnsTokenResponse() throws ExceptionWrapper {
+    public void refreshTokens_validRefreshToken_returnsTokenResponse() {
         var refreshToken = "refresh_token";
         var userId = UUID.randomUUID();
         var user = new User()
@@ -278,7 +278,7 @@ public class AuthServiceImplTest {
     }
 
     @Test
-    public void logout_userNotFound_throwsExceptionWrapper() throws ExceptionWrapper {
+    public void logout_userNotFound_throwsExceptionWrapper() {
         var userId = UUID.randomUUID();
         var accessToken = "access_token";
 
@@ -297,7 +297,7 @@ public class AuthServiceImplTest {
     }
 
     @Test
-    public void logout_existingUser_clearsRefreshTokenAndSavesUser() throws ExceptionWrapper {
+    public void logout_existingUser_clearsRefreshTokenAndSavesUser() {
         var userId = UUID.randomUUID();
         var accessToken = "access_token";
         var user = new User()

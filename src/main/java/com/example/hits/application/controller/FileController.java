@@ -1,6 +1,5 @@
 package com.example.hits.application.controller;
 
-import com.example.hits.application.handler.ExceptionWrapper;
 import com.example.hits.application.model.common.ResponseModel;
 import com.example.hits.application.model.file.FileModel;
 import com.example.hits.application.service.FileService;
@@ -54,7 +53,7 @@ public class FileController {
                     )})
     })
     public FileModel upload(@RequestParam("file") MultipartFile file,
-                            @RequestAttribute("userId") String userId) throws ExceptionWrapper {
+                            @RequestAttribute("userId") String userId) {
         validateSize(file);
         validateExtension(file);
 
@@ -71,7 +70,7 @@ public class FileController {
         return fileService.getById(fileId);
     }
 
-    private void validateSize(MultipartFile file) throws ExceptionWrapper {
+    private void validateSize(MultipartFile file){
         if (file == null || file.isEmpty()) {
             throw ExceptionUtility.badRequestException("File is empty");
         }
@@ -81,7 +80,7 @@ public class FileController {
         }
     }
 
-    private void validateExtension(MultipartFile file) throws ExceptionWrapper {
+    private void validateExtension(MultipartFile file) {
         String fileName = file.getOriginalFilename();
         if (fileName == null || fileName.isBlank() || !fileName.contains(".")) {
             throw ExceptionUtility.badRequestException("File extension is required");

@@ -1,6 +1,5 @@
 package com.example.hits.application.service;
 
-
 import com.example.hits.application.model.course.CourseCreateModel;
 import com.example.hits.application.model.course.CourseEditModel;
 import com.example.hits.application.model.course.CourseShortModel;

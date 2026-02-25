@@ -15,7 +15,6 @@ import com.example.hits.domain.entity.post.Post;
 import com.example.hits.domain.entity.post.PostType;
 import com.example.hits.domain.entity.user.User;
 import com.example.hits.domain.entity.user.UserCourseRole;
-import com.example.hits.domain.entity.usercourse.UserCourse;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -55,7 +54,7 @@ public class PostServiceCreatePostTests {
     private PostService postService;
 
     @Test
-    void createPost_validTeacher_savesPostAndReturnsId() throws ExceptionWrapper {
+    void createPost_validTeacher_savesPostAndReturnsId() {
         UUID courseId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
         User user = createUser(userId);
@@ -89,7 +88,7 @@ public class PostServiceCreatePostTests {
     }
 
     @Test
-    void createPost_withFiles_createsAttachments() throws ExceptionWrapper {
+    void createPost_withFiles_createsAttachments() {
         UUID courseId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
         UUID firstFileId = UUID.randomUUID();
