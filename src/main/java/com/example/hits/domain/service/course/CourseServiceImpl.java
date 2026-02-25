@@ -5,6 +5,8 @@ import com.example.hits.application.model.course.CourseEditModel;
 import com.example.hits.application.model.course.CourseShortModel;
 import com.example.hits.application.model.course.UserCourseModel;
 import com.example.hits.application.repository.CourseRepository;
+import com.example.hits.application.repository.UserCourseRepository;
+import com.example.hits.application.repository.UserRepository;
 import com.example.hits.application.service.CourseService;
 import com.example.hits.domain.entity.user.UserCourseRole;
 import com.example.hits.domain.mapper.CourseMapper;
@@ -17,7 +19,9 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class CourseServiceImpl implements CourseService {
 
+    private final UserRepository userRepository;
     private final CourseRepository courseRepository;
+    private final UserCourseRepository userCourseRepository;
     private final CourseCodeGenerator courseCodeGenerator;
 
     public void createCourse(UUID requestingUserId, CourseCreateModel courseCreateModel) {
