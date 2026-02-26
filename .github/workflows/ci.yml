@@ -44,7 +44,14 @@ jobs:
           SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5433/app
           SPRING_DATASOURCE_USERNAME: app
           SPRING_DATASOURCE_PASSWORD: app
-        run: ./mvnw -B -Dsonar.token=$SONAR_TOKEN verify sonar:sonar
+        run: >
+          ./mvnw -B
+          -Dsonar.host.url=https://sonarcloud.io
+          -Dsonar.token=$SONAR_TOKEN
+          -Dsonar.organization=mikhail-belii
+          -Dsonar.projectKey=mikhail-belii_hits_class
+          -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+          verify sonar:sonar
 
       - name: Upload JaCoCo report
         uses: actions/upload-artifact@v4
