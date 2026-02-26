@@ -48,3 +48,9 @@ jobs:
         with:
           name: 'jacoco-html'
           path: target/site/jacoco
+
+      - name: SonarCloud
+        uses: SonarSource/sonarcloud-github-action@v3
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
