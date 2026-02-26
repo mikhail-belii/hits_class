@@ -18,7 +18,7 @@ jobs:
           cache: maven
 
       - name: Make mvnw executable
-        run: chmod -x mvnw
+        run: chmod +x ./mvnw
 
       - name: Run tests + coverage
         run: ./mvnw -B test
