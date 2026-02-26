@@ -38,21 +38,21 @@ jobs:
       - name: Make mvnw executable
         run: chmod +x ./mvnw
 
-      - name: Run tests + coverage
+      - name: Build, test, coverage, SonarCloud analyze
         env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5433/app
           SPRING_DATASOURCE_USERNAME: app
           SPRING_DATASOURCE_PASSWORD: app
-        run: ./mvnw -B test
+        run: >
+          ./mvnw -B
+          -Dsonar.organization=mikhail-belii
+          -Dsonar.projectKey=mikhail-belii_hits_class
+          -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+          verify sonar:sonar
 
       - name: Upload JaCoCo report
         uses: actions/upload-artifact@v4
         with:
-          name: 'jacoco-html'
+          name: jacoco-html
           path: target/site/jacoco
-
-      - name: SonarCloud
-        uses: SonarSource/sonarcloud-github-action@v3
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
