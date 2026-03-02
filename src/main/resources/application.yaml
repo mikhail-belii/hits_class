@@ -39,3 +39,7 @@ jwt:
     refresh-days: 30
 
 file-storage-root: files/uploads
+
+server:
+  servlet:
+    context-path: /hits-class
