@@ -15,7 +15,6 @@ import com.example.hits.domain.entity.user.User;
 import com.example.hits.domain.entity.user.UserCourseRole;
 import com.example.hits.domain.entity.usercourse.UserCourse;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.BadRequestException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -63,7 +62,18 @@ public class CourseServiceImpl implements CourseService {
     }
 
     public void archiveCourse(UUID requestingUserId, boolean isArchived, UUID courseId){
+        User requestingUser = userRepository.findById(requestingUserId)
+                .orElseThrow(ExceptionUtility::userNotFoundException);
+        Course editingCourse = courseRepository.findById(courseId)
+                .orElseThrow(ExceptionUtility::courseNotFoundException);
 
+        if (!CourseUtility.isCourseAvailableForEditing(editingCourse, requestingUser)) {
+            throw ExceptionUtility.forbiddenRightsException();
+        }
+
+        editingCourse.setIsArchived(isArchived);
+
+        courseRepository.saveAndFlush(editingCourse);
     }
 
     public List<UserCourseModel> getCourseUsers(UUID requestingUserId, UUID courseId) {
@@ -84,7 +94,22 @@ public class CourseServiceImpl implements CourseService {
             UUID userId,
             UserCourseRole newUserRole
     ) {
+        User requestingUser = userRepository.findById(requestingUserId)
+                .orElseThrow(ExceptionUtility::userNotFoundException);
+        User userToChange = userRepository.findById(userId)
+                .orElseThrow(ExceptionUtility::userNotFoundException);
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(ExceptionUtility::courseNotFoundException);
 
+        if (!CourseUtility.isUserAvailableToChangeOtherUserRoleOnCourse(course, userToChange, newUserRole, requestingUser)) {
+            throw ExceptionUtility.forbiddenRightsException();
+        }
+
+        UserCourse userCourse = CourseUtility.getUserCourse(course, userToChange)
+                .orElseThrow(ExceptionUtility::userCourseNotFoundException);
+
+        userCourse.setUserRole(newUserRole);
+        userCourseRepository.saveAndFlush(userCourse);
     }
 
     public void removeUserFromCourse(
@@ -92,7 +117,21 @@ public class CourseServiceImpl implements CourseService {
             UUID courseId,
             UUID userId
     ) {
+        User requestingUser = userRepository.findById(requestingUserId)
+                .orElseThrow(ExceptionUtility::userNotFoundException);
+        User userToChange = userRepository.findById(userId)
+                .orElseThrow(ExceptionUtility::userNotFoundException);
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(ExceptionUtility::courseNotFoundException);
 
+        if (!CourseUtility.isUserAvailableToRemoveOtherUserFromCourse(course, userToChange, requestingUser)) {
+            throw ExceptionUtility.forbiddenRightsException();
+        }
+
+        UserCourse userCourse = CourseUtility.getUserCourse(course, userToChange)
+                .orElseThrow(ExceptionUtility::userCourseNotFoundException);
+
+        userCourseRepository.delete(userCourse);
     }
 
     private Course createCourseFromModel(CourseCreateModel courseCreateModel) {
