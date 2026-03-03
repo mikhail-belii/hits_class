@@ -51,7 +51,7 @@ public class CourseUtility {
         return UserCourseRole.isUserHigherThan(requestingUserCourse.get().getUserRole(), userCourse.get().getUserRole());
     }
 
-    private Optional<UserCourse> getUserCourse(Course course, User user) {
+    public Optional<UserCourse> getUserCourse(Course course, User user) {
         return course.getCourseUsers().stream()
                 .filter(uc -> uc.getUser().equals(user))
                 .findFirst();

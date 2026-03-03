@@ -8,10 +8,10 @@ import com.example.hits.domain.entity.usercourse.UserCourse;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class CourseUtilityTests {
     @Test
@@ -201,6 +201,28 @@ public class CourseUtilityTests {
         assertFalse(CourseUtility.isUserAvailableToRemoveOtherUserFromCourse(
                 course, targetUser, requestingUser
         ));
+    }
+
+    @Test
+    void getUserCourse_whenUserCourseExists_returnsUserCourse() {
+        User requestingUser = createUser();
+        UserCourse userCourse = createUserCourse(requestingUser, UserCourseRole.HEAD_TEACHER);
+        Course course = createCourse(List.of(userCourse));
+
+        Optional<UserCourse> result = CourseUtility.getUserCourse(course, requestingUser);
+
+        assertTrue(result.isPresent());
+        assertEquals(result.get(), userCourse);
+    }
+
+    @Test
+    void getUserCourse_whenUserCourseDoesNotExist_returnsOptionalEmpty() {
+        User requestingUser = createUser();
+        Course course = createCourse(List.of());
+
+        Optional<UserCourse> result = CourseUtility.getUserCourse(course, requestingUser);
+
+        assertTrue(result.isEmpty());
     }
 
     private static User createUser() {

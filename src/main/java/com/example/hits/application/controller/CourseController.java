@@ -21,60 +21,77 @@ public class CourseController {
     @PostMapping
     @Operation(summary = "Create course")
     public void createCourse(
-            @RequestAttribute("userId") UUID userId,
+            @RequestAttribute("userId") UUID requestingUserId,
             @RequestBody CourseCreateModel courseCreateModel
     ) {
-        courseService.createCourse(userId, courseCreateModel);
+        courseService.createCourse(requestingUserId, courseCreateModel);
     }
 
     @PatchMapping("/{courseId}")
     @Operation(summary = "Edit course")
     public void editCourse(
-            @RequestAttribute("userId") UUID userId,
+            @RequestAttribute("userId") UUID requestingUserId,
             @PathVariable("courseId") UUID courseId,
             @RequestBody CourseEditModel courseCreateModel
     ) {
-        courseService.editCourse(userId, courseId, courseCreateModel);
+        courseService.editCourse(requestingUserId, courseId, courseCreateModel);
     }
 
     @PatchMapping(value = "/{courseId}/archive")
     @Operation(summary = "Archive/Unarchive course")
-    public void archiveCourse(@RequestParam boolean isArchived, @PathVariable("courseId") UUID courseId) {
-
+    public void archiveCourse(
+            @RequestAttribute("userId") UUID requestingUserId,
+            @RequestParam boolean isArchived,
+            @PathVariable("courseId") UUID courseId
+    ) {
+        courseService.archiveCourse(requestingUserId, isArchived, courseId);
     }
 
     @GetMapping(value = "/{courseId}/users")
     @Operation(summary = "Get course users")
-    public List<UserCourseModel> getCourseUsers(@PathVariable("courseId") UUID courseId) {
+    public List<UserCourseModel> getCourseUsers(
+            @RequestAttribute("userId") UUID requestingUserId,
+            @PathVariable("courseId") UUID courseId
+    ) {
         return List.of();
     }
 
     @GetMapping(value = "/my")
     @Operation(summary = "Get user courses")
-    public List<CourseShortModel> getUserCourses(@RequestAttribute("userId") UUID userId, @RequestParam boolean isArchived) {
+    public List<CourseShortModel> getUserCourses(
+            @RequestAttribute("userId") UUID requestingUserId,
+            @RequestParam boolean isArchived
+    ) {
         return List.of();
     }
 
     @GetMapping(value = "/{courseId}")
     @Operation(summary = "Get concrete course")
-    public List<CourseModel> getConcreteCourse(@RequestAttribute("userId") UUID userId, @PathVariable("courseId") UUID courseId) {
+    public List<CourseModel> getConcreteCourse(
+            @RequestAttribute("userId") UUID requestingUserId,
+            @PathVariable("courseId") UUID courseId
+    ) {
         return List.of();
     }
 
     @GetMapping(value = "/join")
     @Operation(summary = "Join course by code")
-    public void joinCourseByCode(@RequestAttribute("userId") UUID userId, @RequestParam String code) {
+    public void joinCourseByCode(
+            @RequestAttribute("userId") UUID requestingUserId,
+            @RequestParam String code
+    ) {
 
     }
 
     @PostMapping(value = "/{courseId}/users/{userID}/role")
     @Operation(summary = "Change user role in course")
     public void changeUserRoleOnCourse(
+            @RequestAttribute("userId") UUID requestingUserId,
             @PathVariable("courseId") UUID courseId,
             @PathVariable("userID") UUID userId,
             @RequestParam UserCourseRole newUserRole
     ) {
-
+        courseService.changeUserRoleOnCourse(requestingUserId, courseId, userId, newUserRole);
     }
 
     @PostMapping(value = "/{courseId}/users/{userID}/remove")
@@ -84,7 +101,7 @@ public class CourseController {
             @PathVariable("userID") UUID userId,
             @RequestAttribute("userId") UUID requestingUserId
     ) {
-
+        courseService.removeUserFromCourse(requestingUserId, courseId, userId);
     }
 
 }

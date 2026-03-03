@@ -16,6 +16,12 @@ public class ExceptionUtility {
         return notFoundException;
     }
 
+    public ExceptionWrapper userCourseNotFoundException() {
+        var notFoundException = new ExceptionWrapper(new EntityNotFoundException("UserCourse not found"));
+        notFoundException.addError("userCourse", "User is not studying on this course");
+        return notFoundException;
+    }
+
     public ExceptionWrapper forbiddenRightsException() {
         var forbiddenException = new ExceptionWrapper(
                 new ResponseStatusException(FORBIDDEN, "User has no rights to this action")

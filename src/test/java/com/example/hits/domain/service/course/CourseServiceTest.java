@@ -42,15 +42,21 @@ public class CourseServiceTest {
     private CourseServiceImpl courseService;
 
     private User user;
+    private User userToChange;
     private Course course;
+    private UserCourse userCourse;
+    private UserCourse userToChangeCourse;
     private CourseEditModel editModel;
     private CourseCreateModel createModel;
 
     @BeforeEach
     public void init () {
         user = createUser(UUID.randomUUID());
+        userToChange = createUser(UUID.randomUUID());
         course = createCourse(UUID.randomUUID(), "Course Name", "Course Desc", false);
-        course.setCourseUsers(List.of(createUserCourse(user, course, UserCourseRole.HEAD_TEACHER)));
+        userCourse = createUserCourse(user, course, UserCourseRole.HEAD_TEACHER);
+        userToChangeCourse = createUserCourse(userToChange, course, UserCourseRole.TEACHER);
+        course.setCourseUsers(List.of(userCourse, userToChangeCourse));
         createModel = createCourseCreateModel("New Course", "New Course Description");
         editModel = createCourseEditModel("New Course", "New Course Description");
     }
@@ -170,5 +176,197 @@ public class CourseServiceTest {
         verify(courseRepository, times(0)).saveAndFlush(any());
     }
 
+    @Test
+    void archiveCourse_whenTryingToArchive_updateCourse() {
+        course.setIsArchived(false);
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(courseRepository.findById(course.getId())).thenReturn(Optional.of(course));
+        when(courseRepository.saveAndFlush(any(Course.class))).thenReturn(course);
+
+        courseService.archiveCourse(user.getId(), true, course.getId());
+
+        assertEquals(true, course.getIsArchived());
+        verify(courseRepository).saveAndFlush(course);
+    }
+
+    @Test
+    void archiveCourse_whenTryingToUnarchive_updateCourse() {
+        course.setIsArchived(true);
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(courseRepository.findById(course.getId())).thenReturn(Optional.of(course));
+        when(courseRepository.saveAndFlush(any(Course.class))).thenReturn(course);
+
+        courseService.archiveCourse(user.getId(), false, course.getId());
+
+        assertEquals(false, course.getIsArchived());
+        verify(courseRepository).saveAndFlush(course);
+    }
+
+    @Test
+    void archiveCourse_whenUserNotFound_throwsUserNotFoundException() {
+        when(userRepository.findById(user.getId())).thenReturn(Optional.empty());
+
+        assertThrows(ExceptionUtility.userNotFoundException().getClass(),
+                () -> courseService.archiveCourse(user.getId(), true, course.getId()));
+
+        verify(courseRepository, times(0)).saveAndFlush(any());
+    }
+
+    @Test
+    void archiveCourse_whenCourseNotFound_throwsCourseNotFoundException() {
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(courseRepository.findById(course.getId())).thenReturn(Optional.empty());
+
+        assertThrows(ExceptionUtility.courseNotFoundException().getClass(),
+                () -> courseService.archiveCourse(user.getId(), true, course.getId()));
+
+        verify(courseRepository, times(0)).saveAndFlush(any());
+    }
+
+    @Test
+    void archiveCourse_whenUserNotHaveEnoughRights_throwsForbiddenRightsException() {
+        userCourse.setUserRole(UserCourseRole.STUDENT);
+
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(courseRepository.findById(course.getId())).thenReturn(Optional.of(course));
+
+        assertThrows(ExceptionUtility.forbiddenRightsException().getClass(),
+                () -> courseService.archiveCourse(user.getId(), true, course.getId()));
+
+        verify(courseRepository, times(0)).saveAndFlush(any());
+    }
+
+    @Test
+    void changeUserRoleOnCourse_whenCanChangeRole_changeUserRole() {
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(userRepository.findById(userToChange.getId())).thenReturn(Optional.of(userToChange));
+        when(courseRepository.findById(course.getId())).thenReturn(Optional.of(course));
+
+        courseService.changeUserRoleOnCourse(user.getId(), course.getId(), userToChange.getId(), UserCourseRole.TEACHER);
+
+        assertEquals(UserCourseRole.TEACHER, userToChangeCourse.getUserRole());
+        verify(userCourseRepository).saveAndFlush(userToChangeCourse);
+    }
+
+    @Test
+    void changeUserRoleOnCourse_whenRequestingUserNotFound_throwsUserNotFoundException() {
+        when(userRepository.findById(user.getId())).thenReturn(Optional.empty());
+
+        assertThrows(ExceptionUtility.userNotFoundException().getClass(),
+                () -> courseService.changeUserRoleOnCourse(
+                        user.getId(),
+                        course.getId(),
+                        userToChange.getId(),
+                        UserCourseRole.TEACHER));
+
+        verify(userCourseRepository, times(0)).saveAndFlush(any());
+    }
+
+    @Test
+    void changeUserRoleOnCourse_whenUserToChangeNotFound_throwsUserNotFoundException() {
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(userRepository.findById(userToChange.getId())).thenReturn(Optional.empty());
+
+        assertThrows(ExceptionUtility.userNotFoundException().getClass(),
+                () -> courseService.changeUserRoleOnCourse(
+                        user.getId(),
+                        course.getId(),
+                        userToChange.getId(),
+                        UserCourseRole.TEACHER));
+
+        verify(userCourseRepository, times(0)).saveAndFlush(any());
+    }
+
+    @Test
+    void changeUserRoleOnCourse_whenCourseNotFound_throwsCourseNotFoundException() {
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(userRepository.findById(userToChange.getId())).thenReturn(Optional.of(userToChange));
+        when(courseRepository.findById(course.getId())).thenReturn(Optional.empty());
+
+        assertThrows(ExceptionUtility.courseNotFoundException().getClass(),
+                () -> courseService.changeUserRoleOnCourse(
+                        user.getId(),
+                        course.getId(),
+                        userToChange.getId(),
+                        UserCourseRole.TEACHER));
+
+        verify(userCourseRepository, times(0)).saveAndFlush(any());
+    }
+
+    @Test
+    void changeUserRoleOnCourse_whenUserNotHaveEnoughRights_throwsForbiddenRightsException() {
+        userCourse.setUserRole(UserCourseRole.TEACHER);
+
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(userRepository.findById(userToChange.getId())).thenReturn(Optional.of(userToChange));
+        when(courseRepository.findById(course.getId())).thenReturn(Optional.of(course));
+
+        assertThrows(ExceptionUtility.forbiddenRightsException().getClass(),
+                () -> courseService.changeUserRoleOnCourse(
+                        user.getId(),
+                        course.getId(),
+                        userToChange.getId(),
+                        UserCourseRole.TEACHER));
+
+        verify(userCourseRepository, times(0)).saveAndFlush(any());
+    }
+
+    @Test
+    void removeUserFromCourse_whenCanRemove_removeUserFromCourse() {
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(userRepository.findById(userToChange.getId())).thenReturn(Optional.of(userToChange));
+        when(courseRepository.findById(course.getId())).thenReturn(Optional.of(course));
+
+        courseService.removeUserFromCourse(user.getId(), course.getId(), userToChange.getId());
+
+        verify(userCourseRepository).delete(userToChangeCourse);
+    }
+
+    @Test
+    void removeUserFromCourse_whenRequestingUserNotFound_throwsUserNotFoundException() {
+        when(userRepository.findById(user.getId())).thenReturn(Optional.empty());
+
+        assertThrows(ExceptionUtility.userNotFoundException().getClass(),
+                () -> courseService.removeUserFromCourse(user.getId(), course.getId(), userToChange.getId()));
+
+        verify(userCourseRepository, times(0)).delete(any());
+    }
+
+    @Test
+    void removeUserFromCourse_whenTargetUserNotFound_ThrowsException() {
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(userRepository.findById(userToChange.getId())).thenReturn(Optional.empty());
+
+        assertThrows(ExceptionUtility.userNotFoundException().getClass(),
+                () -> courseService.removeUserFromCourse(user.getId(), course.getId(), userToChange.getId()));
+
+        verify(userCourseRepository, times(0)).delete(any());
+    }
+
+    @Test
+    void removeUserFromCourse_CourseNotFound_ThrowsException() {
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(userRepository.findById(userToChange.getId())).thenReturn(Optional.of(userToChange));
+        when(courseRepository.findById(course.getId())).thenReturn(Optional.empty());
+
+        assertThrows(ExceptionUtility.courseNotFoundException().getClass(),
+                () -> courseService.removeUserFromCourse(user.getId(), course.getId(), userToChange.getId()));
+
+        verify(userCourseRepository, times(0)).delete(any());
+    }
+
+    @Test
+    void removeUserFromCourse_whenUserNotHaveEnoughRights_throwsForbiddenRightsException() {
+        userCourse.setUserRole(UserCourseRole.TEACHER);
+
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(userRepository.findById(userToChange.getId())).thenReturn(Optional.of(userToChange));
+        when(courseRepository.findById(course.getId())).thenReturn(Optional.of(course));
+
+        assertThrows(ExceptionUtility.forbiddenRightsException().getClass(),
+                () -> courseService.removeUserFromCourse(user.getId(), course.getId(), userToChange.getId()));
+
+        verify(userCourseRepository, times(0)).delete(any());
+    }
 
 }
