@@ -79,7 +79,7 @@ public class JwtUtil {
                 .toInstant();
     }
 
-    public UUID getUserIdFromRefreshToken(String token) throws ExceptionWrapper {
+    public UUID getUserIdFromRefreshToken(String token) {
         var claims = parseRefreshClaims(token);
 
         var userId = claims.get("user_id",  String.class);

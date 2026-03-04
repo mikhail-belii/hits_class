@@ -44,7 +44,7 @@ public class FileServiceImplTest {
     Path tempDir;
 
     @Test
-    void upload_validFile_savesFileAndEntity() throws ExceptionWrapper {
+    void upload_validFile_savesFileAndEntity() {
         ReflectionTestUtils.setField(fileService, "storageRoot", tempDir.toString());
         UUID userId = UUID.randomUUID();
         User user = new User().setId(userId);

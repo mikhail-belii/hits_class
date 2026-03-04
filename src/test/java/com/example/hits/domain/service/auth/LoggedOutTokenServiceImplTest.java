@@ -21,7 +21,7 @@ public class LoggedOutTokenServiceImplTest {
     private LoggedOutTokenServiceImpl loggedOutTokenServiceImpl;
 
     @Test
-    public void addLoggedOutToken_validToken_tokenIsMarkedAsLoggedOut() throws ExceptionWrapper {
+    public void addLoggedOutToken_validToken_tokenIsMarkedAsLoggedOut() {
         var token = "access_token";
         var claims = org.mockito.Mockito.mock(Claims.class);
 
@@ -34,7 +34,7 @@ public class LoggedOutTokenServiceImplTest {
     }
 
     @Test
-    public void isTokenLoggedOut_tokenWasNotAdded_returnsFalse() throws ExceptionWrapper {
+    public void isTokenLoggedOut_tokenWasNotAdded_returnsFalse() {
         var token = "access_token";
         var claims = org.mockito.Mockito.mock(Claims.class);
 

@@ -6,13 +6,33 @@ import lombok.experimental.UtilityClass;
 import org.apache.coyote.BadRequestException;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.UUID;
+
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 
 @UtilityClass
 public class ExceptionUtility {
     public ExceptionWrapper courseNotFoundException() {
         var notFoundException = new ExceptionWrapper(new EntityNotFoundException("Course not found"));
-        notFoundException.addError("courseId", "Course not found");
+        notFoundException.addError("courseId", "Cannot find course with requested id");
+        return notFoundException;
+    }
+
+    public ExceptionWrapper courseNotFoundByCodeException() {
+        var notFoundException = new ExceptionWrapper(new EntityNotFoundException("Course with such join code not found"));
+        notFoundException.addError("joinCode", "Cannot find course with requested joinCode");
+        return notFoundException;
+    }
+
+    public ExceptionWrapper userCourseNotFoundException() {
+        var notFoundException = new ExceptionWrapper(new EntityNotFoundException("UserCourse not found"));
+        notFoundException.addError("userCourse", "User is not studying on this course");
+        return notFoundException;
+    }
+
+    public ExceptionWrapper userAlreadyParticipantInCourseException() {
+        var notFoundException = new ExceptionWrapper(new BadRequestException("User is already a participant in the course"));
+        notFoundException.addError("joinCode", "User is already a participant in the course with this joinCode");
         return notFoundException;
     }
 

@@ -6,7 +6,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 
 @Getter
-public class ExceptionWrapper extends Exception {
+public class ExceptionWrapper extends RuntimeException {
     private final Class<? extends Exception> exceptionClass;
     private final Dictionary<String, String> errors = new Hashtable<>();
 

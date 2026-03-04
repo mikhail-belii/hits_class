@@ -43,7 +43,7 @@ public class PostServiceGetPostsTests {
     private PostService postService;
 
     @Test
-    void getClassPosts_validUserInCourse_returnsOnlyCoursePostsAsModels() throws ExceptionWrapper {
+    void getClassPosts_validUserInCourse_returnsOnlyCoursePostsAsModels() {
         UUID courseId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
         User user = createUser(userId);
@@ -79,7 +79,7 @@ public class PostServiceGetPostsTests {
         );
 
         Assertions.assertEquals(EntityNotFoundException.class, exception.getExceptionClass());
-        Assertions.assertEquals("Course not found", exception.getErrors().get("courseId"));
+        Assertions.assertEquals("Cannot find course with requested id", exception.getErrors().get("courseId"));
         verifyNoInteractions(userRepository, postRepository);
     }
 
@@ -127,7 +127,7 @@ public class PostServiceGetPostsTests {
     }
 
     @Test
-    void getPostInfo_validUserAndPost_returnsPostModel() throws ExceptionWrapper {
+    void getPostInfo_validUserAndPost_returnsPostModel() {
         UUID courseId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
         UUID postId = UUID.randomUUID();

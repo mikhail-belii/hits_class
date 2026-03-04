@@ -29,7 +29,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserMapper userMapper;
 
     @Override
-    public TokenResponseModel register(UserRegisterModel userRegisterModel) throws ExceptionWrapper {
+    public TokenResponseModel register(UserRegisterModel userRegisterModel) {
         if (userRepository.existsByEmail(userRegisterModel.getEmail())) {
             var badRequestEx = new ExceptionWrapper(new BadRequestException());
             badRequestEx.addError("Email", "User with this email already exists");
@@ -51,7 +51,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public TokenResponseModel login(UserLoginModel userLoginModel) throws ExceptionWrapper {
+    public TokenResponseModel login(UserLoginModel userLoginModel) {
         var userOpt = userRepository.findByEmail(userLoginModel.getEmail());
 
         var badRequestEx = new ExceptionWrapper(new BadRequestException());
@@ -78,7 +78,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public TokenResponseModel refreshTokens(String refreshToken) throws ExceptionWrapper {
+    public TokenResponseModel refreshTokens(String refreshToken) {
         try {
             jwtUtil.parseRefreshClaims(refreshToken);
         } catch (Exception e) {
@@ -117,7 +117,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void logout(UUID userId, String accessToken) throws ExceptionWrapper {
+    public void logout(UUID userId, String accessToken) {
         var userOpt = userRepository.findById(userId);
 
         if (userOpt.isEmpty()) {

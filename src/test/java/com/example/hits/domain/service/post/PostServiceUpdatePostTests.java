@@ -1,6 +1,5 @@
 package com.example.hits.domain.service.post;
 
-import com.example.hits.application.handler.ExceptionWrapper;
 import com.example.hits.application.model.file.FileModel;
 import com.example.hits.application.repository.AttachmentRepository;
 import com.example.hits.application.model.post.PostUpdateModel;
@@ -50,7 +49,7 @@ public class PostServiceUpdatePostTests {
     private PostService postService;
 
     @Test
-    void updatePost_validTeacher_updatesTextAndSavesPost() throws ExceptionWrapper {
+    void updatePost_validTeacher_updatesTextAndSavesPost() {
         UUID courseId = UUID.randomUUID();
         UUID postId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
@@ -78,7 +77,7 @@ public class PostServiceUpdatePostTests {
     }
 
     @Test
-    void updatePost_withFiles_replacesAttachments() throws ExceptionWrapper {
+    void updatePost_withFiles_replacesAttachments() {
         UUID courseId = UUID.randomUUID();
         UUID postId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();

@@ -41,7 +41,7 @@ public class FileServiceImpl implements FileService {
 
     @Override
     @Transactional
-    public FileModel upload(UUID userId, MultipartFile file) throws ExceptionWrapper {
+    public FileModel upload(UUID userId, MultipartFile file) {
         var userOpt =  userRepository.findById(userId);
         if (userOpt.isEmpty()) {
             var entityNotFoundEx = new ExceptionWrapper(new EntityNotFoundException());

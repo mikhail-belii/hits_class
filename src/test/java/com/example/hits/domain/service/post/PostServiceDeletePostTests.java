@@ -38,7 +38,7 @@ public class PostServiceDeletePostTests {
     private PostService postService;
 
     @Test
-    void deletePost_validTeacherAndPostInCourse_deletesPost() throws ExceptionWrapper {
+    void deletePost_validTeacherAndPostInCourse_deletesPost() {
         UUID courseId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
         UUID postId = UUID.randomUUID();
@@ -71,7 +71,7 @@ public class PostServiceDeletePostTests {
         );
 
         Assertions.assertEquals(EntityNotFoundException.class, exception.getExceptionClass());
-        Assertions.assertEquals("Course not found", exception.getErrors().get("courseId"));
+        Assertions.assertEquals("Cannot find course with requested id", exception.getErrors().get("courseId"));
         verifyNoInteractions(userRepository, postRepository);
     }
 
