@@ -14,13 +14,14 @@ import com.example.hits.domain.entity.course.Course;
 import com.example.hits.domain.entity.user.User;
 import com.example.hits.domain.entity.user.UserCourseRole;
 import com.example.hits.domain.entity.usercourse.UserCourse;
+import com.example.hits.domain.mapper.CourseMapper;
+import com.example.hits.domain.mapper.UserCourseMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -78,7 +79,19 @@ public class CourseServiceImpl implements CourseService {
     }
 
     public List<UserCourseModel> getCourseUsers(UUID requestingUserId, UUID courseId) {
-        return null;
+        User requestingUser = userRepository.findById(requestingUserId)
+                .orElseThrow(ExceptionUtility::userNotFoundException);
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(ExceptionUtility::courseNotFoundException);
+
+        if (CourseUtility.getUserCourse(course, requestingUser).isEmpty()) {
+            throw ExceptionUtility.forbiddenRightsException();
+        }
+
+        return course.getCourseUsers()
+                .stream()
+                .map(UserCourseMapper::toModel)
+                .toList();
     }
 
     public List<CourseShortModel> getUserCourses(UUID requestingUserId, boolean isArchived) {
