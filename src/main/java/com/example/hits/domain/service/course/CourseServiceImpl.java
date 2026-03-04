@@ -92,7 +92,16 @@ public class CourseServiceImpl implements CourseService {
     }
 
     public CourseModel getConcreteCourse(UUID requestingUserId, UUID courseId) {
-        return new CourseModel();
+        User requestingUser = userRepository.findById(requestingUserId)
+                .orElseThrow(ExceptionUtility::userNotFoundException);
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(ExceptionUtility::courseNotFoundException);
+
+        if (CourseUtility.getUserCourse(course, requestingUser).isEmpty()) {
+            throw ExceptionUtility.forbiddenRightsException();
+        }
+
+        return CourseMapper.toModel(course);
     }
 
     public List<CourseShortModel> getUserCourses(UUID requestingUserId, boolean isArchived) {
