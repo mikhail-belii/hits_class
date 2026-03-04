@@ -95,7 +95,14 @@ public class CourseServiceImpl implements CourseService {
     }
 
     public List<CourseShortModel> getUserCourses(UUID requestingUserId, boolean isArchived) {
-        return null;
+        User requestingUser = userRepository.findById(requestingUserId)
+                .orElseThrow(ExceptionUtility::userNotFoundException);
+
+        return requestingUser.getUserCourses()
+                .stream()
+                .filter(c -> c.getCourse().getIsArchived() == isArchived)
+                .map(c -> CourseMapper.toShortModel(c.getCourse()))
+                .toList();
     }
 
     public void joinCourseByCode(UUID requestingUserId, String code) {
