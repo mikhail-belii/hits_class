@@ -16,9 +16,21 @@ public class ExceptionUtility {
         return notFoundException;
     }
 
+    public ExceptionWrapper courseNotFoundByCodeException() {
+        var notFoundException = new ExceptionWrapper(new EntityNotFoundException("Course not found"));
+        notFoundException.addError("joinCode", "Course not found");
+        return notFoundException;
+    }
+
     public ExceptionWrapper userCourseNotFoundException() {
         var notFoundException = new ExceptionWrapper(new EntityNotFoundException("UserCourse not found"));
         notFoundException.addError("userCourse", "User is not studying on this course");
+        return notFoundException;
+    }
+
+    public ExceptionWrapper userAlreadyParticipantInCourseException() {
+        var notFoundException = new ExceptionWrapper(new BadRequestException("User is already a participant in the course"));
+        notFoundException.addError("joinCode", "User is already a participant in the course with this joinCode");
         return notFoundException;
     }
 

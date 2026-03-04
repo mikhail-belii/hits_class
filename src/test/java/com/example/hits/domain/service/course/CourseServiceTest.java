@@ -344,7 +344,7 @@ public class CourseServiceTest {
     }
 
     @Test
-    void removeUserFromCourse_CourseNotFound_ThrowsException() {
+    void removeUserFromCourse_CourseNotFound_throwsCourseNotFoundException() {
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
         when(userRepository.findById(userToChange.getId())).thenReturn(Optional.of(userToChange));
         when(courseRepository.findById(course.getId())).thenReturn(Optional.empty());
@@ -367,6 +367,61 @@ public class CourseServiceTest {
                 () -> courseService.removeUserFromCourse(user.getId(), course.getId(), userToChange.getId()));
 
         verify(userCourseRepository, times(0)).delete(any());
+    }
+
+    @Test
+    void joinCourseByCode_whenCanJoin_joinCourse() {
+        course.setCourseUsers(List.of());
+        String joinCode = "тестКОД1";
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(courseRepository.findByJoinCode(joinCode)).thenReturn(Optional.of(course));
+
+        courseService.joinCourseByCode(user.getId(), joinCode);
+
+        verify(userRepository, times(1)).findById(user.getId());
+        verify(courseRepository, times(1)).findByJoinCode(joinCode);
+
+        ArgumentCaptor<UserCourse> userCourseCaptor = ArgumentCaptor.forClass(UserCourse.class);
+        verify(userCourseRepository, times(1)).saveAndFlush(userCourseCaptor.capture());
+        UserCourse savedUserCourse = userCourseCaptor.getValue();
+        assertEquals(UserCourseRole.STUDENT, savedUserCourse.getUserRole());
+        assertEquals(course, savedUserCourse.getCourse());
+        assertEquals(user, savedUserCourse.getUser());
+    }
+
+    @Test
+    void joinCourseByCode_whenRequestingUserNotFound_throwsUserNotFoundException() {
+        String joinCode = "тестКОД1";
+        when(userRepository.findById(user.getId())).thenReturn(Optional.empty());
+
+        assertThrows(ExceptionUtility.userNotFoundException().getClass(),
+                () -> courseService.joinCourseByCode(user.getId(), joinCode));
+
+        verify(userCourseRepository, times(0)).saveAndFlush(any());
+    }
+
+    @Test
+    void joinCourseByCode_whenCourseNotFound_throwsCourseNotFoundException() {
+        String joinCode = "тестКОД1";
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(courseRepository.findByJoinCode(joinCode)).thenReturn(Optional.empty());
+
+        assertThrows(ExceptionUtility.courseNotFoundByCodeException().getClass(),
+                () -> courseService.joinCourseByCode(user.getId(), joinCode));
+
+        verify(userCourseRepository, times(0)).saveAndFlush(any());
+    }
+
+    @Test
+    void joinCourseByCode_whenUserAlreadyParticipantInCourse_throwsUserAlreadyParticipantInCourseException() {
+        String joinCode = "тестКОД1";
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(courseRepository.findByJoinCode(joinCode)).thenReturn(Optional.of(course));
+
+        assertThrows(ExceptionUtility.userAlreadyParticipantInCourseException().getClass(),
+                () -> courseService.joinCourseByCode(user.getId(), joinCode));
+
+        verify(userCourseRepository, times(0)).saveAndFlush(any());
     }
 
 }
