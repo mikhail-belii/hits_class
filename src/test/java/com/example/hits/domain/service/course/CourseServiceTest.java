@@ -2,6 +2,7 @@ package com.example.hits.domain.service.course;
 
 import com.example.hits.application.model.course.CourseCreateModel;
 import com.example.hits.application.model.course.CourseEditModel;
+import com.example.hits.application.model.course.UserCourseModel;
 import com.example.hits.application.repository.CourseRepository;
 import com.example.hits.application.repository.UserCourseRepository;
 import com.example.hits.application.repository.UserRepository;
@@ -422,6 +423,45 @@ public class CourseServiceTest {
                 () -> courseService.joinCourseByCode(user.getId(), joinCode));
 
         verify(userCourseRepository, times(0)).saveAndFlush(any());
+    }
+
+    @Test
+    void getCourseUsers_whenCanGetCourseUsers_returnCourseUsers() {
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(courseRepository.findById(course.getId())).thenReturn(Optional.of(course));
+
+        List<UserCourseModel> result = courseService.getCourseUsers(user.getId(), course.getId());
+
+        assertEquals(2, result.size());
+        assertEquals(user.getId(), result.get(0).getUserModel().getId());
+        assertEquals(userToChange.getId(), result.get(1).getUserModel().getId());
+    }
+
+    @Test
+    void getCourseUsers_whenRequestingUserNotFound_throwsUserNotFoundException() {
+        when(userRepository.findById(user.getId())).thenReturn(Optional.empty());
+
+        assertThrows(ExceptionUtility.userNotFoundException().getClass(),
+                () -> courseService.getCourseUsers(user.getId(), course.getId()));
+    }
+
+    @Test
+    void getCourseUsers_whenCourseNotFound_throwsCourseNotFoundException() {
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(courseRepository.findById(course.getId())).thenReturn(Optional.empty());
+
+        assertThrows(ExceptionUtility.courseNotFoundException().getClass(),
+                () -> courseService.getCourseUsers(user.getId(), course.getId()));
+    }
+
+    @Test
+    void getCourseUsers_whenRequestingUserNotInCourse_throwsForbiddenRightsException() {
+        course.setCourseUsers(List.of());
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(courseRepository.findById(course.getId())).thenReturn(Optional.of(course));
+
+        assertThrows(ExceptionUtility.forbiddenRightsException().getClass(),
+                () -> courseService.getCourseUsers(user.getId(), course.getId()));
     }
 
 }
