@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -85,7 +86,18 @@ public class CourseServiceImpl implements CourseService {
     }
 
     public void joinCourseByCode(UUID requestingUserId, String code) {
+        User requestingUser = userRepository.findById(requestingUserId)
+                .orElseThrow(ExceptionUtility::userNotFoundException);
+        Course course = courseRepository.findByJoinCode(code)
+                .orElseThrow(ExceptionUtility::courseNotFoundByCodeException);
 
+        if (CourseUtility.getUserCourse(course, requestingUser).isPresent()) {
+            throw ExceptionUtility.userAlreadyParticipantInCourseException();
+        }
+
+        UserCourse userCourse = createUserCourseOnCourseJoin(course, requestingUser);
+
+        userCourseRepository.saveAndFlush(userCourse);
     }
 
     public void changeUserRoleOnCourse(
@@ -150,6 +162,15 @@ public class CourseServiceImpl implements CourseService {
                 .setCourse(newCourse)
                 .setUser(creator)
                 .setUserRole(UserCourseRole.HEAD_TEACHER)
+                .setCreatedAt(LocalDateTime.now());
+    }
+
+    private UserCourse createUserCourseOnCourseJoin(Course course, User joiningUser) {
+        return new UserCourse()
+                .setId(UUID.randomUUID())
+                .setCourse(course)
+                .setUser(joiningUser)
+                .setUserRole(UserCourseRole.STUDENT)
                 .setCreatedAt(LocalDateTime.now());
     }
 
