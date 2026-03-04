@@ -6,19 +6,21 @@ import lombok.experimental.UtilityClass;
 import org.apache.coyote.BadRequestException;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.UUID;
+
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 
 @UtilityClass
 public class ExceptionUtility {
     public ExceptionWrapper courseNotFoundException() {
         var notFoundException = new ExceptionWrapper(new EntityNotFoundException("Course not found"));
-        notFoundException.addError("courseId", "Course not found");
+        notFoundException.addError("courseId", "Cannot find course with requested id");
         return notFoundException;
     }
 
     public ExceptionWrapper courseNotFoundByCodeException() {
-        var notFoundException = new ExceptionWrapper(new EntityNotFoundException("Course not found"));
-        notFoundException.addError("joinCode", "Course not found");
+        var notFoundException = new ExceptionWrapper(new EntityNotFoundException("Course with such join code not found"));
+        notFoundException.addError("joinCode", "Cannot find course with requested joinCode");
         return notFoundException;
     }
 

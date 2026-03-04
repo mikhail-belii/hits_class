@@ -12,6 +12,8 @@ public class CourseCodeGenerator {
 
     private final CourseRepository courseRepository;
 
+    private final Random random = new Random();
+
     public static final String CODE_SYMBOLS = "йцукенгшщзхъфывапролджэячсмитьбюЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮ1234567890";
     public static final int CODE_LENGTH = 8;
     public static final int MAX_ATTEMPTS = 20;
@@ -27,7 +29,6 @@ public class CourseCodeGenerator {
     }
 
     private String generateCode() {
-        Random random = new Random();
         StringBuilder code = new StringBuilder(CODE_LENGTH);
         for (int i = 0; i < CODE_LENGTH; i++) {
             code.append(CODE_SYMBOLS.charAt(random.nextInt(CODE_SYMBOLS.length())));
