@@ -1,9 +1,6 @@
 package com.example.hits.application.service;
 
-import com.example.hits.application.model.course.CourseCreateModel;
-import com.example.hits.application.model.course.CourseEditModel;
-import com.example.hits.application.model.course.CourseShortModel;
-import com.example.hits.application.model.course.UserCourseModel;
+import com.example.hits.application.model.course.*;
 import com.example.hits.domain.entity.user.UserCourseRole;
 
 import java.util.List;
@@ -17,6 +14,8 @@ public interface CourseService {
     void archiveCourse(UUID requestingUserId, boolean isArchived, UUID courseId);
 
     List<UserCourseModel> getCourseUsers(UUID requestingUserId, UUID courseId);
+
+    CourseModel getConcreteCourse(UUID requestingUserId, UUID courseId);
 
     List<CourseShortModel> getUserCourses(UUID requestingUserId, boolean isArchived);
 

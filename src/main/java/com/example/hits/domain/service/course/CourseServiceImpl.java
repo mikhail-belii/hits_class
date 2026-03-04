@@ -1,9 +1,6 @@
 package com.example.hits.domain.service.course;
 
-import com.example.hits.application.model.course.CourseCreateModel;
-import com.example.hits.application.model.course.CourseEditModel;
-import com.example.hits.application.model.course.CourseShortModel;
-import com.example.hits.application.model.course.UserCourseModel;
+import com.example.hits.application.model.course.*;
 import com.example.hits.application.repository.CourseRepository;
 import com.example.hits.application.repository.UserCourseRepository;
 import com.example.hits.application.repository.UserRepository;
@@ -92,6 +89,10 @@ public class CourseServiceImpl implements CourseService {
                 .stream()
                 .map(UserCourseMapper::toModel)
                 .toList();
+    }
+
+    public CourseModel getConcreteCourse(UUID requestingUserId, UUID courseId) {
+        return new CourseModel();
     }
 
     public List<CourseShortModel> getUserCourses(UUID requestingUserId, boolean isArchived) {

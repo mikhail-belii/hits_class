@@ -1,9 +1,6 @@
 package com.example.hits.domain.service.course;
 
-import com.example.hits.application.model.course.CourseCreateModel;
-import com.example.hits.application.model.course.CourseEditModel;
-import com.example.hits.application.model.course.CourseShortModel;
-import com.example.hits.application.model.course.UserCourseModel;
+import com.example.hits.application.model.course.*;
 import com.example.hits.application.repository.CourseRepository;
 import com.example.hits.application.repository.UserCourseRepository;
 import com.example.hits.application.repository.UserRepository;
@@ -506,6 +503,43 @@ public class CourseServiceTest {
         List<CourseShortModel> result = courseService.getUserCourses(user.getId(), false);
 
         assertEquals(0, result.size());
+    }
+
+    @Test
+    void getConcreteCourse_whenCanGetConcreteCourse_returnCourse() {
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(courseRepository.findById(course.getId())).thenReturn(Optional.of(course));
+
+        CourseModel result = courseService.getConcreteCourse(user.getId(), course.getId());
+
+        assertEquals(course.getId(), result.getId());
+    }
+
+    @Test
+    void getConcreteCourse_whenRequestingUserNotFound_throwsUserNotFoundException() {
+        when(userRepository.findById(user.getId())).thenReturn(Optional.empty());
+
+        assertThrows(ExceptionUtility.userNotFoundException().getClass(),
+                () -> courseService.getConcreteCourse(user.getId(), course.getId()));
+    }
+
+    @Test
+    void getConcreteCourse_whenCourseNotFound_throwsCourseNotFoundException() {
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(courseRepository.findById(course.getId())).thenReturn(Optional.empty());
+
+        assertThrows(ExceptionUtility.courseNotFoundException().getClass(),
+                () -> courseService.getConcreteCourse(user.getId(), course.getId()));
+    }
+
+    @Test
+    void getConcreteCourse_whenRequestingUserNotInCourse_throwsForbiddenRightsException() {
+        course.setCourseUsers(List.of());
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(courseRepository.findById(course.getId())).thenReturn(Optional.of(course));
+
+        assertThrows(ExceptionUtility.forbiddenRightsException().getClass(),
+                () -> courseService.getConcreteCourse(user.getId(), course.getId()));
     }
 
 }

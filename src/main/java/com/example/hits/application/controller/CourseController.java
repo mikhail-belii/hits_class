@@ -53,7 +53,7 @@ public class CourseController {
             @RequestAttribute("userId") UUID requestingUserId,
             @PathVariable("courseId") UUID courseId
     ) {
-        return List.of();
+        return courseService.getCourseUsers(requestingUserId, courseId);
     }
 
     @GetMapping(value = "/my")
@@ -62,16 +62,16 @@ public class CourseController {
             @RequestAttribute("userId") UUID requestingUserId,
             @RequestParam boolean isArchived
     ) {
-        return List.of();
+        return courseService.getUserCourses(requestingUserId, isArchived);
     }
 
     @GetMapping(value = "/{courseId}")
     @Operation(summary = "Get concrete course")
-    public List<CourseModel> getConcreteCourse(
+    public CourseModel getConcreteCourse(
             @RequestAttribute("userId") UUID requestingUserId,
             @PathVariable("courseId") UUID courseId
     ) {
-        return List.of();
+        return courseService.getConcreteCourse(requestingUserId, courseId);
     }
 
     @GetMapping(value = "/join")
@@ -80,7 +80,7 @@ public class CourseController {
             @RequestAttribute("userId") UUID requestingUserId,
             @RequestParam String code
     ) {
-
+        courseService.joinCourseByCode(requestingUserId, code);
     }
 
     @PostMapping(value = "/{courseId}/users/{userID}/role")
