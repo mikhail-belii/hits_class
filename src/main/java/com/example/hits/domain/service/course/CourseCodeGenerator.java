@@ -4,6 +4,7 @@ import com.example.hits.application.repository.CourseRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
 import java.util.Random;
 
 @Service
@@ -12,7 +13,7 @@ public class CourseCodeGenerator {
 
     private final CourseRepository courseRepository;
 
-    private final Random random = new Random();
+    private final Random random = new SecureRandom();
 
     public static final String CODE_SYMBOLS = "йцукенгшщзхъфывапролджэячсмитьбюЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮ1234567890";
     public static final int CODE_LENGTH = 8;
