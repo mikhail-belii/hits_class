@@ -71,7 +71,7 @@ public class PostServiceDeletePostTests {
         );
 
         Assertions.assertEquals(EntityNotFoundException.class, exception.getExceptionClass());
-        Assertions.assertEquals("Course not found", exception.getErrors().get("courseId"));
+        Assertions.assertEquals("Cannot find course with requested id", exception.getErrors().get("courseId"));
         verifyNoInteractions(userRepository, postRepository);
     }
 
