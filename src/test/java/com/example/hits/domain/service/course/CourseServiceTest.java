@@ -2,6 +2,7 @@ package com.example.hits.domain.service.course;
 
 import com.example.hits.application.model.course.CourseCreateModel;
 import com.example.hits.application.model.course.CourseEditModel;
+import com.example.hits.application.model.course.CourseShortModel;
 import com.example.hits.application.model.course.UserCourseModel;
 import com.example.hits.application.repository.CourseRepository;
 import com.example.hits.application.repository.UserCourseRepository;
@@ -56,6 +57,7 @@ public class CourseServiceTest {
         userToChange = createUser(UUID.randomUUID());
         course = createCourse(UUID.randomUUID(), "Course Name", "Course Desc", false);
         userCourse = createUserCourse(user, course, UserCourseRole.HEAD_TEACHER);
+        user.setUserCourses(List.of(userCourse));
         userToChangeCourse = createUserCourse(userToChange, course, UserCourseRole.TEACHER);
         course.setCourseUsers(List.of(userCourse, userToChangeCourse));
         createModel = createCourseCreateModel("New Course", "New Course Description");
@@ -462,6 +464,48 @@ public class CourseServiceTest {
 
         assertThrows(ExceptionUtility.forbiddenRightsException().getClass(),
                 () -> courseService.getCourseUsers(user.getId(), course.getId()));
+    }
+
+    @Test
+    void getUserCourses_whenTryToGetArchivedCoursesAndUserHasArchivedCourses_returnUserArchivedCourses() {
+        course.setIsArchived(true);
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+
+        List<CourseShortModel> result = courseService.getUserCourses(user.getId(), true);
+
+        assertEquals(1, result.size());
+        assertEquals(course.getId(), result.getFirst().getId());
+    }
+
+    @Test
+    void getUserCourses_whenTryToGetArchivedCoursesAndUserHasNotArchivedCourses_returnListWithLengthZero() {
+        user.setUserCourses(List.of());
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+
+        List<CourseShortModel> result = courseService.getUserCourses(user.getId(), true);
+
+        assertEquals(0, result.size());
+    }
+
+    @Test
+    void getUserCourses_whenTryToGetNotArchivedCoursesAndUserHasNotArchivedCourses_returnUserNotArchivedCourses() {
+        course.setIsArchived(false);
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+
+        List<CourseShortModel> result = courseService.getUserCourses(user.getId(), false);
+
+        assertEquals(1, result.size());
+        assertEquals(course.getId(), result.getFirst().getId());
+    }
+
+    @Test
+    void getUserCourses_whenTryToGetNotArchivedCoursesAndUserHasOnlyArchivedCourses_returnListWithLengthZero() {
+        course.setIsArchived(true);
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+
+        List<CourseShortModel> result = courseService.getUserCourses(user.getId(), false);
+
+        assertEquals(0, result.size());
     }
 
 }
