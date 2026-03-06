@@ -1,5 +1,6 @@
 package com.example.hits.domain.mapper;
 
+import com.example.hits.application.model.user.UserModel;
 import com.example.hits.application.model.user.UserRegisterModel;
 import com.example.hits.domain.entity.user.User;
 import org.mapstruct.Mapper;
@@ -12,4 +13,5 @@ public interface UserMapper {
     @Mapping(target = "refreshToken", ignore = true)
     @Mapping(target = "refreshTokenExpiryDate", ignore = true)
     User toEntity(UserRegisterModel userRegisterModel);
+    UserModel toModel(User user);
 }
