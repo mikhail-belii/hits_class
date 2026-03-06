@@ -5,11 +5,7 @@ import com.example.hits.application.model.file.FileModel;
 import com.example.hits.application.model.post.PostCreateModel;
 import com.example.hits.application.model.post.PostModel;
 import com.example.hits.application.model.post.PostUpdateModel;
-import com.example.hits.application.repository.AttachmentRepository;
-import com.example.hits.application.repository.CourseRepository;
-import com.example.hits.application.repository.FileRepository;
-import com.example.hits.application.repository.PostRepository;
-import com.example.hits.application.repository.UserRepository;
+import com.example.hits.application.repository.*;
 import com.example.hits.application.util.ExceptionUtility;
 import com.example.hits.application.util.PostUtility;
 import com.example.hits.domain.entity.attachment.Attachment;
@@ -27,7 +23,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -161,12 +156,12 @@ public class PostService {
                 throw ExceptionUtility.badRequestException("You can attach only your files");
             }
 
-            var isAlreadyAttached = currentPostId == null
-                    ? attachmentRepository.existsByFile_Id(fileId)
-                    : attachmentRepository.existsByFile_IdAndPost_IdNot(fileId, currentPostId);
-            if (isAlreadyAttached) {
-                throw ExceptionUtility.badRequestException("File is already attached");
-            }
+//            var isAlreadyAttached = currentPostId == null
+//                    ? attachmentRepository.existsByFile_Id(fileId)
+//                    : attachmentRepository.existsByFile_IdAndPost_IdNot(fileId, currentPostId);
+//            if (isAlreadyAttached) {
+//                throw ExceptionUtility.badRequestException("File is already attached");
+//            }
 
             attachments.add(new Attachment()
                     .setFile(file)

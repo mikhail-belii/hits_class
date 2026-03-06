@@ -109,8 +109,6 @@ public class PostServiceCreatePostTests {
         when(courseRepository.findById(courseId)).thenReturn(Optional.of(course));
         when(userRepository.findById(userId)).thenReturn(Optional.of(teacher));
         when(fileRepository.findAllById(List.of(firstFileId, secondFileId))).thenReturn(List.of(firstFile, secondFile));
-        when(attachmentRepository.existsByFile_Id(firstFileId)).thenReturn(false);
-        when(attachmentRepository.existsByFile_Id(secondFileId)).thenReturn(false);
         when(postRepository.save(any(Post.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         postService.createPost(courseId, userId, postCreateModel);
