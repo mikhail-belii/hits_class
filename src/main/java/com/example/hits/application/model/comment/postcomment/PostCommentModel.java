@@ -1,4 +1,4 @@
-package com.example.hits.application.model.comment;
+package com.example.hits.application.model.comment.postcomment;
 
 import com.example.hits.application.model.user.UserModel;
 import lombok.AllArgsConstructor;

@@ -1,6 +1,6 @@
 package com.example.hits.domain.mapper;
 
-import com.example.hits.application.model.comment.PostCommentModel;
+import com.example.hits.application.model.comment.postcomment.PostCommentModel;
 import com.example.hits.domain.entity.postcomment.PostComment;
 import com.example.hits.domain.entity.user.User;
 import org.junit.jupiter.api.Test;

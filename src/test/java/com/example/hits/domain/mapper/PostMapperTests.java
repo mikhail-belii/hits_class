@@ -1,6 +1,6 @@
 package com.example.hits.domain.mapper;
 
-import com.example.hits.application.model.comment.PostCommentModel;
+import com.example.hits.application.model.comment.postcomment.PostCommentModel;
 import com.example.hits.application.model.post.PostModel;
 import com.example.hits.domain.entity.attachment.Attachment;
 import com.example.hits.domain.entity.post.Post;
