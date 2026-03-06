@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("api/v1/user")
+@RequestMapping("api/v1/auth")
 @AllArgsConstructor
 public class AuthController {
     private final AuthService authService;
@@ -85,7 +84,6 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    @SecurityRequirement(name = "JWT")
     @Operation(summary = "Logout")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
