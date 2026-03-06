@@ -14,6 +14,7 @@ import com.example.hits.domain.entity.file.File;
 import com.example.hits.domain.entity.post.Post;
 import com.example.hits.domain.entity.user.User;
 import com.example.hits.domain.mapper.PostMapper;
+import com.example.hits.domain.service.taskanswer.TaskAnswerService;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.ExtensionMethod;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,7 @@ import java.util.stream.Collectors;
 @ExtensionMethod(PostMapper.class)
 public class PostService {
 
+    private final TaskAnswerService taskAnswerService;
     private final CourseRepository courseRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
@@ -49,6 +51,8 @@ public class PostService {
 
         Post post = createPostFromModel(postCreateModel, user, course);
         post.setAttachments(buildPostAttachments(postCreateModel.getFiles(), post, user, null));
+
+        taskAnswerService.createTaskAnswerForEveryCourseMember(course, post);
 
         postRepository.save(post);
 
