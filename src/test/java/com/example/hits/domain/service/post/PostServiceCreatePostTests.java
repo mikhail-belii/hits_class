@@ -15,6 +15,7 @@ import com.example.hits.domain.entity.post.Post;
 import com.example.hits.domain.entity.post.PostType;
 import com.example.hits.domain.entity.user.User;
 import com.example.hits.domain.entity.user.UserCourseRole;
+import com.example.hits.domain.service.taskanswer.TaskAnswerService;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -49,6 +50,8 @@ public class PostServiceCreatePostTests {
     private FileRepository fileRepository;
     @Mock
     private AttachmentRepository attachmentRepository;
+    @Mock
+    private TaskAnswerService taskAnswerService;
 
     @InjectMocks
     private PostService postService;
@@ -75,6 +78,7 @@ public class PostServiceCreatePostTests {
 
         verify(postRepository).save(postCaptor.capture());
         Post savedPost = postCaptor.getValue();
+        verify(taskAnswerService).createTaskAnswerForEveryCourseMember(course, savedPost);
 
         Assertions.assertNotNull(response);
         Assertions.assertNotNull(response.getId());
@@ -109,8 +113,6 @@ public class PostServiceCreatePostTests {
         when(courseRepository.findById(courseId)).thenReturn(Optional.of(course));
         when(userRepository.findById(userId)).thenReturn(Optional.of(teacher));
         when(fileRepository.findAllById(List.of(firstFileId, secondFileId))).thenReturn(List.of(firstFile, secondFile));
-        when(attachmentRepository.existsByFile_Id(firstFileId)).thenReturn(false);
-        when(attachmentRepository.existsByFile_Id(secondFileId)).thenReturn(false);
         when(postRepository.save(any(Post.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         postService.createPost(courseId, userId, postCreateModel);
@@ -119,6 +121,7 @@ public class PostServiceCreatePostTests {
         verify(postRepository).save(postCaptor.capture());
 
         Post savedPost = postCaptor.getValue();
+        verify(taskAnswerService).createTaskAnswerForEveryCourseMember(course, savedPost);
         Assertions.assertNotNull(savedPost.getAttachments());
         Assertions.assertEquals(2, savedPost.getAttachments().size());
         Assertions.assertEquals(firstFileId, savedPost.getAttachments().get(0).getFile().getId());
@@ -141,7 +144,7 @@ public class PostServiceCreatePostTests {
         Assertions.assertEquals(EntityNotFoundException.class, exception.getExceptionClass());
         Assertions.assertEquals("Cannot find course with requested id", exception.getErrors().get("courseId"));
 
-        verifyNoInteractions(userRepository, postRepository);
+        verifyNoInteractions(userRepository, postRepository, taskAnswerService);
     }
 
     @Test
@@ -161,7 +164,7 @@ public class PostServiceCreatePostTests {
         Assertions.assertEquals(EntityNotFoundException.class, exception.getExceptionClass());
         Assertions.assertEquals("User not found", exception.getErrors().get("userId"));
 
-        verifyNoInteractions(postRepository);
+        verifyNoInteractions(postRepository, taskAnswerService);
     }
 
     @Test
@@ -181,6 +184,6 @@ public class PostServiceCreatePostTests {
         );
         Assertions.assertEquals(ResponseStatusException.class, exception.getExceptionClass());
         Assertions.assertEquals("User has no rights to this action", exception.getErrors().get("forbidden"));
-        verifyNoInteractions(postRepository);
+        verifyNoInteractions(postRepository, taskAnswerService);
     }
 }

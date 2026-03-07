@@ -5,11 +5,7 @@ import com.example.hits.application.model.file.FileModel;
 import com.example.hits.application.model.post.PostCreateModel;
 import com.example.hits.application.model.post.PostModel;
 import com.example.hits.application.model.post.PostUpdateModel;
-import com.example.hits.application.repository.AttachmentRepository;
-import com.example.hits.application.repository.CourseRepository;
-import com.example.hits.application.repository.FileRepository;
-import com.example.hits.application.repository.PostRepository;
-import com.example.hits.application.repository.UserRepository;
+import com.example.hits.application.repository.*;
 import com.example.hits.application.util.ExceptionUtility;
 import com.example.hits.application.util.PostUtility;
 import com.example.hits.domain.entity.attachment.Attachment;
@@ -18,6 +14,7 @@ import com.example.hits.domain.entity.file.File;
 import com.example.hits.domain.entity.post.Post;
 import com.example.hits.domain.entity.user.User;
 import com.example.hits.domain.mapper.PostMapper;
+import com.example.hits.domain.service.taskanswer.TaskAnswerService;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.ExtensionMethod;
 import org.springframework.stereotype.Service;
@@ -27,7 +24,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -37,6 +33,7 @@ import java.util.stream.Collectors;
 @ExtensionMethod(PostMapper.class)
 public class PostService {
 
+    private final TaskAnswerService taskAnswerService;
     private final CourseRepository courseRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
@@ -54,6 +51,8 @@ public class PostService {
 
         Post post = createPostFromModel(postCreateModel, user, course);
         post.setAttachments(buildPostAttachments(postCreateModel.getFiles(), post, user, null));
+
+        taskAnswerService.createTaskAnswerForEveryCourseMember(course, post);
 
         postRepository.save(post);
 
@@ -161,12 +160,12 @@ public class PostService {
                 throw ExceptionUtility.badRequestException("You can attach only your files");
             }
 
-            var isAlreadyAttached = currentPostId == null
-                    ? attachmentRepository.existsByFile_Id(fileId)
-                    : attachmentRepository.existsByFile_IdAndPost_IdNot(fileId, currentPostId);
-            if (isAlreadyAttached) {
-                throw ExceptionUtility.badRequestException("File is already attached");
-            }
+//            var isAlreadyAttached = currentPostId == null
+//                    ? attachmentRepository.existsByFile_Id(fileId)
+//                    : attachmentRepository.existsByFile_IdAndPost_IdNot(fileId, currentPostId);
+//            if (isAlreadyAttached) {
+//                throw ExceptionUtility.badRequestException("File is already attached");
+//            }
 
             attachments.add(new Attachment()
                     .setFile(file)
