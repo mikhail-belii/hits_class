@@ -3,11 +3,16 @@ package com.example.hits.domain.service.comment;
 import com.example.hits.application.model.comment.postcomment.PostCommentCreateModel;
 import com.example.hits.application.model.comment.postcomment.PostCommentEditModel;
 import com.example.hits.application.model.comment.postcomment.PostCommentModel;
+import com.example.hits.application.model.comment.taskanswercomment.TaskAnswerCommentCreateModel;
+import com.example.hits.application.model.comment.taskanswercomment.TaskAnswerCommentEditModel;
+import com.example.hits.application.model.comment.taskanswercomment.TaskAnswerCommentModel;
 import com.example.hits.application.repository.*;
 import com.example.hits.application.util.ExceptionUtility;
 import com.example.hits.domain.entity.course.Course;
 import com.example.hits.domain.entity.post.Post;
 import com.example.hits.domain.entity.postcomment.PostComment;
+import com.example.hits.domain.entity.taskanswer.TaskAnswer;
+import com.example.hits.domain.entity.taskanswercomment.TaskAnswerComment;
 import com.example.hits.domain.entity.user.User;
 import com.example.hits.domain.entity.user.UserCourseRole;
 import com.example.hits.domain.entity.usercourse.UserCourse;
@@ -33,6 +38,8 @@ public class CommentServiceTest {
     @Mock
     private TaskAnswerCommentRepository taskAnswerCommentRepository;
     @Mock
+    private TaskAnswerRepository taskAnswerRepository;
+    @Mock
     private PostCommentRepository postCommentRepository;
     @Mock
     private PostRepository postRepository;
@@ -44,9 +51,13 @@ public class CommentServiceTest {
     private Course course;
     private UserCourse userCourse;
     private Post post;
+    private TaskAnswer taskAnswer;
     private PostComment postComment;
+    private TaskAnswerComment taskAnswerComment;
     private PostCommentCreateModel postCommentCreateModel;
     private PostCommentEditModel postCommentEditModel;
+    private TaskAnswerCommentCreateModel taskAnswerCommentCreateModel;
+    private TaskAnswerCommentEditModel taskAnswerCommentEditModel;
 
     @BeforeEach
     public void init () {
@@ -55,11 +66,18 @@ public class CommentServiceTest {
         userCourse = createUserCourse(user, course, UserCourseRole.HEAD_TEACHER);
         user.setUserCourses(List.of(userCourse));
         course.setCourseUsers(List.of(userCourse));
+
         post = createPost(course, user);
         postComment = createPostComment(user, post);
         post.setComments(List.of(postComment));
         postCommentCreateModel = createPostCommentCreateModel("testComment");
         postCommentEditModel = createPostCommentEditModel("editedComment");
+
+        taskAnswer = createTaskAnswer(post, user);
+        taskAnswerComment = createTaskAnswerComment(user, taskAnswer);
+        taskAnswer.setComments(List.of(taskAnswerComment));
+        taskAnswerCommentCreateModel = createTaskAnswerCommentCreateModel("testComment");
+        taskAnswerCommentEditModel = createTaskAnswerCommentEditModel("editedComment");
     }
 
     @Test
@@ -196,6 +214,167 @@ public class CommentServiceTest {
                 () -> commentService.editPostComment(user.getId(), postComment.getId(), postCommentEditModel));
 
         verify(postCommentRepository, times(0)).flush();
+    }
+
+    @Test
+    void getTaskAnswerComments_whenCanGetCommentsWithTeacherRole_returnsComments() {
+        taskAnswer.setUser(new User());
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(taskAnswerRepository.findById(taskAnswer.getId())).thenReturn(Optional.of(taskAnswer));
+
+        List<TaskAnswerCommentModel> result = commentService.getTaskAnswerComments(user.getId(), taskAnswer.getId());
+
+        TaskAnswerCommentModel taskAnswerCommentModel = result.get(0);
+        assertEquals(taskAnswerCommentModel.getId(), taskAnswerComment.getId());
+    }
+
+    @Test
+    void getTaskAnswerComments_whenCanGetCommentsWithStudentRole_returnsComments() {
+        userCourse.setUserRole(UserCourseRole.STUDENT);
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(taskAnswerRepository.findById(taskAnswer.getId())).thenReturn(Optional.of(taskAnswer));
+
+        List<TaskAnswerCommentModel> result = commentService.getTaskAnswerComments(user.getId(), taskAnswer.getId());
+
+        TaskAnswerCommentModel taskAnswerCommentModel = result.get(0);
+        assertEquals(taskAnswerCommentModel.getId(), taskAnswerComment.getId());
+    }
+
+    @Test
+    void getTaskAnswerComments_whenUserTryToGetNotHisTaskAnswer_throwsForbiddenRightsException() {
+        userCourse.setUserRole(UserCourseRole.STUDENT);
+        taskAnswer.setUser(new User());
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(taskAnswerRepository.findById(taskAnswer.getId())).thenReturn(Optional.of(taskAnswer));
+
+        assertThrows(ExceptionUtility.forbiddenRightsException().getClass(),
+                () -> commentService.getTaskAnswerComments(user.getId(), taskAnswer.getId()));
+    }
+
+    @Test
+    void getTaskAnswerComments_whenUserNotFound_throwsUserNotFoundException() {
+        when(userRepository.findById(user.getId())).thenReturn(Optional.empty());
+
+        assertThrows(ExceptionUtility.userNotFoundException().getClass(),
+                () -> commentService.getTaskAnswerComments(user.getId(), taskAnswer.getId()));
+    }
+
+    @Test
+    void getTaskAnswerComments_whenTaskAnswerNotFound_throwsTaskAnswerNotFoundException() {
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(taskAnswerRepository.findById(taskAnswer.getId())).thenReturn(Optional.empty());
+
+        assertThrows(ExceptionUtility.taskAnswerNotFoundException().getClass(),
+                () -> commentService.getTaskAnswerComments(user.getId(), taskAnswer.getId()));
+    }
+
+    @Test
+    void createTaskAnswerComment_whenCanCreateCommentWithTeacherRole_commentCreated() {
+        taskAnswer.setUser(new User());
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(taskAnswerRepository.findById(taskAnswer.getId())).thenReturn(Optional.of(taskAnswer));
+
+        TaskAnswerCommentModel result = commentService.createTaskAnswerComment(user.getId(), taskAnswer.getId(), taskAnswerCommentCreateModel);
+
+        assertEquals(result.getText(), taskAnswerCommentCreateModel.getText());
+        assertEquals(result.getAuthor().getId(), user.getId());
+
+        verify(taskAnswerCommentRepository, times(1)).saveAndFlush(any());
+    }
+
+    @Test
+    void createTaskAnswerComment_whenCanCreateCommentWithStudentRole_commentCreated() {
+        userCourse.setUserRole(UserCourseRole.STUDENT);
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(taskAnswerRepository.findById(taskAnswer.getId())).thenReturn(Optional.of(taskAnswer));
+
+        TaskAnswerCommentModel result = commentService.createTaskAnswerComment(user.getId(), taskAnswer.getId(), taskAnswerCommentCreateModel);
+
+        assertEquals(result.getText(), taskAnswerCommentCreateModel.getText());
+        assertEquals(result.getAuthor().getId(), user.getId());
+
+        verify(taskAnswerCommentRepository, times(1)).saveAndFlush(any());
+    }
+
+    @Test
+    void createTaskAnswerComment_whenUserTryToCreateCommentOnNotHisTaskAnswer_throwsForbiddenRightsException() {
+        userCourse.setUserRole(UserCourseRole.STUDENT);
+        taskAnswer.setUser(new User());
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(taskAnswerRepository.findById(taskAnswer.getId())).thenReturn(Optional.of(taskAnswer));
+
+        assertThrows(ExceptionUtility.forbiddenRightsException().getClass(),
+                () -> commentService.createTaskAnswerComment(user.getId(), taskAnswer.getId(), taskAnswerCommentCreateModel));
+
+        verify(taskAnswerCommentRepository, times(0)).saveAndFlush(any());
+    }
+
+    @Test
+    void createTaskAnswerComment_whenUserNotFound_throwsUserNotFoundException() {
+        when(userRepository.findById(user.getId())).thenReturn(Optional.empty());
+
+        assertThrows(ExceptionUtility.userNotFoundException().getClass(),
+                () -> commentService.createTaskAnswerComment(user.getId(), taskAnswer.getId(), taskAnswerCommentCreateModel));
+
+        verify(taskAnswerCommentRepository, times(0)).saveAndFlush(any());
+    }
+
+    @Test
+    void createTaskAnswerComment_whenTaskAnswerNotFound_throwsTaskAnswerNotFoundException() {
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(taskAnswerRepository.findById(taskAnswer.getId())).thenReturn(Optional.empty());
+
+        assertThrows(ExceptionUtility.taskAnswerNotFoundException().getClass(),
+                () -> commentService.createTaskAnswerComment(user.getId(), taskAnswer.getId(), taskAnswerCommentCreateModel));
+
+        verify(taskAnswerCommentRepository, times(0)).saveAndFlush(any());
+    }
+
+    @Test
+    void editTaskAnswerComment_whenCanEditComment_commentEdited() {
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(taskAnswerCommentRepository.findById(taskAnswerComment.getId())).thenReturn(Optional.of(taskAnswerComment));
+
+        TaskAnswerCommentModel result = commentService.editTaskAnswerComment(user.getId(), taskAnswerComment.getId(), taskAnswerCommentEditModel);
+
+        assertEquals(result.getText(), taskAnswerCommentEditModel.getText());
+        assertEquals(result.getAuthor().getId(), user.getId());
+
+        verify(taskAnswerCommentRepository, times(1)).flush();
+    }
+
+    @Test
+    void editTaskAnswerComment_whenUserTryToEditNotHisComment_throwsForbiddenRightsException() {
+        User newUser = new User();
+        taskAnswerComment.setAuthor(newUser);
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(taskAnswerCommentRepository.findById(taskAnswerComment.getId())).thenReturn(Optional.of(taskAnswerComment));
+
+        assertThrows(ExceptionUtility.forbiddenRightsException().getClass(),
+                () -> commentService.editTaskAnswerComment(user.getId(), taskAnswerComment.getId(), taskAnswerCommentEditModel));
+
+        verify(taskAnswerCommentRepository, times(0)).flush();
+    }
+
+    @Test
+    void editTaskAnswerComment_whenUserNotFound_throwsUserNotFoundException() {
+        when(userRepository.findById(user.getId())).thenReturn(Optional.empty());
+
+        assertThrows(ExceptionUtility.userNotFoundException().getClass(),
+                () -> commentService.editTaskAnswerComment(user.getId(), taskAnswerComment.getId(), taskAnswerCommentEditModel));
+
+        verify(taskAnswerCommentRepository, times(0)).flush();
+    }
+
+    @Test
+    void editTaskAnswerComment_whenTaskAnswerCommentNotFound_throwsTaskAnswerCommentNotFoundException() {
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(taskAnswerCommentRepository.findById(taskAnswerComment.getId())).thenReturn(Optional.empty());
+
+        assertThrows(ExceptionUtility.taskAnswerCommentNotFoundException().getClass(),
+                () -> commentService.editTaskAnswerComment(user.getId(), taskAnswerComment.getId(), taskAnswerCommentEditModel));
+
+        verify(taskAnswerCommentRepository, times(0)).flush();
     }
 
 }

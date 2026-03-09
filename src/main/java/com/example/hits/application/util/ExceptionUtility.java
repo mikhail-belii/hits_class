@@ -18,6 +18,12 @@ public class ExceptionUtility {
         return notFoundException;
     }
 
+    public ExceptionWrapper taskAnswerNotFoundException() {
+        var notFoundException = new ExceptionWrapper(new EntityNotFoundException("Task answer not found"));
+        notFoundException.addError("taskAnswerId", "Cannot find task answer with requested id");
+        return notFoundException;
+    }
+
     public ExceptionWrapper courseNotFoundByCodeException() {
         var notFoundException = new ExceptionWrapper(new EntityNotFoundException("Course with such join code not found"));
         notFoundException.addError("joinCode", "Cannot find course with requested joinCode");
@@ -54,6 +60,13 @@ public class ExceptionUtility {
     public ExceptionWrapper postCommentNotFoundException() {
         var notFoundException = new ExceptionWrapper(new EntityNotFoundException("Post comment not found"));
         notFoundException.addError("postCommentId", "Post comment not found");
+
+        return notFoundException;
+    }
+
+    public ExceptionWrapper taskAnswerCommentNotFoundException() {
+        var notFoundException = new ExceptionWrapper(new EntityNotFoundException("Task answer comment not found"));
+        notFoundException.addError("taskAnswerCommentId", "Task answer comment not found");
 
         return notFoundException;
     }
