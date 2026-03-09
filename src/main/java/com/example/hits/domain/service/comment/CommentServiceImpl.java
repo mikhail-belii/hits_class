@@ -10,10 +10,7 @@ import com.example.hits.application.model.course.*;
 import com.example.hits.application.repository.*;
 import com.example.hits.application.service.CommentService;
 import com.example.hits.application.service.CourseService;
-import com.example.hits.application.util.CourseUtility;
-import com.example.hits.application.util.ExceptionUtility;
-import com.example.hits.application.util.PostCommentUtility;
-import com.example.hits.application.util.PostUtility;
+import com.example.hits.application.util.*;
 import com.example.hits.domain.entity.course.Course;
 import com.example.hits.domain.entity.post.Post;
 import com.example.hits.domain.entity.postcomment.PostComment;
@@ -24,6 +21,7 @@ import com.example.hits.domain.entity.user.UserCourseRole;
 import com.example.hits.domain.entity.usercourse.UserCourse;
 import com.example.hits.domain.mapper.CourseMapper;
 import com.example.hits.domain.mapper.PostCommentMapper;
+import com.example.hits.domain.mapper.TaskAnswerCommentMapper;
 import com.example.hits.domain.mapper.UserCourseMapper;
 import com.example.hits.domain.service.course.CourseCodeGenerator;
 import lombok.RequiredArgsConstructor;
@@ -98,21 +96,52 @@ public class CommentServiceImpl implements CommentService {
     }
 
     public List<TaskAnswerCommentModel> getTaskAnswerComments(UUID requestingUserId, UUID taskAnswerId) {
-        return null;
+        User requestingUser = userRepository.findById(requestingUserId)
+                .orElseThrow(ExceptionUtility::userNotFoundException);
+        TaskAnswer taskAnswer = taskAnswerRepository.findById(taskAnswerId)
+                .orElseThrow(ExceptionUtility::taskAnswerNotFoundException);
+        if (!TaskAnswerCommentUtility.isTaskAnswerCommentsAvailableForUser(taskAnswer, requestingUser)) {
+            throw ExceptionUtility.forbiddenRightsException();
+        }
+        return taskAnswer.getComments()
+                .stream()
+                .map(TaskAnswerCommentMapper::toModel)
+                .toList();
     }
 
     public TaskAnswerCommentModel createTaskAnswerComment(
             UUID requestingUserId,
-            UUID postId,
-            TaskAnswerCommentCreateModel taskAnswerCommentCreateModel) {
-        return null;
+            UUID taskAnswerId,
+            TaskAnswerCommentCreateModel taskAnswerCommentCreateModel
+    ) {
+        User requestingUser = userRepository.findById(requestingUserId)
+                .orElseThrow(ExceptionUtility::userNotFoundException);
+        TaskAnswer taskAnswer = taskAnswerRepository.findById(taskAnswerId)
+                .orElseThrow(ExceptionUtility::taskAnswerNotFoundException);
+        if (!TaskAnswerCommentUtility.isTaskAnswerCommentsAvailableForUser(taskAnswer, requestingUser)) {
+            throw ExceptionUtility.forbiddenRightsException();
+        }
+        TaskAnswerComment taskAnswerComment = createTaskAnswerComment(taskAnswerCommentCreateModel, requestingUser, taskAnswer);
+        taskAnswerCommentRepository.saveAndFlush(taskAnswerComment);
+        return TaskAnswerCommentMapper.toModel(taskAnswerComment);
     }
 
     public TaskAnswerCommentModel editTaskAnswerComment(
             UUID requestingUserId,
-            UUID postId,
-            TaskAnswerCommentEditModel taskAnswerCommentEditModel) {
-        return null;
+            UUID taskAnswerCommentId,
+            TaskAnswerCommentEditModel taskAnswerCommentEditModel
+    ) {
+        User requestingUser = userRepository.findById(requestingUserId)
+                .orElseThrow(ExceptionUtility::userNotFoundException);
+        TaskAnswerComment taskAnswerComment = taskAnswerCommentRepository.findById(taskAnswerCommentId)
+                .orElseThrow(ExceptionUtility::taskAnswerNotFoundException);
+        if (!TaskAnswerCommentUtility.isCommentAvailableForEditing(taskAnswerComment, requestingUser)) {
+            throw ExceptionUtility.forbiddenRightsException();
+        }
+        taskAnswerComment.setText(taskAnswerCommentEditModel.getText());
+        taskAnswerComment.setUpdatedAt(LocalDateTime.now());
+        taskAnswerCommentRepository.flush();
+        return TaskAnswerCommentMapper.toModel(taskAnswerComment);
     }
 
     private PostComment createPostComment(
@@ -125,6 +154,19 @@ public class CommentServiceImpl implements CommentService {
                 .setAuthor(requestingUser)
                 .setPost(post)
                 .setText(postCommentCreateModel.getText())
+                .setCreatedAt(LocalDateTime.now());
+    }
+
+    private TaskAnswerComment createTaskAnswerComment(
+            TaskAnswerCommentCreateModel taskAnswerCommentCreateModel,
+            User requestingUser,
+            TaskAnswer taskAnswer
+    ) {
+        return new TaskAnswerComment()
+                .setId(UUID.randomUUID())
+                .setAuthor(requestingUser)
+                .setTaskAnswer(taskAnswer)
+                .setText(taskAnswerCommentCreateModel.getText())
                 .setCreatedAt(LocalDateTime.now());
     }
 
