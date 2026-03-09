@@ -31,7 +31,7 @@ import java.util.Set;
 @AllArgsConstructor
 public class FileController {
     private static final long MAX_FILE_SIZE_BYTES = 10L * 1024L * 1024L;
-    private static final Set<String> ALLOWED_EXTENSIONS = Set.of("txt", "docx", "png", "pdf");
+    private static final Set<String> ALLOWED_EXTENSIONS = Set.of("txt", "docx", "png", "pdf", "jpg");
 
     private final FileService fileService;
 
@@ -88,7 +88,7 @@ public class FileController {
 
         String extension = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
         if (!ALLOWED_EXTENSIONS.contains(extension)) {
-            throw ExceptionUtility.badRequestException("Allowed extensions: txt, docx, png, pdf");
+            throw ExceptionUtility.badRequestException("Allowed extensions: txt, pdf, docx, png, jpg");
         }
     }
 }
