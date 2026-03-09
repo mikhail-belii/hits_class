@@ -3,7 +3,7 @@ package com.example.hits.domain.service.post;
 import com.example.hits.application.model.common.IdResponseModel;
 import com.example.hits.application.model.file.FileModel;
 import com.example.hits.application.model.post.PostCreateModel;
-import com.example.hits.application.model.post.PostModel;
+import com.example.hits.application.model.post.PostShortModel;
 import com.example.hits.application.model.post.PostUpdateModel;
 import com.example.hits.application.repository.*;
 import com.example.hits.application.util.ExceptionUtility;
@@ -59,7 +59,7 @@ public class PostService {
         return new IdResponseModel(post.getId());
     }
 
-    public List<PostModel> getClassPosts(UUID courseId, UUID userId) {
+    public List<PostShortModel> getClassPosts(UUID courseId, UUID userId) {
         Course course = getCourseById(courseId);
         User user = findUserById(userId);
 
@@ -73,7 +73,7 @@ public class PostService {
                 .toList();
     }
 
-    public PostModel getPostInfo(UUID courseId, UUID postId, UUID userId) {
+    public PostShortModel getPostInfo(UUID courseId, UUID postId, UUID userId) {
         Course course = getCourseById(courseId);
         User user = findUserById(userId);
         Post post = findPostById(postId);

@@ -2,7 +2,6 @@ package com.example.hits.application.model.post;
 
 import com.example.hits.application.model.attachment.AttachmentModel;
 import com.example.hits.application.model.comment.PostCommentModel;
-import com.example.hits.application.model.file.FileModel;
 import com.example.hits.application.model.user.UserModel;
 import com.example.hits.domain.entity.post.PostType;
 import lombok.AllArgsConstructor;
@@ -18,7 +17,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Accessors(chain=true)
-public class PostModel {
+public class PostShortModel {
 
     private UUID id;
 

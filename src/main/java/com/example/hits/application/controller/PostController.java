@@ -2,7 +2,7 @@ package com.example.hits.application.controller;
 
 import com.example.hits.application.model.common.IdResponseModel;
 import com.example.hits.application.model.post.PostCreateModel;
-import com.example.hits.application.model.post.PostModel;
+import com.example.hits.application.model.post.PostShortModel;
 import com.example.hits.application.model.post.PostUpdateModel;
 import com.example.hits.domain.service.post.PostService;
 import lombok.RequiredArgsConstructor;
@@ -26,12 +26,12 @@ public class PostController {
     }
 
     @GetMapping
-    public List<PostModel> getCoursePosts(@PathVariable UUID courseId, @RequestAttribute("userId") UUID userId) {
+    public List<PostShortModel> getCoursePosts(@PathVariable UUID courseId, @RequestAttribute("userId") UUID userId) {
         return postService.getClassPosts(courseId, userId);
     }
 
     @GetMapping("/{postId}")
-    public PostModel getPost(@PathVariable UUID courseId, @PathVariable UUID postId, @RequestAttribute("userId") UUID userId) {
+    public PostShortModel getPost(@PathVariable UUID courseId, @PathVariable UUID postId, @RequestAttribute("userId") UUID userId) {
         return postService.getPostInfo(courseId, postId, userId);
     }
 

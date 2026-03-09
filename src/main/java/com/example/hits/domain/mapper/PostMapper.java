@@ -1,8 +1,7 @@
 package com.example.hits.domain.mapper;
 
 import com.example.hits.application.model.attachment.AttachmentModel;
-import com.example.hits.application.model.file.FileModel;
-import com.example.hits.application.model.post.PostModel;
+import com.example.hits.application.model.post.PostShortModel;
 import com.example.hits.domain.entity.post.Post;
 import lombok.experimental.ExtensionMethod;
 import lombok.experimental.UtilityClass;
@@ -14,8 +13,8 @@ import java.util.List;
 @ExtensionMethod({SimpleUserMapper.class, PostCommentMapper.class})
 public class PostMapper {
 
-    public PostModel toModel(Post postEntity) {
-        return new PostModel()
+    public PostShortModel toModel(Post postEntity) {
+        return new PostShortModel()
                 .setId(postEntity.getId())
                 .setText(postEntity.getText())
                 .setAuthor(postEntity.getAuthor() != null ? postEntity.getAuthor().toModel() : null)

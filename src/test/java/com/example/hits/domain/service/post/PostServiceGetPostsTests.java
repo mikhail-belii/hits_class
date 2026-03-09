@@ -1,7 +1,7 @@
 package com.example.hits.domain.service.post;
 
 import com.example.hits.application.handler.ExceptionWrapper;
-import com.example.hits.application.model.post.PostModel;
+import com.example.hits.application.model.post.PostShortModel;
 import com.example.hits.application.repository.CourseRepository;
 import com.example.hits.application.repository.PostRepository;
 import com.example.hits.application.repository.UserRepository;
@@ -59,7 +59,7 @@ public class PostServiceGetPostsTests {
                 createPost(UUID.randomUUID(), anotherCourse, user, "post-3")
         ));
 
-        List<PostModel> posts = postService.getClassPosts(courseId, userId);
+        List<PostShortModel> posts = postService.getClassPosts(courseId, userId);
 
         Assertions.assertEquals(2, posts.size());
         Assertions.assertEquals("post-1", posts.get(0).getText());
@@ -141,10 +141,10 @@ public class PostServiceGetPostsTests {
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(postRepository.findById(postId)).thenReturn(Optional.of(post));
 
-        PostModel postModel = postService.getPostInfo(courseId, postId, userId);
+        PostShortModel postShortModel = postService.getPostInfo(courseId, postId, userId);
 
-        Assertions.assertEquals(postId, postModel.getId());
-        Assertions.assertEquals("Бебебе", postModel.getText());
+        Assertions.assertEquals(postId, postShortModel.getId());
+        Assertions.assertEquals("Бебебе", postShortModel.getText());
     }
 
     @Test
