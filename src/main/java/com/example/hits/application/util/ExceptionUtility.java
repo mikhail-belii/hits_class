@@ -51,6 +51,13 @@ public class ExceptionUtility {
         return notFoundException;
     }
 
+    public ExceptionWrapper postCommentNotFoundException() {
+        var notFoundException = new ExceptionWrapper(new EntityNotFoundException("Post comment not found"));
+        notFoundException.addError("postCommentId", "Post comment not found");
+
+        return notFoundException;
+    }
+
     public ExceptionWrapper postNotFoundException() {
         var notFoundException = new ExceptionWrapper(new EntityNotFoundException("Post not found"));
         notFoundException.addError("postId", "Post not found");
