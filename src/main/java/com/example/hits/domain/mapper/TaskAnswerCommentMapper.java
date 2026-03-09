@@ -12,6 +12,13 @@ import lombok.experimental.UtilityClass;
 public class TaskAnswerCommentMapper {
 
     public TaskAnswerCommentModel toModel(TaskAnswerComment taskAnswerComment) {
-        return null;
+        return new TaskAnswerCommentModel()
+                .setId(taskAnswerComment.getId())
+                .setText(taskAnswerComment.getText())
+                .setAuthor(taskAnswerComment.getAuthor() != null
+                        ? taskAnswerComment.getAuthor().toModel()
+                        : null)
+                .setCreatedAt(taskAnswerComment.getCreatedAt())
+                .setUpdatedAt(taskAnswerComment.getUpdatedAt());
     }
 }
