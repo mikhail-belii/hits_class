@@ -1,7 +1,9 @@
 package com.example.hits.domain.mapper;
 
 import com.example.hits.application.model.comment.postcomment.PostCommentModel;
+import com.example.hits.application.model.comment.taskanswercomment.TaskAnswerCommentModel;
 import com.example.hits.domain.entity.postcomment.PostComment;
+import com.example.hits.domain.entity.taskanswercomment.TaskAnswerComment;
 import com.example.hits.domain.entity.user.User;
 import org.junit.jupiter.api.Test;
 
@@ -10,14 +12,14 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class PostCommentMapperTests {
+public class TaskAnswerCommentMapperTests {
 
     @Test
     void toModel_nullAuthor_shouldHandleNullAuthor() {
-        PostComment entity = new PostComment();
+        TaskAnswerComment entity = new TaskAnswerComment();
         entity.setAuthor(null);
 
-        PostCommentModel result = PostCommentMapper.toModel(entity);
+        TaskAnswerCommentModel result = TaskAnswerCommentMapper.toModel(entity);
 
         assertNull(result.getAuthor());
     }
@@ -30,14 +32,14 @@ public class PostCommentMapperTests {
         user.setId(userId);
         user.setEmail("user@aaa.com");
 
-        PostComment entity = new PostComment();
+        TaskAnswerComment entity = new TaskAnswerComment();
         entity.setId(postId);
         entity.setText("Скебоб момент");
         entity.setAuthor(user);
         entity.setCreatedAt(LocalDateTime.now().minusDays(1));
         entity.setUpdatedAt(LocalDateTime.now());
 
-        PostCommentModel result = PostCommentMapper.toModel(entity);
+        TaskAnswerCommentModel result = TaskAnswerCommentMapper.toModel(entity);
 
         assertNotNull(result);
         assertEquals(postId, result.getId());
@@ -53,9 +55,9 @@ public class PostCommentMapperTests {
 
     @Test
     void toModel_emptyCommentData_shouldHandleNullFields() {
-        PostComment entity = new PostComment();
+        TaskAnswerComment entity = new TaskAnswerComment();
 
-        PostCommentModel result = PostCommentMapper.toModel(entity);
+        TaskAnswerCommentModel result = TaskAnswerCommentMapper.toModel(entity);
 
         assertNotNull(result);
         assertNull(result.getId());
@@ -68,7 +70,7 @@ public class PostCommentMapperTests {
     @Test
     void toModel_shouldThrowException_whenEntityIsNull() {
         assertThrows(NullPointerException.class, () ->
-                PostCommentMapper.toModel(null)
+                TaskAnswerCommentMapper.toModel(null)
         );
     }
 }
