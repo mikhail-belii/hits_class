@@ -52,7 +52,7 @@ public class JwtFilter implements Filter {
     }
 
     private Boolean isPublicEndpoint(String uri) {
-        return uri.equals("/hits-class/api/v1/auth/login") || uri.equals("/hits-class/api/v1/auth/register")
-                || uri.equals("/hits-class/api/v1/auth/refresh-tokens");
+        return uri.equals("/api/v1/auth/login") || uri.equals("/api/v1/auth/register")
+                || uri.equals("/api/v1/auth/refresh-tokens");
     }
 }

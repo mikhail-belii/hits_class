@@ -17,7 +17,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Accessors(chain=true)
-public class PostModel {
+public class PostShortModel {
 
     private UUID id;
 

@@ -10,6 +10,7 @@ import com.example.hits.domain.entity.post.PostType;
 import com.example.hits.domain.entity.user.User;
 import com.example.hits.domain.entity.user.UserCourseRole;
 import jakarta.persistence.EntityNotFoundException;
+import org.apache.coyote.BadRequestException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -73,6 +74,81 @@ public class PostServiceDeletePostTests {
         Assertions.assertEquals(EntityNotFoundException.class, exception.getExceptionClass());
         Assertions.assertEquals("Cannot find course with requested id", exception.getErrors().get("courseId"));
         verifyNoInteractions(userRepository, postRepository);
+    }
+
+    @Test
+    void deletePost_userNotFound_throwsEntityNotFoundException() {
+        UUID courseId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        UUID postId = UUID.randomUUID();
+
+        User anotherUser = createUser(UUID.randomUUID());
+        Course course = createCourseWithUserRole(anotherUser, UserCourseRole.TEACHER);
+        course.setId(courseId);
+
+        when(courseRepository.findById(courseId)).thenReturn(Optional.of(course));
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        ExceptionWrapper exception = Assertions.assertThrows(
+                ExceptionWrapper.class,
+                () -> postService.deletePost(courseId, postId, userId)
+        );
+
+        Assertions.assertEquals(EntityNotFoundException.class, exception.getExceptionClass());
+        Assertions.assertEquals("User not found", exception.getErrors().get("userId"));
+        verifyNoInteractions(postRepository);
+    }
+
+    @Test
+    void deletePost_postNotFound_throwsEntityNotFoundException() {
+        UUID courseId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        UUID postId = UUID.randomUUID();
+
+        User teacher = createUser(userId);
+        Course course = createCourseWithUserRole(teacher, UserCourseRole.TEACHER);
+        course.setId(courseId);
+
+        when(courseRepository.findById(courseId)).thenReturn(Optional.of(course));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(teacher));
+        when(postRepository.findById(postId)).thenReturn(Optional.empty());
+
+        ExceptionWrapper exception = Assertions.assertThrows(
+                ExceptionWrapper.class,
+                () -> postService.deletePost(courseId, postId, userId)
+        );
+
+        Assertions.assertEquals(EntityNotFoundException.class, exception.getExceptionClass());
+        Assertions.assertEquals("Post not found", exception.getErrors().get("postId"));
+        verify(postRepository, never()).delete(any(Post.class));
+    }
+
+    @Test
+    void deletePost_postIsFromAnotherCourse_throwsBadRequestException() {
+        UUID courseId = UUID.randomUUID();
+        UUID anotherCourseId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        UUID postId = UUID.randomUUID();
+
+        User teacher = createUser(userId);
+        Course course = createCourseWithUserRole(teacher, UserCourseRole.TEACHER);
+        course.setId(courseId);
+        Course anotherCourse = createCourseWithUserRole(createUser(UUID.randomUUID()), UserCourseRole.STUDENT);
+        anotherCourse.setId(anotherCourseId);
+        Post post = createPost(postId, anotherCourse, teacher);
+
+        when(courseRepository.findById(courseId)).thenReturn(Optional.of(course));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(teacher));
+        when(postRepository.findById(postId)).thenReturn(Optional.of(post));
+
+        ExceptionWrapper exception = Assertions.assertThrows(
+                ExceptionWrapper.class,
+                () -> postService.deletePost(courseId, postId, userId)
+        );
+
+        Assertions.assertEquals(BadRequestException.class, exception.getExceptionClass());
+        Assertions.assertEquals("You can't delete this post", exception.getErrors().get("Bad request"));
+        verify(postRepository, never()).delete(any(Post.class));
     }
 
     private static Post createPost(UUID id, Course course, User author) {

@@ -2,6 +2,8 @@ package com.example.hits.domain.mapper;
 
 import com.example.hits.application.model.comment.postcomment.PostCommentModel;
 import com.example.hits.application.model.post.PostModel;
+import com.example.hits.application.model.comment.PostCommentModel;
+import com.example.hits.application.model.post.PostShortModel;
 import com.example.hits.domain.entity.attachment.Attachment;
 import com.example.hits.domain.entity.post.Post;
 import com.example.hits.domain.entity.post.PostType;
@@ -65,7 +67,7 @@ public class PostMapperTests {
         post.setMaxScore(100);
         post.setComments(List.of(comment1, comment2));
 
-        PostModel model = PostMapper.toModel(post);
+        PostShortModel model = PostMapper.toModel(post);
 
         assertNotNull(model);
         assertEquals(postId, model.getId());
@@ -107,7 +109,7 @@ public class PostMapperTests {
         post.setAuthor(null);
         post.setComments(List.of());
 
-        PostModel model = PostMapper.toModel(post);
+        PostShortModel model = PostMapper.toModel(post);
 
         assertNotNull(model);
         assertNull(model.getAuthor());
@@ -126,7 +128,7 @@ public class PostMapperTests {
         post.setAuthor(author);
         post.setComments(List.of());
 
-        PostModel model = PostMapper.toModel(post);
+        PostShortModel model = PostMapper.toModel(post);
 
         assertNotNull(model.getComments());
         assertTrue(model.getComments().isEmpty());
