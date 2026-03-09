@@ -12,6 +12,7 @@ import com.example.hits.domain.entity.attachment.Attachment;
 import com.example.hits.domain.entity.course.Course;
 import com.example.hits.domain.entity.file.File;
 import com.example.hits.domain.entity.post.Post;
+import com.example.hits.domain.entity.post.PostType;
 import com.example.hits.domain.entity.user.User;
 import com.example.hits.domain.mapper.PostMapper;
 import com.example.hits.domain.service.taskanswer.TaskAnswerService;
@@ -53,7 +54,9 @@ public class PostService {
 
         postRepository.save(post);
 
-        taskAnswerService.createTaskAnswerForEveryCourseMember(course, post);
+        if (post.getPostType() == PostType.TASK) {
+            taskAnswerService.createTaskAnswerForEveryCourseMember(course, post);
+        }
 
         return new IdResponseModel(post.getId());
     }
@@ -80,6 +83,8 @@ public class PostService {
         if (!PostUtility.isPostAvailableForReading(course, post, user)) {
             throw ExceptionUtility.badRequestException("You can't read this post");
         }
+
+        // todo: возвращать PostFullModel
 
         return post.toModel();
     }

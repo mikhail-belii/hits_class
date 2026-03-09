@@ -34,6 +34,7 @@ import java.util.UUID;
 import static com.example.hits.domain.service.post.PostServiceTestUtils.createCourseWithUserRole;
 import static com.example.hits.domain.service.post.PostServiceTestUtils.createUser;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -92,7 +93,7 @@ public class PostServiceCreatePostTests {
     }
 
     @Test
-    void createPost_withFiles_createsAttachments() {
+    void createPost_withFilesAndNonTaskType_createsAttachmentsAndDoesNotCreateTaskAnswers() {
         UUID courseId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
         UUID firstFileId = UUID.randomUUID();
@@ -121,7 +122,7 @@ public class PostServiceCreatePostTests {
         verify(postRepository).save(postCaptor.capture());
 
         Post savedPost = postCaptor.getValue();
-        verify(taskAnswerService).createTaskAnswerForEveryCourseMember(course, savedPost);
+        verify(taskAnswerService, never()).createTaskAnswerForEveryCourseMember(any(Course.class), any(Post.class));
         Assertions.assertNotNull(savedPost.getAttachments());
         Assertions.assertEquals(2, savedPost.getAttachments().size());
         Assertions.assertEquals(firstFileId, savedPost.getAttachments().get(0).getFile().getId());
