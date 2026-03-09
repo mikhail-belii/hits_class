@@ -38,5 +38,5 @@ public class PostFullModel {
 
     private List<PostCommentModel> comments;
 
-    private TaskAnswerModel taskAnswerModel;
+    private TaskAnswerModel taskAnswer;
 }

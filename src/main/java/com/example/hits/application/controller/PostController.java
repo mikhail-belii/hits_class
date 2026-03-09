@@ -2,6 +2,7 @@ package com.example.hits.application.controller;
 
 import com.example.hits.application.model.common.IdResponseModel;
 import com.example.hits.application.model.post.PostCreateModel;
+import com.example.hits.application.model.post.PostFullModel;
 import com.example.hits.application.model.post.PostShortModel;
 import com.example.hits.application.model.post.PostUpdateModel;
 import com.example.hits.domain.service.post.PostService;
@@ -31,7 +32,7 @@ public class PostController {
     }
 
     @GetMapping("/{postId}")
-    public PostShortModel getPost(@PathVariable UUID courseId, @PathVariable UUID postId, @RequestAttribute("userId") UUID userId) {
+    public PostFullModel getPost(@PathVariable UUID courseId, @PathVariable UUID postId, @RequestAttribute("userId") UUID userId) {
         return postService.getPostInfo(courseId, postId, userId);
     }
 
