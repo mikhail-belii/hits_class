@@ -31,7 +31,7 @@ public class CourseServiceImpl implements CourseService {
     private final CourseCodeGenerator courseCodeGenerator;
 
     @Transactional
-    public void createCourse(UUID requestingUserId, CourseCreateModel courseCreateModel) {
+    public CourseModel createCourse(UUID requestingUserId, CourseCreateModel courseCreateModel) {
         User requestingUser = userRepository.findById(requestingUserId)
                 .orElseThrow(ExceptionUtility::userNotFoundException);
         Course course = createCourseFromModel(courseCreateModel);
@@ -41,6 +41,8 @@ public class CourseServiceImpl implements CourseService {
         userCourseRepository.save(userCourse);
 
         courseRepository.flush();
+
+        return CourseMapper.toModel(course, userCourse.getUserRole());
     }
 
     public void editCourse(UUID requestingUserId, UUID courseId, CourseEditModel courseEditModel) {
@@ -97,11 +99,11 @@ public class CourseServiceImpl implements CourseService {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(ExceptionUtility::courseNotFoundException);
 
-        if (CourseUtility.getUserCourse(course, requestingUser).isEmpty()) {
-            throw ExceptionUtility.forbiddenRightsException();
-        }
+        UserCourse userCourse = CourseUtility.getUserCourse(course, requestingUser)
+                .orElseThrow(ExceptionUtility::forbiddenRightsException);
 
-        return CourseMapper.toModel(course);
+
+        return CourseMapper.toModel(course, userCourse.getUserRole());
     }
 
     public List<CourseShortModel> getUserCourses(UUID requestingUserId, boolean isArchived) {
