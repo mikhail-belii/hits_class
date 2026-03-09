@@ -38,7 +38,6 @@ public class PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final FileRepository fileRepository;
-    private final AttachmentRepository attachmentRepository;
 
     @Transactional
     public IdResponseModel createPost(UUID courseId, UUID userId, PostCreateModel postCreateModel) {
@@ -52,9 +51,9 @@ public class PostService {
         Post post = createPostFromModel(postCreateModel, user, course);
         post.setAttachments(buildPostAttachments(postCreateModel.getFiles(), post, user, null));
 
-        taskAnswerService.createTaskAnswerForEveryCourseMember(course, post);
-
         postRepository.save(post);
+
+        taskAnswerService.createTaskAnswerForEveryCourseMember(course, post);
 
         return new IdResponseModel(post.getId());
     }
