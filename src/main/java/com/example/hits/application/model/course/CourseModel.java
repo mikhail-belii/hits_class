@@ -1,5 +1,6 @@
 package com.example.hits.application.model.course;
 
+import com.example.hits.domain.entity.user.UserCourseRole;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -26,5 +27,7 @@ public class CourseModel {
     private Boolean isArchived;
 
     private LocalDateTime createdAt;
+
+    private UserCourseRole currentUserCourseRole;
 
 }

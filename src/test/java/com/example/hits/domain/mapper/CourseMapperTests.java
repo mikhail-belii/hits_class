@@ -3,6 +3,8 @@ package com.example.hits.domain.mapper;
 import com.example.hits.application.model.course.CourseModel;
 import com.example.hits.application.model.course.CourseShortModel;
 import com.example.hits.domain.entity.course.Course;
+import com.example.hits.domain.entity.user.UserCourseRole;
+import com.example.hits.domain.entity.usercourse.UserCourse;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -20,11 +22,12 @@ public class CourseMapperTests {
         LocalDateTime createdAt = LocalDateTime.now();
         String joinCode = "ABC123";
         Boolean isArchived = false;
+        UserCourseRole userCourseRole = UserCourseRole.HEAD_TEACHER;
 
         Course courseEntity = createCourseWithFields(
                 id, name, description, createdAt, joinCode, isArchived);
 
-        CourseModel result = CourseMapper.toModel(courseEntity);
+        CourseModel result = CourseMapper.toModel(courseEntity, userCourseRole);
 
         assertEquals(id, result.getId());
         assertEquals(name, result.getName());
@@ -32,6 +35,7 @@ public class CourseMapperTests {
         assertEquals(createdAt, result.getCreatedAt());
         assertEquals(joinCode, result.getJoinCode());
         assertEquals(isArchived, result.getIsArchived());
+        assertEquals(userCourseRole, result.getCurrentUserCourseRole());
     }
 
     @Test
@@ -39,7 +43,7 @@ public class CourseMapperTests {
         Course courseEntity = createCourseWithFields(
                 UUID.randomUUID(), null, null, null, null, null);
 
-        CourseModel result = CourseMapper.toModel(courseEntity);
+        CourseModel result = CourseMapper.toModel(courseEntity, null);
 
         assertNotNull(result.getId());
         assertNull(result.getName());
@@ -47,6 +51,7 @@ public class CourseMapperTests {
         assertNull(result.getCreatedAt());
         assertNull(result.getJoinCode());
         assertNull(result.getIsArchived());
+        assertNull(result.getCurrentUserCourseRole());
     }
 
     @Test
