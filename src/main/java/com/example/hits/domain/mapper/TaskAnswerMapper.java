@@ -13,6 +13,8 @@ import java.time.LocalDateTime;
 @ExtensionMethod(TaskAnswerCommentMapper.class)
 public class TaskAnswerMapper {
 
+    private static int MAX_POST_NAME_LENGTH = 10;
+
     public TaskAnswerModel toModel(TaskAnswer taskAnswer) {
         String postText = taskAnswer.getPost().getText();
 
@@ -27,7 +29,7 @@ public class TaskAnswerMapper {
                 .setComments(taskAnswer.getComments().stream()
                         .map(TaskAnswerCommentMapper::toModel)
                         .toList())
-                .setPostName(postText.substring(0, Math.min(10, postText.length())));
+                .setPostName(postText.substring(0, Math.min(MAX_POST_NAME_LENGTH, postText.length())));
     }
 
     private TaskAnswerStatus parseStatus(TaskAnswer taskAnswer) {
