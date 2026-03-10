@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface CourseService {
-    void createCourse(UUID requestingUserId, CourseCreateModel courseCreateModel);
+    CourseModel createCourse(UUID requestingUserId, CourseCreateModel courseCreateModel);
 
     void editCourse(UUID requestingUserId, UUID courseId, CourseEditModel courseEditModel);
 

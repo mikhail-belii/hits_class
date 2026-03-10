@@ -20,11 +20,11 @@ public class CourseController {
 
     @PostMapping
     @Operation(summary = "Create course")
-    public void createCourse(
+    public CourseModel createCourse(
             @RequestAttribute("userId") UUID requestingUserId,
             @RequestBody CourseCreateModel courseCreateModel
     ) {
-        courseService.createCourse(requestingUserId, courseCreateModel);
+        return courseService.createCourse(requestingUserId, courseCreateModel);
     }
 
     @PatchMapping("/{courseId}")

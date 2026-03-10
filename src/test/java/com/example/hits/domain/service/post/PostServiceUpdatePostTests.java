@@ -27,9 +27,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static com.example.hits.domain.service.post.PostServiceTestUtils.createCourseWithUserRole;
 import static com.example.hits.domain.service.post.PostServiceTestUtils.createUser;
@@ -97,7 +95,7 @@ public class PostServiceUpdatePostTests {
 
         File oldFile = new File().setId(UUID.randomUUID()).setUploader(teacher).setPath("files/uploads/old.txt").setOriginalName("old.txt").setCreatedAt(LocalDateTime.now());
         Attachment oldAttachment = new Attachment().setFile(oldFile).setPost(post).setCreatedAt(LocalDateTime.now());
-        post.setAttachments(List.of(oldAttachment));
+        post.setAttachments(new ArrayList<>(Arrays.asList(oldAttachment)));
 
         File newFile = new File().setId(newFileId).setUploader(teacher).setPath("files/uploads/new.txt").setOriginalName("new.txt").setCreatedAt(LocalDateTime.now());
         PostUpdateModel model = new PostUpdateModel("new-text", List.of(new FileModel(newFileId)));
