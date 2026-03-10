@@ -12,6 +12,7 @@ import com.example.hits.domain.entity.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -50,11 +51,29 @@ public class TaskAnswerUploadService {
     }
 
     public void submitTask(UUID taskAnswerId, UUID userId) {
+        TaskAnswer taskAnswer = getTaskAnswer(taskAnswerId);
+        User user = getUser(userId);
 
+        if (!taskAnswer.getUser().equals(user)) {
+            throw ExceptionUtility.forbiddenRightsException();
+        }
+
+        taskAnswer.setSubmittedAt(LocalDateTime.now());
+
+        taskAnswerRepository.save(taskAnswer);
     }
 
     public void unsubmitTask(UUID taskAnswerId, UUID userId) {
+        TaskAnswer taskAnswer = getTaskAnswer(taskAnswerId);
+        User user = getUser(userId);
 
+        if (!taskAnswer.getUser().equals(user)) {
+            throw ExceptionUtility.forbiddenRightsException();
+        }
+
+        taskAnswer.setSubmittedAt(null);
+
+        taskAnswerRepository.save(taskAnswer);
     }
 
     private TaskAnswer getTaskAnswer(UUID taskAnswerId) {

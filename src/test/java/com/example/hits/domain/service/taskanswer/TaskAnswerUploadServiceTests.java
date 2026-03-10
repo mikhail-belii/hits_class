@@ -16,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -135,5 +136,133 @@ public class TaskAnswerUploadServiceTests {
 
         assertThrows(ExceptionUtility.userNotFoundException().getClass(),
                 () -> taskAnswerUploadService.evaluateTask(taskAnswerId, taskRate, userId));
+    }
+
+    @Test
+    void submitTask_whenUserIsTaskAnswerAuthor_setsSubmittedAtAndSavesTaskAnswer() {
+        UUID taskAnswerId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        User user = new User().setId(userId);
+        TaskAnswer taskAnswer = new TaskAnswer()
+                .setId(taskAnswerId)
+                .setUser(user)
+                .setSubmittedAt(null);
+
+        when(taskAnswerRepository.findById(taskAnswerId)).thenReturn(Optional.of(taskAnswer));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        taskAnswerUploadService.submitTask(taskAnswerId, userId);
+
+        verify(taskAnswerRepository).save(argThat(savedTaskAnswer ->
+                savedTaskAnswer.getId().equals(taskAnswerId)
+                        && savedTaskAnswer.getSubmittedAt() != null));
+    }
+
+    @Test
+    void submitTask_whenUserIsNotTaskAnswerAuthor_throwsForbiddenRightsException() {
+        UUID taskAnswerId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        User author = new User().setId(UUID.randomUUID());
+        User anotherUser = new User().setId(userId);
+        TaskAnswer taskAnswer = new TaskAnswer()
+                .setId(taskAnswerId)
+                .setUser(author);
+
+        when(taskAnswerRepository.findById(taskAnswerId)).thenReturn(Optional.of(taskAnswer));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(anotherUser));
+
+        assertThrows(ExceptionUtility.forbiddenRightsException().getClass(),
+                () -> taskAnswerUploadService.submitTask(taskAnswerId, userId));
+    }
+
+    @Test
+    void submitTask_whenTaskAnswerDoesNotExist_throwsTaskAnswerNotFoundException() {
+        UUID taskAnswerId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+
+        when(taskAnswerRepository.findById(taskAnswerId)).thenReturn(Optional.empty());
+
+        assertThrows(ExceptionUtility.taskAnswerNotFoundException().getClass(),
+                () -> taskAnswerUploadService.submitTask(taskAnswerId, userId));
+    }
+
+    @Test
+    void submitTask_whenUserDoesNotExist_throwsUserNotFoundException() {
+        UUID taskAnswerId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        TaskAnswer taskAnswer = new TaskAnswer()
+                .setId(taskAnswerId)
+                .setUser(new User().setId(userId));
+
+        when(taskAnswerRepository.findById(taskAnswerId)).thenReturn(Optional.of(taskAnswer));
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        assertThrows(ExceptionUtility.userNotFoundException().getClass(),
+                () -> taskAnswerUploadService.submitTask(taskAnswerId, userId));
+    }
+
+    @Test
+    void unsubmitTask_whenUserIsTaskAnswerAuthor_clearsSubmittedAtAndSavesTaskAnswer() {
+        UUID taskAnswerId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        User user = new User().setId(userId);
+        TaskAnswer taskAnswer = new TaskAnswer()
+                .setId(taskAnswerId)
+                .setUser(user)
+                .setSubmittedAt(LocalDateTime.now());
+
+        when(taskAnswerRepository.findById(taskAnswerId)).thenReturn(Optional.of(taskAnswer));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        taskAnswerUploadService.unsubmitTask(taskAnswerId, userId);
+
+        verify(taskAnswerRepository).save(argThat(savedTaskAnswer ->
+                savedTaskAnswer.getId().equals(taskAnswerId)
+                        && savedTaskAnswer.getSubmittedAt() == null));
+    }
+
+    @Test
+    void unsubmitTask_whenUserIsNotTaskAnswerAuthor_throwsForbiddenRightsException() {
+        UUID taskAnswerId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        User author = new User().setId(UUID.randomUUID());
+        User anotherUser = new User().setId(userId);
+        TaskAnswer taskAnswer = new TaskAnswer()
+                .setId(taskAnswerId)
+                .setUser(author)
+                .setSubmittedAt(LocalDateTime.now());
+
+        when(taskAnswerRepository.findById(taskAnswerId)).thenReturn(Optional.of(taskAnswer));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(anotherUser));
+
+        assertThrows(ExceptionUtility.forbiddenRightsException().getClass(),
+                () -> taskAnswerUploadService.unsubmitTask(taskAnswerId, userId));
+    }
+
+    @Test
+    void unsubmitTask_whenTaskAnswerDoesNotExist_throwsTaskAnswerNotFoundException() {
+        UUID taskAnswerId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+
+        when(taskAnswerRepository.findById(taskAnswerId)).thenReturn(Optional.empty());
+
+        assertThrows(ExceptionUtility.taskAnswerNotFoundException().getClass(),
+                () -> taskAnswerUploadService.unsubmitTask(taskAnswerId, userId));
+    }
+
+    @Test
+    void unsubmitTask_whenUserDoesNotExist_throwsUserNotFoundException() {
+        UUID taskAnswerId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        TaskAnswer taskAnswer = new TaskAnswer()
+                .setId(taskAnswerId)
+                .setUser(new User().setId(userId))
+                .setSubmittedAt(LocalDateTime.now());
+
+        when(taskAnswerRepository.findById(taskAnswerId)).thenReturn(Optional.of(taskAnswer));
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        assertThrows(ExceptionUtility.userNotFoundException().getClass(),
+                () -> taskAnswerUploadService.unsubmitTask(taskAnswerId, userId));
     }
 }
