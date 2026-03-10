@@ -13,6 +13,7 @@ import com.example.hits.domain.entity.user.UserCourseRole;
 import com.example.hits.domain.entity.usercourse.UserCourse;
 import com.example.hits.domain.mapper.CourseMapper;
 import com.example.hits.domain.mapper.UserCourseMapper;
+import com.example.hits.domain.service.taskanswer.TaskAnswerGeneralService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +30,7 @@ public class CourseServiceImpl implements CourseService {
     private final CourseRepository courseRepository;
     private final UserCourseRepository userCourseRepository;
     private final CourseCodeGenerator courseCodeGenerator;
+    private final TaskAnswerGeneralService taskAnswerGeneralService;
 
     @Transactional
     public CourseModel createCourse(UUID requestingUserId, CourseCreateModel courseCreateModel) {
@@ -130,6 +132,8 @@ public class CourseServiceImpl implements CourseService {
         UserCourse userCourse = createUserCourseOnCourseJoin(course, requestingUser);
 
         userCourseRepository.saveAndFlush(userCourse);
+
+        taskAnswerGeneralService.createTaskAnswersForNewCourseUser(requestingUser, course);
     }
 
     public void changeUserRoleOnCourse(

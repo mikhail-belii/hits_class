@@ -26,6 +26,7 @@ import java.util.stream.StreamSupport;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -100,6 +101,39 @@ public class TaskAnswerGeneralServiceTests {
                 post.equals(taskAnswer.getPost())
                         && user.equals(taskAnswer.getUser())
         ));
+    }
+
+    @Test
+    void createTaskAnswersForNewCourseUser_whenCourseHasTaskPosts_savesTaskAnswerForEachTaskPost() {
+        User user = new User().setId(UUID.randomUUID());
+        Course course = new Course().setId(UUID.randomUUID());
+        Post firstTaskPost = new Post().setId(UUID.randomUUID()).setCourse(course).setPostType(PostType.TASK);
+        Post secondTaskPost = new Post().setId(UUID.randomUUID()).setCourse(course).setPostType(PostType.TASK);
+
+        when(postRepository.findAllByCourseAndPostType(course, PostType.TASK))
+                .thenReturn(List.of(firstTaskPost, secondTaskPost));
+
+        taskAnswerGeneralService.createTaskAnswersForNewCourseUser(user, course);
+
+        verify(postRepository).findAllByCourseAndPostType(course, PostType.TASK);
+        verify(taskAnswerRepository).save(argThat(taskAnswer ->
+                firstTaskPost.equals(taskAnswer.getPost()) && user.equals(taskAnswer.getUser())));
+        verify(taskAnswerRepository).save(argThat(taskAnswer ->
+                secondTaskPost.equals(taskAnswer.getPost()) && user.equals(taskAnswer.getUser())));
+    }
+
+    @Test
+    void createTaskAnswersForNewCourseUser_whenCourseHasNoTaskPosts_doesNotSaveTaskAnswers() {
+        User user = new User().setId(UUID.randomUUID());
+        Course course = new Course().setId(UUID.randomUUID());
+
+        when(postRepository.findAllByCourseAndPostType(course, PostType.TASK))
+                .thenReturn(List.of());
+
+        taskAnswerGeneralService.createTaskAnswersForNewCourseUser(user, course);
+
+        verify(postRepository).findAllByCourseAndPostType(course, PostType.TASK);
+        verify(taskAnswerRepository, never()).save(any(TaskAnswer.class));
     }
 
     @Test

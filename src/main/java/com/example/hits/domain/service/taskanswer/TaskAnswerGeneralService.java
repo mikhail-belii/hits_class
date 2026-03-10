@@ -89,6 +89,14 @@ public class TaskAnswerGeneralService {
         return TaskAnswerMapper.toModel(taskAnswer);
     }
 
+    public void createTaskAnswersForNewCourseUser(User user, Course course) {
+        List<Post> coursePosts = postRepository.findAllByCourseAndPostType(course, PostType.TASK);
+
+        for (Post post : coursePosts) {
+            createTaskAnswerForUser(post, user);
+        }
+    }
+
     public void createTaskAnswerForUser(Post post, User user) {
         TaskAnswer newUserTaskAnswer = createTaskAnswerForDefiniteUser(post, user);
 

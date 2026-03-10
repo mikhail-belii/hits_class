@@ -9,6 +9,7 @@ import com.example.hits.domain.entity.course.Course;
 import com.example.hits.domain.entity.user.User;
 import com.example.hits.domain.entity.user.UserCourseRole;
 import com.example.hits.domain.entity.usercourse.UserCourse;
+import com.example.hits.domain.service.taskanswer.TaskAnswerGeneralService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,6 +37,8 @@ public class CourseServiceTest {
     private UserCourseRepository userCourseRepository;
     @Mock
     private CourseCodeGenerator courseCodeGenerator;
+    @Mock
+    private TaskAnswerGeneralService taskAnswerGeneralService;
 
     @InjectMocks
     private CourseServiceImpl courseService;
@@ -387,6 +390,7 @@ public class CourseServiceTest {
         assertEquals(UserCourseRole.STUDENT, savedUserCourse.getUserRole());
         assertEquals(course, savedUserCourse.getCourse());
         assertEquals(user, savedUserCourse.getUser());
+        verify(taskAnswerGeneralService).createTaskAnswersForNewCourseUser(user, course);
     }
 
     @Test
