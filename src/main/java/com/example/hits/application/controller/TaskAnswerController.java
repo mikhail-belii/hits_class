@@ -2,6 +2,7 @@ package com.example.hits.application.controller;
 
 import com.example.hits.application.model.attachment.AttachmentModel;
 import com.example.hits.application.model.taskanswer.TaskAnswerModel;
+import com.example.hits.application.model.taskanswer.TaskRateRequestModel;
 import com.example.hits.domain.service.taskanswer.TaskAnswerGeneralService;
 import com.example.hits.domain.service.taskanswer.TaskAnswerUploadService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -57,6 +58,13 @@ public class TaskAnswerController {
 
     @DeleteMapping("/submit/{taskAnswerId}")
     public void unsubmitTask(@PathVariable UUID taskAnswerId, @RequestAttribute("userId") UUID userId) {
+
+    }
+
+    @PutMapping("/task-answer/{taskAnswerId}/evaluate")
+    public void evaluateTask(@PathVariable UUID taskAnswerId,
+                             @RequestBody TaskRateRequestModel taskRate,
+                             @RequestAttribute("userId") UUID userId) {
 
     }
 }
