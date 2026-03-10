@@ -1,10 +1,13 @@
 package com.example.hits.domain.service.taskanswer;
 
 import com.example.hits.application.repository.TaskAnswerRepository;
+import com.example.hits.application.repository.UserRepository;
 import com.example.hits.domain.entity.course.Course;
 import com.example.hits.domain.entity.post.Post;
 import com.example.hits.domain.entity.taskanswer.TaskAnswer;
+import com.example.hits.domain.entity.taskanswer.TaskAnswerStatus;
 import com.example.hits.domain.entity.user.User;
+import com.example.hits.domain.entity.user.UserCourseRole;
 import com.example.hits.domain.entity.usercourse.UserCourse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,18 +16,25 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.StreamSupport;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class TaskAnswerServiceTests {
 
     @Mock
     private TaskAnswerRepository taskAnswerRepository;
+
+    @Mock
+    private UserRepository userRepository;
 
     @InjectMocks
     private TaskAnswerService taskAnswerService;
@@ -82,5 +92,61 @@ public class TaskAnswerServiceTests {
                 post.equals(taskAnswer.getPost())
                         && user.equals(taskAnswer.getUser())
         ));
+    }
+
+    @Test
+    void getAllUserTaskAnswers_whenUserIsStudentOnCourse_returnsOnlyTaskAnswersFromThatCourse() {
+        UUID userId = UUID.randomUUID();
+        UUID courseId = UUID.randomUUID();
+        User user = new User().setId(userId);
+        Course course = new Course().setId(courseId);
+        UserCourse studentCourse = new UserCourse()
+                .setUser(user)
+                .setCourse(course)
+                .setUserRole(UserCourseRole.STUDENT);
+        user.setUserCourses(List.of(studentCourse));
+
+        TaskAnswer firstTaskAnswer = new TaskAnswer()
+                .setId(UUID.randomUUID())
+                .setUser(user)
+                .setPost(new Post().setId(UUID.randomUUID()).setText("0123456789-first").setCourse(course))
+                .setStatus(TaskAnswerStatus.NEW);
+        TaskAnswer secondTaskAnswer = new TaskAnswer()
+                .setId(UUID.randomUUID())
+                .setUser(user)
+                .setPost(new Post().setId(UUID.randomUUID()).setText("0123456789-second").setCourse(course))
+                .setStatus(TaskAnswerStatus.COMPLETED);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(taskAnswerRepository.findAllByUserIdAndPostCourseId(userId, courseId))
+                .thenReturn(List.of(firstTaskAnswer, secondTaskAnswer));
+
+        var result = taskAnswerService.getAllUserTaskAnswers(userId);
+
+        assertEquals(2, result.size());
+        assertEquals(firstTaskAnswer.getId(), result.get(0).getId());
+        assertEquals(secondTaskAnswer.getId(), result.get(1).getId());
+        assertEquals("0123456789", result.get(0).getPostName());
+        assertEquals("0123456789", result.get(1).getPostName());
+        verify(taskAnswerRepository).findAllByUserIdAndPostCourseId(userId, courseId);
+    }
+
+    @Test
+    void getAllUserTaskAnswers_whenUserIsNotStudentOnCourse_doesNotRequestTaskAnswersForCourse() {
+        UUID userId = UUID.randomUUID();
+        User user = new User().setId(userId);
+        Course course = new Course().setId(UUID.randomUUID());
+        UserCourse teacherCourse = new UserCourse()
+                .setUser(user)
+                .setCourse(course)
+                .setUserRole(UserCourseRole.TEACHER);
+        user.setUserCourses(List.of(teacherCourse));
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        var result = taskAnswerService.getAllUserTaskAnswers(userId);
+
+        assertEquals(0, result.size());
+        verify(taskAnswerRepository, never()).findAllByUserIdAndPostCourseId(userId, course.getId());
     }
 }

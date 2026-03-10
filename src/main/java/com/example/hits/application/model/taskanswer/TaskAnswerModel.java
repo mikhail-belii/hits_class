@@ -1,7 +1,7 @@
 package com.example.hits.application.model.taskanswer;
 
 import com.example.hits.application.model.attachment.AttachmentModel;
-import com.example.hits.application.model.comment.TaskAnswerCommentModel;
+import com.example.hits.application.model.comment.taskanswercomment.TaskAnswerCommentModel;
 import com.example.hits.domain.entity.taskanswer.TaskAnswerStatus;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -26,4 +26,6 @@ public class TaskAnswerModel {
     private List<AttachmentModel> attachments = new ArrayList<>();
 
     private List<TaskAnswerCommentModel> comments = new ArrayList<>();
+
+    private String postName;
 }

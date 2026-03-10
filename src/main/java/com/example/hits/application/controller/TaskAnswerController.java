@@ -19,8 +19,7 @@ public class TaskAnswerController {
 
     @GetMapping("/all")
     public List<TaskAnswerModel> getAllUserTaskAnswers(@RequestAttribute("userId") UUID userId) {
-        // todo: только для курсов, в которых пользователь является студентом
-        return new ArrayList<>();
+        return taskAnswerService.getAllUserTaskAnswers(userId);
     }
 
     @PostMapping("/pin-file/{taskAnswerId}")
