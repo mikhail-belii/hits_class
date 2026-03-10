@@ -1,11 +1,14 @@
 package com.example.hits.domain.service.taskanswer;
 
 import com.example.hits.application.model.taskanswer.TaskAnswerModel;
+import com.example.hits.application.repository.PostRepository;
 import com.example.hits.application.repository.TaskAnswerRepository;
 import com.example.hits.application.repository.UserRepository;
 import com.example.hits.application.util.ExceptionUtility;
+import com.example.hits.application.util.PostUtility;
 import com.example.hits.domain.entity.course.Course;
 import com.example.hits.domain.entity.post.Post;
+import com.example.hits.domain.entity.post.PostType;
 import com.example.hits.domain.entity.taskanswer.TaskAnswer;
 import com.example.hits.domain.entity.taskanswer.TaskAnswerStatus;
 import com.example.hits.domain.entity.user.User;
@@ -24,6 +27,7 @@ public class TaskAnswerGeneralService {
 
     private final TaskAnswerRepository taskAnswerRepository;
     private final UserRepository userRepository;
+    private final PostRepository postRepository;
 
     Map<TaskAnswerStatus, Integer> priority = Map.of(
             TaskAnswerStatus.NEW, 1,
@@ -60,9 +64,22 @@ public class TaskAnswerGeneralService {
     }
 
     public List<TaskAnswerModel> getAllPostTaskAnswers(UUID postId, UUID userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(ExceptionUtility::userNotFoundException);
+        Post post = postRepository.findById(postId)
+                .orElseThrow(ExceptionUtility::postNotFoundException);
 
+        if (post.getPostType() != PostType.TASK) {
+            throw ExceptionUtility.badRequestException("Post is not a task type");
+        }
 
-        return new ArrayList<>();
+        if (post.getCourse() == null || !PostUtility.isAvailableForEditing(post.getCourse(), user)) {
+            throw ExceptionUtility.forbiddenRightsException();
+        }
+
+        return taskAnswerRepository.findAllByPostId(postId).stream()
+                .map(TaskAnswerMapper::toModel)
+                .toList();
     }
 
     public TaskAnswerModel getUserPostTaskAnswer(UUID postId, UUID userId) {

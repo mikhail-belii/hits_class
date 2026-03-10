@@ -10,4 +10,5 @@ import java.util.UUID;
 public interface TaskAnswerRepository extends JpaRepository<TaskAnswer, UUID> {
     Optional<TaskAnswer> findByUserIdAndPostId(UUID userId, UUID postId);
     List<TaskAnswer> findAllByUserIdAndPostCourseId(UUID userId, UUID courseId);
+    List<TaskAnswer> findAllByPostId(UUID postId);
 }

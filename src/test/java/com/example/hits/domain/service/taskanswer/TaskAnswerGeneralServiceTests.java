@@ -1,10 +1,12 @@
 package com.example.hits.domain.service.taskanswer;
 
+import com.example.hits.application.repository.PostRepository;
 import com.example.hits.application.repository.TaskAnswerRepository;
 import com.example.hits.application.repository.UserRepository;
 import com.example.hits.application.util.ExceptionUtility;
 import com.example.hits.domain.entity.course.Course;
 import com.example.hits.domain.entity.post.Post;
+import com.example.hits.domain.entity.post.PostType;
 import com.example.hits.domain.entity.taskanswer.TaskAnswer;
 import com.example.hits.domain.entity.taskanswer.TaskAnswerStatus;
 import com.example.hits.domain.entity.user.User;
@@ -38,6 +40,9 @@ public class TaskAnswerGeneralServiceTests {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private PostRepository postRepository;
 
     @InjectMocks
     private TaskAnswerGeneralService taskAnswerGeneralService;
@@ -189,5 +194,92 @@ public class TaskAnswerGeneralServiceTests {
 
         assertThrows(ExceptionUtility.taskAnswerNotFoundException().getClass(),
                 () -> taskAnswerGeneralService.getUserPostTaskAnswer(postId, userId));
+    }
+
+    @Test
+    void getAllPostTaskAnswers_whenUserIsTeacherOnPostCourse_returnsAllPostTaskAnswers() {
+        UUID userId = UUID.randomUUID();
+        UUID postId = UUID.randomUUID();
+        UUID courseId = UUID.randomUUID();
+        User user = new User().setId(userId);
+        Course course = new Course().setId(courseId);
+        UserCourse teacherOnCourse = new UserCourse()
+                .setUser(user)
+                .setCourse(course)
+                .setUserRole(UserCourseRole.TEACHER);
+        course.setCourseUsers(List.of(teacherOnCourse));
+
+        Post post = new Post()
+                .setId(postId)
+                .setCourse(course)
+                .setPostType(PostType.TASK);
+        TaskAnswer firstTaskAnswer = new TaskAnswer()
+                .setId(UUID.randomUUID())
+                .setPost(new Post()
+                        .setId(postId)
+                        .setText("0123456789-first")
+                        .setCreatedAt(LocalDateTime.now().minusDays(2)))
+                .setAttachments(List.of())
+                .setComments(List.of());
+        TaskAnswer secondTaskAnswer = new TaskAnswer()
+                .setId(UUID.randomUUID())
+                .setPost(new Post()
+                        .setId(postId)
+                        .setText("short")
+                        .setCreatedAt(LocalDateTime.now().minusDays(10)))
+                .setAttachments(List.of())
+                .setComments(List.of());
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(postRepository.findById(postId)).thenReturn(Optional.of(post));
+        when(taskAnswerRepository.findAllByPostId(postId)).thenReturn(List.of(firstTaskAnswer, secondTaskAnswer));
+
+        var result = taskAnswerGeneralService.getAllPostTaskAnswers(postId, userId);
+
+        assertEquals(2, result.size());
+        assertEquals(firstTaskAnswer.getId(), result.get(0).getId());
+        assertEquals(secondTaskAnswer.getId(), result.get(1).getId());
+        assertEquals("0123456789", result.get(0).getPostName());
+        assertEquals("short", result.get(1).getPostName());
+        verify(taskAnswerRepository).findAllByPostId(postId);
+    }
+
+    @Test
+    void getAllPostTaskAnswers_whenUserIsNotTeacherOnPostCourse_throwsForbiddenRightsException() {
+        UUID userId = UUID.randomUUID();
+        UUID postId = UUID.randomUUID();
+        User user = new User().setId(userId);
+        Course course = new Course().setId(UUID.randomUUID());
+        UserCourse studentOnCourse = new UserCourse()
+                .setUser(user)
+                .setCourse(course)
+                .setUserRole(UserCourseRole.STUDENT);
+        course.setCourseUsers(List.of(studentOnCourse));
+        Post post = new Post()
+                .setId(postId)
+                .setCourse(course)
+                .setPostType(PostType.TASK);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(postRepository.findById(postId)).thenReturn(Optional.of(post));
+
+        assertThrows(ExceptionUtility.forbiddenRightsException().getClass(),
+                () -> taskAnswerGeneralService.getAllPostTaskAnswers(postId, userId));
+    }
+
+    @Test
+    void getAllPostTaskAnswers_whenPostIsNotTask_throwsBadRequestException() {
+        UUID userId = UUID.randomUUID();
+        UUID postId = UUID.randomUUID();
+        User user = new User().setId(userId);
+        Post post = new Post()
+                .setId(postId)
+                .setPostType(PostType.ANNOUNCEMENT);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(postRepository.findById(postId)).thenReturn(Optional.of(post));
+
+        assertThrows(ExceptionUtility.badRequestException("Post is not a task type").getClass(),
+                () -> taskAnswerGeneralService.getAllPostTaskAnswers(postId, userId));
     }
 }
