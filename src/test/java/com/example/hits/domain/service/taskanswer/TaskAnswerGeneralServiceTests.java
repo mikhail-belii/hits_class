@@ -2,6 +2,7 @@ package com.example.hits.domain.service.taskanswer;
 
 import com.example.hits.application.repository.TaskAnswerRepository;
 import com.example.hits.application.repository.UserRepository;
+import com.example.hits.application.util.ExceptionUtility;
 import com.example.hits.domain.entity.course.Course;
 import com.example.hits.domain.entity.post.Post;
 import com.example.hits.domain.entity.taskanswer.TaskAnswer;
@@ -15,12 +16,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.StreamSupport;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -148,5 +151,43 @@ public class TaskAnswerGeneralServiceTests {
 
         assertEquals(0, result.size());
         verify(taskAnswerRepository, never()).findAllByUserIdAndPostCourseId(userId, course.getId());
+    }
+
+    @Test
+    void getUserPostTaskAnswer_whenTaskAnswerExists_returnsMappedModel() {
+        UUID userId = UUID.randomUUID();
+        UUID postId = UUID.randomUUID();
+        UUID taskAnswerId = UUID.randomUUID();
+        TaskAnswer taskAnswer = new TaskAnswer()
+                .setId(taskAnswerId)
+                .setUser(new User().setId(userId))
+                .setPost(new Post()
+                        .setId(postId)
+                        .setText("0123456789ГООООЛ")
+                        .setCreatedAt(LocalDateTime.now().minusDays(2)))
+                .setAttachments(List.of())
+                .setComments(List.of());
+
+        when(taskAnswerRepository.findByUserIdAndPostId(userId, postId))
+                .thenReturn(Optional.of(taskAnswer));
+
+        var result = taskAnswerGeneralService.getUserPostTaskAnswer(postId, userId);
+
+        assertEquals(taskAnswerId, result.getId());
+        assertEquals("0123456789", result.getPostName());
+        assertEquals(TaskAnswerStatus.NEW, result.getStatus());
+        verify(taskAnswerRepository).findByUserIdAndPostId(userId, postId);
+    }
+
+    @Test
+    void getUserPostTaskAnswer_whenTaskAnswerDoesNotExist_throwsTaskAnswerNotFoundException() {
+        UUID userId = UUID.randomUUID();
+        UUID postId = UUID.randomUUID();
+
+        when(taskAnswerRepository.findByUserIdAndPostId(userId, postId))
+                .thenReturn(Optional.empty());
+
+        assertThrows(ExceptionUtility.taskAnswerNotFoundException().getClass(),
+                () -> taskAnswerGeneralService.getUserPostTaskAnswer(postId, userId));
     }
 }

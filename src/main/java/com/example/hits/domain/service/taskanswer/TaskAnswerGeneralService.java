@@ -59,18 +59,23 @@ public class TaskAnswerGeneralService {
                 .toList();
     }
 
-    public void createTaskAnswerForUser(Post post, User user) {
-        TaskAnswer newUserTaskAnswer = createTaskAnswerForDefiniteUser(post, user);
-
-        taskAnswerRepository.save(newUserTaskAnswer);
-    }
-
     public List<TaskAnswerModel> getAllPostTaskAnswers(UUID postId, UUID userId) {
+
+
         return new ArrayList<>();
     }
 
     public TaskAnswerModel getUserPostTaskAnswer(UUID postId, UUID userId) {
-        return null;
+        var taskAnswer = taskAnswerRepository.findByUserIdAndPostId(userId, postId)
+                .orElseThrow(ExceptionUtility::taskAnswerNotFoundException);
+
+        return TaskAnswerMapper.toModel(taskAnswer);
+    }
+
+    public void createTaskAnswerForUser(Post post, User user) {
+        TaskAnswer newUserTaskAnswer = createTaskAnswerForDefiniteUser(post, user);
+
+        taskAnswerRepository.save(newUserTaskAnswer);
     }
 
     private List<TaskAnswerModel> formAllUserTaskAnswers(User user) {
