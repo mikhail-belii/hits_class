@@ -41,30 +41,30 @@ public class TaskAnswerController {
     public void appendFiles(@PathVariable UUID taskAnswerId,
                             @RequestBody List<AttachmentModel> attachmentModels,
                             @RequestAttribute("userId") UUID userId) {
-
+        taskAnswerUploadService.appendFiles(taskAnswerId, attachmentModels, userId);
     }
 
     @DeleteMapping("/unpin-file/{taskAnswerId}/file/{fileId}")
     public void unpinFile(@PathVariable UUID taskAnswerId,
                           @PathVariable UUID fileId,
                           @RequestAttribute("userId") UUID userId) {
-
+        taskAnswerUploadService.unpinFiles(taskAnswerId, fileId, userId);
     }
 
     @PostMapping("/submit/{taskAnswerId}")
     public void submitTask(@PathVariable UUID taskAnswerId, @RequestAttribute("userId") UUID userId) {
-
+        taskAnswerUploadService.submitTask(taskAnswerId, userId);
     }
 
     @DeleteMapping("/submit/{taskAnswerId}")
     public void unsubmitTask(@PathVariable UUID taskAnswerId, @RequestAttribute("userId") UUID userId) {
-
+        taskAnswerUploadService.unsubmitTask(taskAnswerId, userId);
     }
 
     @PutMapping("/task-answer/{taskAnswerId}/evaluate")
     public void evaluateTask(@PathVariable UUID taskAnswerId,
                              @RequestBody TaskRateRequestModel taskRate,
                              @RequestAttribute("userId") UUID userId) {
-
+        taskAnswerUploadService.evaluateTask(taskAnswerId, taskRate, userId);
     }
 }
