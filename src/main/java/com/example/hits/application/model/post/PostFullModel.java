@@ -1,7 +1,7 @@
 package com.example.hits.application.model.post;
 
 import com.example.hits.application.model.attachment.AttachmentModel;
-import com.example.hits.application.model.comment.PostCommentModel;
+import com.example.hits.application.model.comment.postcomment.PostCommentModel;
 import com.example.hits.application.model.taskanswer.TaskAnswerModel;
 import com.example.hits.application.model.user.UserModel;
 import com.example.hits.domain.entity.post.PostType;
@@ -38,5 +38,5 @@ public class PostFullModel {
 
     private List<PostCommentModel> comments;
 
-    private TaskAnswerModel taskAnswerModel;
+    private TaskAnswerModel taskAnswer;
 }

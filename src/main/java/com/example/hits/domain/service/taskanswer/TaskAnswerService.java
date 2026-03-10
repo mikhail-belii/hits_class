@@ -34,6 +34,12 @@ public class TaskAnswerService {
         taskAnswerRepository.saveAll(taskAnswers);
     }
 
+    public void createTaskAnswerForUser(Post post, User user) {
+        TaskAnswer newUserTaskAnswer = createTaskAnswerForDefiniteUser(post, user);
+
+        taskAnswerRepository.save(newUserTaskAnswer);
+    }
+
     private TaskAnswer createTaskAnswerForDefiniteUser(Post post, User user) {
         return new TaskAnswer()
                 .setPost(post)

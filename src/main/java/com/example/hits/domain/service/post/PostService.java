@@ -3,6 +3,7 @@ package com.example.hits.domain.service.post;
 import com.example.hits.application.model.common.IdResponseModel;
 import com.example.hits.application.model.file.FileModel;
 import com.example.hits.application.model.post.PostCreateModel;
+import com.example.hits.application.model.post.PostFullModel;
 import com.example.hits.application.model.post.PostShortModel;
 import com.example.hits.application.model.post.PostUpdateModel;
 import com.example.hits.application.repository.*;
@@ -12,11 +13,13 @@ import com.example.hits.domain.entity.attachment.Attachment;
 import com.example.hits.domain.entity.course.Course;
 import com.example.hits.domain.entity.file.File;
 import com.example.hits.domain.entity.post.Post;
+import com.example.hits.domain.entity.post.PostType;
 import com.example.hits.domain.entity.user.User;
 import com.example.hits.domain.mapper.PostMapper;
 import com.example.hits.domain.service.taskanswer.TaskAnswerService;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.ExtensionMethod;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +31,7 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @ExtensionMethod(PostMapper.class)
@@ -38,7 +42,7 @@ public class PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final FileRepository fileRepository;
-    private final AttachmentRepository attachmentRepository;
+    private final TaskAnswerRepository taskAnswerRepository;
 
     @Transactional
     public IdResponseModel createPost(UUID courseId, UUID userId, PostCreateModel postCreateModel) {
@@ -52,9 +56,11 @@ public class PostService {
         Post post = createPostFromModel(postCreateModel, user, course);
         post.setAttachments(buildPostAttachments(postCreateModel.getFiles(), post, user, null));
 
-        taskAnswerService.createTaskAnswerForEveryCourseMember(course, post);
-
         postRepository.save(post);
+
+        if (post.getPostType() == PostType.TASK) {
+            taskAnswerService.createTaskAnswerForEveryCourseMember(course, post);
+        }
 
         return new IdResponseModel(post.getId());
     }
@@ -73,7 +79,7 @@ public class PostService {
                 .toList();
     }
 
-    public PostShortModel getPostInfo(UUID courseId, UUID postId, UUID userId) {
+    public PostFullModel getPostInfo(UUID courseId, UUID postId, UUID userId) {
         Course course = getCourseById(courseId);
         User user = findUserById(userId);
         Post post = findPostById(postId);
@@ -82,7 +88,10 @@ public class PostService {
             throw ExceptionUtility.badRequestException("You can't read this post");
         }
 
-        return post.toModel();
+        var taskAnswer = taskAnswerRepository.findByUserIdAndPostId(userId, postId)
+                .orElse(null);
+
+        return PostMapper.toModel(post, taskAnswer);
     }
 
     @Transactional
@@ -207,3 +216,4 @@ public class PostService {
                 .orElseThrow(ExceptionUtility::postNotFoundException);
     }
 }
+

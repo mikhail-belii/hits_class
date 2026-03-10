@@ -1,5 +1,6 @@
 package com.example.hits.application.controller;
 
+import com.example.hits.application.model.attachment.AttachmentModel;
 import com.example.hits.application.model.taskanswer.TaskAnswerModel;
 import com.example.hits.domain.service.taskanswer.TaskAnswerService;
 import lombok.RequiredArgsConstructor;
@@ -22,8 +23,32 @@ public class TaskAnswerController {
         return new ArrayList<>();
     }
 
-    @PostMapping("/submit/{taskId}")
-    public void submitTask(@PathVariable UUID taskId, @RequestAttribute("userId") UUID userId) {
+    @PostMapping("/pin-file/{taskAnswerId}")
+    public void appendFiles(@PathVariable UUID taskAnswerId,
+                            @RequestBody List<AttachmentModel> attachmentModels,
+                            @RequestAttribute("userId") UUID userId) {
 
+    }
+
+    @DeleteMapping("/unpin-file/{taskAnswerId}/file/{fileId}")
+    public void unpinFile(@PathVariable UUID taskAnswerId,
+                          @PathVariable UUID fileId,
+                          @RequestAttribute("userId") UUID userId) {
+
+    }
+
+    @PostMapping("/submit/{taskAnswerId}")
+    public void submitTask(@PathVariable UUID taskAnswerId, @RequestAttribute("userId") UUID userId) {
+
+    }
+
+    @DeleteMapping("/submit/{taskAnswerId}")
+    public void unsubmitTask(@PathVariable UUID taskAnswerId, @RequestAttribute("userId") UUID userId) {
+
+    }
+
+    @GetMapping("/post/{postId}")
+    public List<TaskAnswerModel> getAllPostTaskAnswers(@PathVariable UUID postId, @RequestAttribute("userId") UUID userId) {
+        return new ArrayList<>();
     }
 }

@@ -31,4 +31,11 @@
                                  referencedTableName="task_answer"/>
     </changeSet>
 
+    <changeSet id="TaskAnswerCommentAddUpdatedAt" author="KBelovodchenko">
+        <addColumn tableName="task_answer_comment">
+            <column name="updated_at"
+                    type="DATETIME"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

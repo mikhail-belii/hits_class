@@ -70,4 +70,17 @@ public class TaskAnswerServiceTests {
                     .equals(List.of(firstUser, secondUser));
         }));
     }
+
+    @Test
+    void createTaskAnswerForUser_validPostAndUser_savesTaskAnswer() {
+        User user = new User().setId(UUID.randomUUID());
+        Post post = new Post().setId(UUID.randomUUID());
+
+        taskAnswerService.createTaskAnswerForUser(post, user);
+
+        verify(taskAnswerRepository).save(argThat(taskAnswer ->
+                post.equals(taskAnswer.getPost())
+                        && user.equals(taskAnswer.getUser())
+        ));
+    }
 }

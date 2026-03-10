@@ -1,13 +1,16 @@
 package com.example.hits.domain.service.post;
 
 import com.example.hits.application.handler.ExceptionWrapper;
+import com.example.hits.application.model.post.PostFullModel;
 import com.example.hits.application.model.post.PostShortModel;
 import com.example.hits.application.repository.CourseRepository;
 import com.example.hits.application.repository.PostRepository;
+import com.example.hits.application.repository.TaskAnswerRepository;
 import com.example.hits.application.repository.UserRepository;
 import com.example.hits.domain.entity.course.Course;
 import com.example.hits.domain.entity.post.Post;
 import com.example.hits.domain.entity.post.PostType;
+import com.example.hits.domain.entity.taskanswer.TaskAnswer;
 import com.example.hits.domain.entity.user.User;
 import com.example.hits.domain.entity.user.UserCourseRole;
 import jakarta.persistence.EntityNotFoundException;
@@ -27,6 +30,7 @@ import java.util.UUID;
 
 import static com.example.hits.domain.service.post.PostServiceTestUtils.createCourseWithUserRole;
 import static com.example.hits.domain.service.post.PostServiceTestUtils.createUser;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
@@ -38,6 +42,8 @@ public class PostServiceGetPostsTests {
     private PostRepository postRepository;
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private TaskAnswerRepository taskAnswerRepository;
 
     @InjectMocks
     private PostService postService;
@@ -127,7 +133,34 @@ public class PostServiceGetPostsTests {
     }
 
     @Test
-    void getPostInfo_validUserAndPost_returnsPostModel() {
+    void getPostInfo_validUserAndPost_returnsPostFullModelWithTaskAnswer() {
+        UUID courseId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        UUID postId = UUID.randomUUID();
+        UUID taskAnswerId = UUID.randomUUID();
+
+        User user = createUser(userId);
+        Course course = createCourseWithUserRole(user, UserCourseRole.STUDENT);
+        course.setId(courseId);
+        Post post = createPost(postId, course, user, "Р‘РµР±РµР±Рµ");
+        TaskAnswer taskAnswer = new TaskAnswer().setId(taskAnswerId).setUser(user).setPost(post);
+
+        when(courseRepository.findById(courseId)).thenReturn(Optional.of(course));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(postRepository.findById(postId)).thenReturn(Optional.of(post));
+        when(taskAnswerRepository.findByUserIdAndPostId(userId, postId)).thenReturn(Optional.of(taskAnswer));
+
+        PostFullModel postFullModel = postService.getPostInfo(courseId, postId, userId);
+
+        Assertions.assertEquals(postId, postFullModel.getId());
+        Assertions.assertEquals("Р‘РµР±РµР±Рµ", postFullModel.getText());
+        Assertions.assertNotNull(postFullModel.getTaskAnswer());
+        Assertions.assertEquals(taskAnswerId, postFullModel.getTaskAnswer().getId());
+        verify(taskAnswerRepository).findByUserIdAndPostId(userId, postId);
+    }
+
+    @Test
+    void getPostInfo_whenTaskAnswerIsMissing_returnsPostFullModelWithNullTaskAnswer() {
         UUID courseId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
         UUID postId = UUID.randomUUID();
@@ -135,16 +168,18 @@ public class PostServiceGetPostsTests {
         User user = createUser(userId);
         Course course = createCourseWithUserRole(user, UserCourseRole.STUDENT);
         course.setId(courseId);
-        Post post = createPost(postId, course, user, "Бебебе");
+        Post post = createPost(postId, course, user, "Р’СЃРµРј РїСЂРёРІРµС‚");
 
         when(courseRepository.findById(courseId)).thenReturn(Optional.of(course));
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(postRepository.findById(postId)).thenReturn(Optional.of(post));
+        when(taskAnswerRepository.findByUserIdAndPostId(userId, postId)).thenReturn(Optional.empty());
 
-        PostShortModel postShortModel = postService.getPostInfo(courseId, postId, userId);
+        PostFullModel postFullModel = postService.getPostInfo(courseId, postId, userId);
 
-        Assertions.assertEquals(postId, postShortModel.getId());
-        Assertions.assertEquals("Бебебе", postShortModel.getText());
+        Assertions.assertEquals(postId, postFullModel.getId());
+        Assertions.assertNull(postFullModel.getTaskAnswer());
+        verify(taskAnswerRepository).findByUserIdAndPostId(userId, postId);
     }
 
     @Test
@@ -168,6 +203,7 @@ public class PostServiceGetPostsTests {
 
         Assertions.assertEquals(EntityNotFoundException.class, exception.getExceptionClass());
         Assertions.assertEquals("Post not found", exception.getErrors().get("postId"));
+        verifyNoInteractions(taskAnswerRepository);
     }
 
     @Test
@@ -181,7 +217,7 @@ public class PostServiceGetPostsTests {
 
         Course course = createCourseWithUserRole(anotherUser, UserCourseRole.STUDENT);
         course.setId(courseId);
-        Post post = createPost(postId, course, anotherUser, "Всем привет");
+        Post post = createPost(postId, course, anotherUser, "Р’СЃРµРј РїСЂРёРІРµС‚");
 
         when(courseRepository.findById(courseId)).thenReturn(Optional.of(course));
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
@@ -193,6 +229,7 @@ public class PostServiceGetPostsTests {
         );
 
         Assertions.assertEquals(BadRequestException.class, exception.getExceptionClass());
+        verifyNoInteractions(taskAnswerRepository);
     }
 
     private static Post createPost(UUID postId, Course course, User author, String text) {

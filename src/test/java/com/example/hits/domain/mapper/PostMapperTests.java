@@ -1,11 +1,13 @@
 package com.example.hits.domain.mapper;
 
-import com.example.hits.application.model.comment.PostCommentModel;
+import com.example.hits.application.model.comment.postcomment.PostCommentModel;
+import com.example.hits.application.model.post.PostFullModel;
 import com.example.hits.application.model.post.PostShortModel;
 import com.example.hits.domain.entity.attachment.Attachment;
 import com.example.hits.domain.entity.post.Post;
 import com.example.hits.domain.entity.post.PostType;
 import com.example.hits.domain.entity.postcomment.PostComment;
+import com.example.hits.domain.entity.taskanswer.TaskAnswer;
 import com.example.hits.domain.entity.user.User;
 import org.junit.jupiter.api.Test;
 
@@ -135,5 +137,57 @@ public class PostMapperTests {
     @Test
     void toModel_shouldThrowException_whenPostIsNull() {
         assertThrows(NullPointerException.class, () -> PostMapper.toModel(null));
+    }
+
+    @Test
+    void toModel_withTaskAnswer_shouldMapPostAndTaskAnswer() {
+        UUID postId = UUID.randomUUID();
+        UUID taskAnswerId = UUID.randomUUID();
+
+        User author = new User();
+        author.setId(UUID.randomUUID());
+        author.setEmail("author@example.com");
+
+        Post post = new Post();
+        post.setId(postId);
+        post.setText("post text");
+        post.setAuthor(author);
+        post.setAttachments(List.of());
+        post.setPostType(PostType.TASK);
+        post.setCreatedAt(LocalDateTime.now());
+        post.setComments(List.of());
+
+        TaskAnswer taskAnswer = new TaskAnswer();
+        taskAnswer.setId(taskAnswerId);
+        taskAnswer.setPost(post);
+
+        PostFullModel model = PostMapper.toModel(post, taskAnswer);
+
+        assertNotNull(model);
+        assertEquals(postId, model.getId());
+        assertEquals("post text", model.getText());
+        assertNotNull(model.getTaskAnswer());
+        assertEquals(taskAnswerId, model.getTaskAnswer().getId());
+    }
+
+    @Test
+    void toModel_withTaskAnswer_nullTaskAnswer_shouldMapTaskAnswerAsNull() {
+        Post post = new Post();
+        post.setId(UUID.randomUUID());
+        post.setText("x");
+        post.setComments(List.of());
+
+        PostFullModel model = PostMapper.toModel(post, null);
+
+        assertNotNull(model);
+        assertEquals(post.getId(), model.getId());
+        assertNull(model.getTaskAnswer());
+    }
+
+    @Test
+    void toModel_withTaskAnswer_shouldThrowException_whenPostIsNull() {
+        TaskAnswer taskAnswer = new TaskAnswer();
+
+        assertThrows(NullPointerException.class, () -> PostMapper.toModel(null, taskAnswer));
     }
 }
