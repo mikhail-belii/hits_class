@@ -145,9 +145,11 @@ public class PostService {
                                                   Post post,
                                                   User user,
                                                   UUID currentPostId) {
+        var attachments = post.getAttachments();
+
         var fileIds = extractFileIds(fileModels);
         if (fileIds.isEmpty()) {
-            return new ArrayList<>();
+            return attachments;
         }
 
         var files = fileRepository.findAllById(fileIds);
@@ -158,7 +160,13 @@ public class PostService {
         var filesById = files.stream()
                 .collect(Collectors.toMap(File::getId, Function.identity()));
 
-        var attachments = new ArrayList<Attachment>();
+
+        if (attachments == null) {
+            attachments = new ArrayList<>();
+        } else {
+            attachments.clear();
+        }
+
         for (UUID fileId : fileIds) {
             var file = filesById.get(fileId);
             if (file == null) {

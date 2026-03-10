@@ -36,7 +36,6 @@ public class FileController {
     private final FileService fileService;
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @SecurityRequirement(name = "JWT")
     @Operation(summary = "Upload file")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
@@ -61,7 +60,6 @@ public class FileController {
     }
 
     @GetMapping("/{fileId}")
-    @SecurityRequirement(name = "JWT")
     @Operation(summary = "Get file by id")
     @ApiResponse(responseCode = "200",
             description = "File was received",

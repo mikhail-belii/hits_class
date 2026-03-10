@@ -13,6 +13,10 @@ public class SimpleUserMapper {
     public UserModel toModel(User userEntity) {
         return new UserModel()
                 .setId(userEntity.getId())
+                .setFirstName(userEntity.getFirstName())
+                .setLastName(userEntity.getLastName())
+                .setCity(userEntity.getCity())
+                .setBirthday(userEntity.getBirthday())
                 .setEmail(userEntity.getEmail());
     }
 }
