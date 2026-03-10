@@ -2,6 +2,7 @@ package com.example.hits.domain.service.taskanswer;
 
 import com.example.hits.application.model.attachment.AttachmentModel;
 import com.example.hits.application.model.taskanswer.TaskRateRequestModel;
+import com.example.hits.application.repository.PostRepository;
 import com.example.hits.application.repository.TaskAnswerRepository;
 import com.example.hits.application.repository.UserRepository;
 import com.example.hits.application.util.ExceptionUtility;
@@ -22,6 +23,7 @@ public class TaskAnswerUploadService {
 
     private final TaskAnswerRepository taskAnswerRepository;
     private final UserRepository userRepository;
+    private final PostRepository postRepository;
 
     public void evaluateTask(UUID taskAnswerId, TaskRateRequestModel taskRate, UUID userId) {
         TaskAnswer taskAnswer = getTaskAnswer(taskAnswerId);
@@ -47,7 +49,26 @@ public class TaskAnswerUploadService {
     }
 
     public void unpinFiles(UUID taskAnswerId, UUID fileId, UUID userId) {
+        TaskAnswer taskAnswer = getTaskAnswer(taskAnswerId);
+        User user = getUser(userId);
 
+        if (!taskAnswer.getUser().equals(user)) {
+            throw ExceptionUtility.forbiddenRightsException();
+        }
+
+        if (taskAnswer.getSubmittedAt() != null) {
+            throw ExceptionUtility.badRequestException("Task already submitted");
+        }
+
+        boolean removed = taskAnswer.getAttachments().removeIf(attachment ->
+                fileId.equals(attachment.getId())
+        );
+
+        if (!removed) {
+            throw ExceptionUtility.badRequestException("File not found in attachments");
+        }
+
+        taskAnswerRepository.save(taskAnswer);
     }
 
     public void submitTask(UUID taskAnswerId, UUID userId) {

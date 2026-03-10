@@ -4,6 +4,7 @@ import com.example.hits.application.model.taskanswer.TaskRateRequestModel;
 import com.example.hits.application.repository.TaskAnswerRepository;
 import com.example.hits.application.repository.UserRepository;
 import com.example.hits.application.util.ExceptionUtility;
+import com.example.hits.domain.entity.attachment.Attachment;
 import com.example.hits.domain.entity.course.Course;
 import com.example.hits.domain.entity.post.Post;
 import com.example.hits.domain.entity.taskanswer.TaskAnswer;
@@ -264,5 +265,29 @@ public class TaskAnswerUploadServiceTests {
 
         assertThrows(ExceptionUtility.userNotFoundException().getClass(),
                 () -> taskAnswerUploadService.unsubmitTask(taskAnswerId, userId));
+    }
+
+    @Test
+    void unpinFiles_whenFileExistsInTaskAnswerAttachments_removesFileAndSavesTaskAnswer() {
+        UUID taskAnswerId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        UUID removableFileId = UUID.randomUUID();
+        User user = new User().setId(userId);
+        Attachment removableAttachment = new Attachment().setId(removableFileId);
+        Attachment anotherAttachment = new Attachment().setId(UUID.randomUUID());
+        TaskAnswer taskAnswer = new TaskAnswer()
+                .setId(taskAnswerId)
+                .setUser(user)
+                .setSubmittedAt(null)
+                .setAttachments(new java.util.ArrayList<>(List.of(removableAttachment, anotherAttachment)));
+
+        when(taskAnswerRepository.findById(taskAnswerId)).thenReturn(Optional.of(taskAnswer));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        taskAnswerUploadService.unpinFiles(taskAnswerId, removableFileId, userId);
+
+        assertEquals(1, taskAnswer.getAttachments().size());
+        assertEquals(anotherAttachment.getId(), taskAnswer.getAttachments().getFirst().getId());
+        verify(taskAnswerRepository).save(taskAnswer);
     }
 }
