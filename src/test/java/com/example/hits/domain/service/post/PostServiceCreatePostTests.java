@@ -15,7 +15,7 @@ import com.example.hits.domain.entity.post.Post;
 import com.example.hits.domain.entity.post.PostType;
 import com.example.hits.domain.entity.user.User;
 import com.example.hits.domain.entity.user.UserCourseRole;
-import com.example.hits.domain.service.taskanswer.TaskAnswerService;
+import com.example.hits.domain.service.taskanswer.TaskAnswerGeneralService;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -52,7 +52,7 @@ public class PostServiceCreatePostTests {
     @Mock
     private AttachmentRepository attachmentRepository;
     @Mock
-    private TaskAnswerService taskAnswerService;
+    private TaskAnswerGeneralService taskAnswerGeneralService;
 
     @InjectMocks
     private PostService postService;
@@ -79,7 +79,7 @@ public class PostServiceCreatePostTests {
 
         verify(postRepository).save(postCaptor.capture());
         Post savedPost = postCaptor.getValue();
-        verify(taskAnswerService).createTaskAnswerForEveryCourseMember(course, savedPost);
+        verify(taskAnswerGeneralService).createTaskAnswerForEveryCourseMember(course, savedPost);
 
         Assertions.assertNotNull(response);
         Assertions.assertNotNull(response.getId());
@@ -122,7 +122,7 @@ public class PostServiceCreatePostTests {
         verify(postRepository).save(postCaptor.capture());
 
         Post savedPost = postCaptor.getValue();
-        verify(taskAnswerService, never()).createTaskAnswerForEveryCourseMember(any(Course.class), any(Post.class));
+        verify(taskAnswerGeneralService, never()).createTaskAnswerForEveryCourseMember(any(Course.class), any(Post.class));
         Assertions.assertNotNull(savedPost.getAttachments());
         Assertions.assertEquals(2, savedPost.getAttachments().size());
         Assertions.assertEquals(firstFileId, savedPost.getAttachments().get(0).getFile().getId());
@@ -145,7 +145,7 @@ public class PostServiceCreatePostTests {
         Assertions.assertEquals(EntityNotFoundException.class, exception.getExceptionClass());
         Assertions.assertEquals("Cannot find course with requested id", exception.getErrors().get("courseId"));
 
-        verifyNoInteractions(userRepository, postRepository, taskAnswerService);
+        verifyNoInteractions(userRepository, postRepository, taskAnswerGeneralService);
     }
 
     @Test
@@ -165,7 +165,7 @@ public class PostServiceCreatePostTests {
         Assertions.assertEquals(EntityNotFoundException.class, exception.getExceptionClass());
         Assertions.assertEquals("User not found", exception.getErrors().get("userId"));
 
-        verifyNoInteractions(postRepository, taskAnswerService);
+        verifyNoInteractions(postRepository, taskAnswerGeneralService);
     }
 
     @Test
@@ -185,6 +185,6 @@ public class PostServiceCreatePostTests {
         );
         Assertions.assertEquals(ResponseStatusException.class, exception.getExceptionClass());
         Assertions.assertEquals("User has no rights to this action", exception.getErrors().get("forbidden"));
-        verifyNoInteractions(postRepository, taskAnswerService);
+        verifyNoInteractions(postRepository, taskAnswerGeneralService);
     }
 }

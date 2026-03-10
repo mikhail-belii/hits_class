@@ -16,7 +16,7 @@ import com.example.hits.domain.entity.post.Post;
 import com.example.hits.domain.entity.post.PostType;
 import com.example.hits.domain.entity.user.User;
 import com.example.hits.domain.mapper.PostMapper;
-import com.example.hits.domain.service.taskanswer.TaskAnswerService;
+import com.example.hits.domain.service.taskanswer.TaskAnswerGeneralService;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.ExtensionMethod;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 @ExtensionMethod(PostMapper.class)
 public class PostService {
 
-    private final TaskAnswerService taskAnswerService;
+    private final TaskAnswerGeneralService taskAnswerGeneralService;
     private final CourseRepository courseRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
@@ -59,7 +59,7 @@ public class PostService {
         postRepository.save(post);
 
         if (post.getPostType() == PostType.TASK) {
-            taskAnswerService.createTaskAnswerForEveryCourseMember(course, post);
+            taskAnswerGeneralService.createTaskAnswerForEveryCourseMember(course, post);
         }
 
         return new IdResponseModel(post.getId());

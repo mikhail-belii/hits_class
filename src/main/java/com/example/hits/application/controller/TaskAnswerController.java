@@ -2,11 +2,12 @@ package com.example.hits.application.controller;
 
 import com.example.hits.application.model.attachment.AttachmentModel;
 import com.example.hits.application.model.taskanswer.TaskAnswerModel;
-import com.example.hits.domain.service.taskanswer.TaskAnswerService;
+import com.example.hits.domain.service.taskanswer.TaskAnswerGeneralService;
+import com.example.hits.domain.service.taskanswer.TaskAnswerUploadService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -15,11 +16,24 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class TaskAnswerController {
 
-    private final TaskAnswerService taskAnswerService;
+    private final TaskAnswerGeneralService taskAnswerGeneralService;
+    private final TaskAnswerUploadService taskAnswerUploadService;
 
     @GetMapping("/all")
     public List<TaskAnswerModel> getAllUserTaskAnswers(@RequestAttribute("userId") UUID userId) {
-        return taskAnswerService.getAllUserTaskAnswers(userId);
+        return taskAnswerGeneralService.getAllUserTaskAnswers(userId);
+    }
+
+    @GetMapping("/post/{postId}/all")
+    @Operation(summary = "Get all post task answers [FOR TEACHER+]")
+    public List<TaskAnswerModel> getAllPostTaskAnswers(@PathVariable UUID postId, @RequestAttribute("userId") UUID userId) {
+        return taskAnswerGeneralService.getAllPostTaskAnswers(postId, userId);
+    }
+
+    @GetMapping("/post/{postId}")
+    @Operation(summary = "Get post task answer [FOR STUDENT]")
+    public TaskAnswerModel getUserPostTaskAnswer(@PathVariable UUID postId, @RequestAttribute("userId") UUID userId) {
+        return taskAnswerGeneralService.getUserPostTaskAnswer(postId, userId);
     }
 
     @PostMapping("/pin-file/{taskAnswerId}")
@@ -44,10 +58,5 @@ public class TaskAnswerController {
     @DeleteMapping("/submit/{taskAnswerId}")
     public void unsubmitTask(@PathVariable UUID taskAnswerId, @RequestAttribute("userId") UUID userId) {
 
-    }
-
-    @GetMapping("/post/{postId}")
-    public List<TaskAnswerModel> getAllPostTaskAnswers(@PathVariable UUID postId, @RequestAttribute("userId") UUID userId) {
-        return new ArrayList<>();
     }
 }

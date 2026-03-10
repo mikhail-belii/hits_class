@@ -20,7 +20,7 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
-public class TaskAnswerService {
+public class TaskAnswerGeneralService {
 
     private final TaskAnswerRepository taskAnswerRepository;
     private final UserRepository userRepository;
@@ -63,6 +63,14 @@ public class TaskAnswerService {
         TaskAnswer newUserTaskAnswer = createTaskAnswerForDefiniteUser(post, user);
 
         taskAnswerRepository.save(newUserTaskAnswer);
+    }
+
+    public List<TaskAnswerModel> getAllPostTaskAnswers(UUID postId, UUID userId) {
+        return new ArrayList<>();
+    }
+
+    public TaskAnswerModel getUserPostTaskAnswer(UUID postId, UUID userId) {
+        return null;
     }
 
     private List<TaskAnswerModel> formAllUserTaskAnswers(User user) {

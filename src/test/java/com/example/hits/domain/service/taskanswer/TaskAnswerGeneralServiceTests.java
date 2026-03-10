@@ -28,7 +28,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class TaskAnswerServiceTests {
+public class TaskAnswerGeneralServiceTests {
 
     @Mock
     private TaskAnswerRepository taskAnswerRepository;
@@ -37,14 +37,14 @@ public class TaskAnswerServiceTests {
     private UserRepository userRepository;
 
     @InjectMocks
-    private TaskAnswerService taskAnswerService;
+    private TaskAnswerGeneralService taskAnswerGeneralService;
 
     @Test
     void createTaskAnswerForEveryCourseMember_courseUsersIsNull_notSavingData() {
         Course course = new Course().setCourseUsers(null);
         Post post = new Post().setId(UUID.randomUUID());
 
-        taskAnswerService.createTaskAnswerForEveryCourseMember(course, post);
+        taskAnswerGeneralService.createTaskAnswerForEveryCourseMember(course, post);
 
         verifyNoInteractions(taskAnswerRepository);
     }
@@ -54,7 +54,7 @@ public class TaskAnswerServiceTests {
         Course course = new Course().setCourseUsers(List.of());
         Post post = new Post().setId(UUID.randomUUID());
 
-        taskAnswerService.createTaskAnswerForEveryCourseMember(course, post);
+        taskAnswerGeneralService.createTaskAnswerForEveryCourseMember(course, post);
 
         verifyNoInteractions(taskAnswerRepository);
     }
@@ -68,7 +68,7 @@ public class TaskAnswerServiceTests {
         Course course = new Course().setCourseUsers(List.of(firstUserCourse, secondUserCourse));
         Post post = new Post().setId(UUID.randomUUID());
 
-        taskAnswerService.createTaskAnswerForEveryCourseMember(course, post);
+        taskAnswerGeneralService.createTaskAnswerForEveryCourseMember(course, post);
 
         verify(taskAnswerRepository).saveAll(argThat(taskAnswers -> {
             var savedTaskAnswers = StreamSupport.stream(taskAnswers.spliterator(), false)
@@ -86,7 +86,7 @@ public class TaskAnswerServiceTests {
         User user = new User().setId(UUID.randomUUID());
         Post post = new Post().setId(UUID.randomUUID());
 
-        taskAnswerService.createTaskAnswerForUser(post, user);
+        taskAnswerGeneralService.createTaskAnswerForUser(post, user);
 
         verify(taskAnswerRepository).save(argThat(taskAnswer ->
                 post.equals(taskAnswer.getPost())
@@ -121,7 +121,7 @@ public class TaskAnswerServiceTests {
         when(taskAnswerRepository.findAllByUserIdAndPostCourseId(userId, courseId))
                 .thenReturn(List.of(firstTaskAnswer, secondTaskAnswer));
 
-        var result = taskAnswerService.getAllUserTaskAnswers(userId);
+        var result = taskAnswerGeneralService.getAllUserTaskAnswers(userId);
 
         assertEquals(2, result.size());
         assertEquals(firstTaskAnswer.getId(), result.get(0).getId());
@@ -144,7 +144,7 @@ public class TaskAnswerServiceTests {
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
-        var result = taskAnswerService.getAllUserTaskAnswers(userId);
+        var result = taskAnswerGeneralService.getAllUserTaskAnswers(userId);
 
         assertEquals(0, result.size());
         verify(taskAnswerRepository, never()).findAllByUserIdAndPostCourseId(userId, course.getId());
