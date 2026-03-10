@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @ExtensionMethod(TaskAnswerCommentMapper.class)
 public class TaskAnswerMapper {
 
-    private static int MAX_POST_NAME_LENGTH = 10;
+    private static final int MAX_POST_NAME_LENGTH = 10;
 
     public TaskAnswerModel toModel(TaskAnswer taskAnswer) {
         String postText = taskAnswer.getPost().getText();
