@@ -21,6 +21,7 @@ public class TaskAnswerMapperTests {
 
     private static final String LONG_POST_TEXT = "0123456789тест";
     private static final String SHORT_POST_TEXT = "бебе";
+    private static final int MAX_SCORE = 100;
 
     @Test
     void toModel_withRecentPostAndNoSubmittedAt_shouldMapNewStatus() {
@@ -31,6 +32,7 @@ public class TaskAnswerMapperTests {
 
         assertNotNull(result);
         assertEquals(id, result.getId());
+        assertEquals(MAX_SCORE, result.getMaxScore());
         assertEquals(TaskAnswerStatus.NEW, result.getStatus());
         assertEquals("0123456789", result.getPostName());
     }
@@ -43,6 +45,7 @@ public class TaskAnswerMapperTests {
 
         assertNotNull(result);
         assertNull(result.getId());
+        assertEquals(MAX_SCORE, result.getMaxScore());
         assertEquals(TaskAnswerStatus.NOT_COMPLETED, result.getStatus());
         assertEquals(SHORT_POST_TEXT, result.getPostName());
     }
@@ -60,6 +63,7 @@ public class TaskAnswerMapperTests {
 
         TaskAnswerModel result = TaskAnswerMapper.toModel(taskAnswer);
 
+        assertEquals(MAX_SCORE, result.getMaxScore());
         assertEquals(TaskAnswerStatus.COMPLETED, result.getStatus());
     }
 
@@ -76,6 +80,7 @@ public class TaskAnswerMapperTests {
 
         TaskAnswerModel result = TaskAnswerMapper.toModel(taskAnswer);
 
+        assertEquals(MAX_SCORE, result.getMaxScore());
         assertEquals(TaskAnswerStatus.COMPETED_AFTER_DEADLINE, result.getStatus());
     }
 
@@ -105,6 +110,7 @@ public class TaskAnswerMapperTests {
 
         TaskAnswerModel result = TaskAnswerMapper.toModel(taskAnswer);
 
+        assertEquals(MAX_SCORE, result.getMaxScore());
         assertEquals(1, result.getComments().size());
         assertEquals(commentId, result.getComments().getFirst().getId());
         assertEquals("comment text", result.getComments().getFirst().getText());
@@ -117,11 +123,13 @@ public class TaskAnswerMapperTests {
             String postText,
             LocalDateTime createdAt,
             LocalDateTime submittedAt,
-            LocalDateTime deadline) {
+            LocalDateTime deadline
+    ) {
         Post post = new Post()
                 .setText(postText)
                 .setCreatedAt(createdAt)
-                .setDeadline(deadline);
+                .setDeadline(deadline)
+                .setMaxScore(MAX_SCORE);
 
         return new TaskAnswer()
                 .setId(id)

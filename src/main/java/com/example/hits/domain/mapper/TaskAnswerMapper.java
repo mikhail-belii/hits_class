@@ -21,6 +21,7 @@ public class TaskAnswerMapper {
         return new TaskAnswerModel()
                 .setId(taskAnswer.getId())
                 .setScore(taskAnswer.getScore())
+                .setMaxScore(taskAnswer.getPost().getMaxScore())
                 .setSubmittedAt(taskAnswer.getSubmittedAt())
                 .setStatus(parseStatus(taskAnswer))
                 .setAttachments(taskAnswer.getAttachments().stream()

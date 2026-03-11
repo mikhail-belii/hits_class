@@ -19,6 +19,8 @@ public class TaskAnswerModel {
 
     private Integer score = 0;
 
+    private Integer maxScore = 100;
+
     private LocalDateTime submittedAt = null;
 
     private TaskAnswerStatus status = TaskAnswerStatus.NOT_COMPLETED;
