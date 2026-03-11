@@ -178,6 +178,9 @@ public class CourseServiceImpl implements CourseService {
         userCourseRepository.delete(userCourse);
     }
 
+    public void leaveFromCourse(UUID requestingUserId, UUID courseId) {
+    }
+
     private Course createCourseFromModel(CourseCreateModel courseCreateModel) {
         return new Course()
                 .setId(UUID.randomUUID())

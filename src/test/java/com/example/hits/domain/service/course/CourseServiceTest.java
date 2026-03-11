@@ -542,4 +542,47 @@ public class CourseServiceTest {
                 () -> courseService.getConcreteCourse(user.getId(), course.getId()));
     }
 
+    @Test
+    void leaveFromCourse_whenCanLeave_removeUserFromCourse() {
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(courseRepository.findById(course.getId())).thenReturn(Optional.of(course));
+
+        courseService.leaveFromCourse(user.getId(), course.getId());
+
+        verify(userCourseRepository).delete(userCourse);
+    }
+
+    @Test
+    void leaveFromCourse_whenRequestingUserNotFound_throwsUserNotFoundException() {
+        when(userRepository.findById(user.getId())).thenReturn(Optional.empty());
+
+        assertThrows(ExceptionUtility.userNotFoundException().getClass(),
+                () -> courseService.leaveFromCourse(user.getId(), course.getId()));
+
+        verify(userCourseRepository, times(0)).delete(any());
+    }
+
+    @Test
+    void leaveFromCourse_CourseNotFound_throwsCourseNotFoundException() {
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(courseRepository.findById(course.getId())).thenReturn(Optional.empty());
+
+        assertThrows(ExceptionUtility.courseNotFoundException().getClass(),
+                () -> courseService.leaveFromCourse(user.getId(), course.getId()));
+
+        verify(userCourseRepository, times(0)).delete(any());
+    }
+
+    @Test
+    void leaveFromCourse_whenUserNotInCourse_throwsUserCourseNotFoundException() {
+        course.setCourseUsers(List.of());
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(courseRepository.findById(course.getId())).thenReturn(Optional.of(course));
+
+        assertThrows(ExceptionUtility.userCourseNotFoundException().getClass(),
+                () -> courseService.leaveFromCourse(user.getId(), course.getId()));
+
+        verify(userCourseRepository, times(0)).delete(any());
+    }
+
 }
