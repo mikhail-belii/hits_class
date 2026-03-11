@@ -116,6 +116,28 @@ public class TaskAnswerUploadServiceTests {
     }
 
     @Test
+    void evaluateTask_whenCurrentTaskAnswerScoreIsNegative_throwsBadRequestException() {
+        UUID taskAnswerId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        User user = new User().setId(userId);
+        Course course = new Course();
+        course.setCourseUsers(List.of(new UserCourse()
+                .setUser(user)
+                .setCourse(course)
+                .setUserRole(UserCourseRole.TEACHER)));
+        Post post = new Post().setCourse(course).setMaxScore(10);
+        TaskAnswer taskAnswer = new TaskAnswer().setId(taskAnswerId).setPost(post).setScore(-1);
+        TaskRateRequestModel taskRate = new TaskRateRequestModel();
+        taskRate.setRate(7);
+
+        when(taskAnswerRepository.findById(taskAnswerId)).thenReturn(Optional.of(taskAnswer));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        assertThrows(ExceptionUtility.badRequestException("Invalid score").getClass(),
+                () -> taskAnswerUploadService.evaluateTask(taskAnswerId, taskRate, userId));
+    }
+
+    @Test
     void evaluateTask_whenTaskAnswerDoesNotExist_throwsTaskAnswerNotFoundException() {
         UUID taskAnswerId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
@@ -216,6 +238,7 @@ public class TaskAnswerUploadServiceTests {
         TaskAnswer taskAnswer = new TaskAnswer()
                 .setId(taskAnswerId)
                 .setUser(user)
+                .setScore(null)
                 .setSubmittedAt(LocalDateTime.now());
 
         when(taskAnswerRepository.findById(taskAnswerId)).thenReturn(Optional.of(taskAnswer));
@@ -264,12 +287,31 @@ public class TaskAnswerUploadServiceTests {
         TaskAnswer taskAnswer = new TaskAnswer()
                 .setId(taskAnswerId)
                 .setUser(new User().setId(userId))
+                .setScore(null)
                 .setSubmittedAt(LocalDateTime.now());
 
         when(taskAnswerRepository.findById(taskAnswerId)).thenReturn(Optional.of(taskAnswer));
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         assertThrows(ExceptionUtility.userNotFoundException().getClass(),
+                () -> taskAnswerUploadService.unsubmitTask(taskAnswerId, userId));
+    }
+
+    @Test
+    void unsubmitTask_whenTaskAlreadyEvaluated_throwsBadRequestException() {
+        UUID taskAnswerId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        User user = new User().setId(userId);
+        TaskAnswer taskAnswer = new TaskAnswer()
+                .setId(taskAnswerId)
+                .setUser(user)
+                .setScore(5)
+                .setSubmittedAt(LocalDateTime.now());
+
+        when(taskAnswerRepository.findById(taskAnswerId)).thenReturn(Optional.of(taskAnswer));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        assertThrows(ExceptionUtility.badRequestException("Task already evaluated").getClass(),
                 () -> taskAnswerUploadService.unsubmitTask(taskAnswerId, userId));
     }
 

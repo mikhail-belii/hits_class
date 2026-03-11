@@ -40,7 +40,7 @@ public class TaskAnswerUploadService {
             throw ExceptionUtility.forbiddenRightsException();
         }
 
-        if (post.getMaxScore() < taskRate.getRate()) {
+        if (post.getMaxScore() < taskRate.getRate() || taskAnswer.getScore() < 0) {
             throw ExceptionUtility.badRequestException("Invalid score");
         }
 
@@ -110,6 +110,10 @@ public class TaskAnswerUploadService {
 
         if (!taskAnswer.getUser().equals(user)) {
             throw ExceptionUtility.forbiddenRightsException();
+        }
+
+        if (taskAnswer.getScore() != null) {
+            throw ExceptionUtility.badRequestException("Task already evaluated");
         }
 
         taskAnswer.setSubmittedAt(null);

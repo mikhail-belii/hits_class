@@ -17,7 +17,7 @@ public class TaskAnswerModel {
 
     private UUID id = UUID.randomUUID();
 
-    private Integer score = 0;
+    private Integer score = null;
 
     private Integer maxScore = 100;
 
