@@ -34,6 +34,7 @@ import static com.example.hits.domain.service.post.PostServiceTestUtils.createCo
 import static com.example.hits.domain.service.post.PostServiceTestUtils.createUser;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -74,8 +75,8 @@ public class PostServiceCreatePostTests {
         IdResponseModel response = postService.createPost(courseId, userId, postCreateModel);
         ArgumentCaptor<Post> postCaptor = ArgumentCaptor.forClass(Post.class);
 
-        verify(postRepository).save(postCaptor.capture());
-        Post savedPost = postCaptor.getValue();
+        verify(postRepository, times(2)).save(postCaptor.capture());
+        Post savedPost = postCaptor.getAllValues().getLast();
         verify(taskAnswerGeneralService).createTaskAnswerForEveryCourseMember(course, savedPost);
 
         Assertions.assertNotNull(response);
@@ -116,9 +117,9 @@ public class PostServiceCreatePostTests {
         postService.createPost(courseId, userId, postCreateModel);
 
         ArgumentCaptor<Post> postCaptor = ArgumentCaptor.forClass(Post.class);
-        verify(postRepository).save(postCaptor.capture());
+        verify(postRepository, times(2)).save(postCaptor.capture());
 
-        Post savedPost = postCaptor.getValue();
+        Post savedPost = postCaptor.getAllValues().getLast();
         verify(taskAnswerGeneralService, never()).createTaskAnswerForEveryCourseMember(any(Course.class), any(Post.class));
         Assertions.assertNotNull(savedPost.getFiles());
         Assertions.assertEquals(2, savedPost.getFiles().size());
