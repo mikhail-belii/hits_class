@@ -16,20 +16,20 @@ services:
       retries: 10
     restart: unless-stopped
 
-#  hits-app:
-#    image: ghcr.io/mikhail-belii/hits_class:latest
-#    container_name: hits-app
-#    depends_on:
-#      postgres:
-#        condition: service_healthy
-#    environment:
-#      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/hits_class_db
-#      SPRING_DATASOURCE_USERNAME: postgres
-#      SPRING_DATASOURCE_PASSWORD: postgres
-#      SERVER_PORT: 8079
-#    ports:
-#      - "127.0.0.1:8079:8079"
-#    restart: unless-stopped
+  hits-app:
+    image: ghcr.io/mikhail-belii/hits_class:latest
+    container_name: hits-app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/hits_class_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SERVER_PORT: 8079
+    ports:
+      - "127.0.0.1:8079:8079"
+    restart: unless-stopped
 
 volumes:
   pgdata:
