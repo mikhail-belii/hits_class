@@ -59,17 +59,21 @@ public class PostServiceGetPostsTests {
 
         when(courseRepository.findById(courseId)).thenReturn(Optional.of(course));
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        Post olderPost = createPost(UUID.randomUUID(), course, user, "post-1");
+        olderPost.setCreatedAt(LocalDateTime.of(2026, 1, 1, 10, 0));
+        Post newerPost = createPost(UUID.randomUUID(), course, user, "post-2");
+        newerPost.setCreatedAt(LocalDateTime.of(2026, 1, 1, 10, 5));
         when(postRepository.findAll()).thenReturn(List.of(
-                createPost(UUID.randomUUID(), course, user, "post-1"),
-                createPost(UUID.randomUUID(), course, user, "post-2"),
+                olderPost,
+                newerPost,
                 createPost(UUID.randomUUID(), anotherCourse, user, "post-3")
         ));
 
         List<PostShortModel> posts = postService.getClassPosts(courseId, userId);
 
         Assertions.assertEquals(2, posts.size());
-        Assertions.assertEquals("post-1", posts.get(0).getText());
-        Assertions.assertEquals("post-2", posts.get(1).getText());
+        Assertions.assertEquals("post-2", posts.get(0).getText());
+        Assertions.assertEquals("post-1", posts.get(1).getText());
     }
 
     @Test
