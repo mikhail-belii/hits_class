@@ -548,7 +548,7 @@ public class CourseServiceTest {
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
         when(courseRepository.findById(course.getId())).thenReturn(Optional.of(course));
 
-        courseService.leaveFromCourse(user.getId(), course.getId());
+        courseService.leaveCourse(user.getId(), course.getId());
 
         verify(userCourseRepository).delete(userCourse);
     }
@@ -558,7 +558,7 @@ public class CourseServiceTest {
         when(userRepository.findById(user.getId())).thenReturn(Optional.empty());
 
         assertThrows(ExceptionUtility.userNotFoundException().getClass(),
-                () -> courseService.leaveFromCourse(user.getId(), course.getId()));
+                () -> courseService.leaveCourse(user.getId(), course.getId()));
 
         verify(userCourseRepository, times(0)).delete(any());
     }
@@ -569,7 +569,7 @@ public class CourseServiceTest {
         when(courseRepository.findById(course.getId())).thenReturn(Optional.empty());
 
         assertThrows(ExceptionUtility.courseNotFoundException().getClass(),
-                () -> courseService.leaveFromCourse(user.getId(), course.getId()));
+                () -> courseService.leaveCourse(user.getId(), course.getId()));
 
         verify(userCourseRepository, times(0)).delete(any());
     }
@@ -582,7 +582,7 @@ public class CourseServiceTest {
         when(courseRepository.findById(course.getId())).thenReturn(Optional.of(course));
 
         assertThrows(ExceptionUtility.userCannotLeaveCourseException().getClass(),
-                () -> courseService.leaveFromCourse(user.getId(), course.getId()));
+                () -> courseService.leaveCourse(user.getId(), course.getId()));
 
         verify(userCourseRepository, times(0)).delete(any());
     }
@@ -593,7 +593,7 @@ public class CourseServiceTest {
         when(courseRepository.findById(course.getId())).thenReturn(Optional.of(course));
 
         assertThrows(ExceptionUtility.userCannotLeaveCourseException().getClass(),
-                () -> courseService.leaveFromCourse(user.getId(), course.getId()));
+                () -> courseService.leaveCourse(user.getId(), course.getId()));
 
         verify(userCourseRepository, times(0)).delete(any());
     }

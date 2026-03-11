@@ -32,5 +32,5 @@ public interface CourseService {
             UUID courseId,
             UUID userId);
 
-    void leaveFromCourse(UUID requestingUserId, UUID courseId);
+    void leaveCourse(UUID requestingUserId, UUID courseId);
 }

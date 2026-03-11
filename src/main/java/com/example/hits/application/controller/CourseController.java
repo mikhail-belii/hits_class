@@ -105,12 +105,12 @@ public class CourseController {
     }
 
     @PostMapping(value = "/{courseId}/leave")
-    @Operation(summary = "Remove user from course")
-    public void leaveFromCourse(
+    @Operation(summary = "Leave course")
+    public void leaveCourse(
             @PathVariable("courseId") UUID courseId,
             @RequestAttribute("userId") UUID requestingUserId
     ) {
-        courseService.leaveFromCourse(requestingUserId, courseId);
+        courseService.leaveCourse(requestingUserId, courseId);
     }
 
 }

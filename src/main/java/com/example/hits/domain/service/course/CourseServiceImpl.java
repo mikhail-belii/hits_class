@@ -178,7 +178,7 @@ public class CourseServiceImpl implements CourseService {
         userCourseRepository.delete(userCourse);
     }
 
-    public void leaveFromCourse(UUID requestingUserId, UUID courseId) {
+    public void leaveCourse(UUID requestingUserId, UUID courseId) {
         User requestingUser = userRepository.findById(requestingUserId)
                 .orElseThrow(ExceptionUtility::userNotFoundException);
         Course course = courseRepository.findById(courseId)
