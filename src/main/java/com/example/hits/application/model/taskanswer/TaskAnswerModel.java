@@ -1,7 +1,7 @@
 package com.example.hits.application.model.taskanswer;
 
-import com.example.hits.application.model.attachment.AttachmentModel;
 import com.example.hits.application.model.comment.taskanswercomment.TaskAnswerCommentModel;
+import com.example.hits.application.model.file.FileModel;
 import com.example.hits.domain.entity.taskanswer.TaskAnswerStatus;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -25,7 +25,7 @@ public class TaskAnswerModel {
 
     private TaskAnswerStatus status = TaskAnswerStatus.NOT_COMPLETED;
 
-    private List<AttachmentModel> attachments = new ArrayList<>();
+    private List<FileModel> files = new ArrayList<>();
 
     private List<TaskAnswerCommentModel> comments = new ArrayList<>();
 

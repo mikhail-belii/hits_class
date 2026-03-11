@@ -85,7 +85,7 @@ public class FileServiceImpl implements FileService {
 
         fileRepository.save(savedFile);
 
-        return new FileModel(savedFile.getId());
+        return new FileModel(savedFile.getId(), savedFile.getOriginalName());
     }
 
     @Override

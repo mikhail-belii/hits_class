@@ -204,7 +204,7 @@ public class TaskAnswerGeneralServiceTests {
                         .setId(postId)
                         .setText("0123456789ГООООЛ")
                         .setCreatedAt(LocalDateTime.now().minusDays(2)))
-                .setAttachments(List.of())
+                .setFiles(List.of())
                 .setComments(List.of());
 
         when(taskAnswerRepository.findByUserIdAndPostId(userId, postId))
@@ -253,7 +253,7 @@ public class TaskAnswerGeneralServiceTests {
                         .setId(postId)
                         .setText("0123456789-first")
                         .setCreatedAt(LocalDateTime.now().minusDays(2)))
-                .setAttachments(List.of())
+                .setFiles(List.of())
                 .setComments(List.of());
         TaskAnswer secondTaskAnswer = new TaskAnswer()
                 .setId(UUID.randomUUID())
@@ -261,7 +261,7 @@ public class TaskAnswerGeneralServiceTests {
                         .setId(postId)
                         .setText("short")
                         .setCreatedAt(LocalDateTime.now().minusDays(10)))
-                .setAttachments(List.of())
+                .setFiles(List.of())
                 .setComments(List.of());
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));

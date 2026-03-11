@@ -1,12 +1,11 @@
 package com.example.hits.domain.service.taskanswer;
 
-import com.example.hits.application.model.attachment.AttachmentModel;
+import com.example.hits.application.model.file.FileModel;
 import com.example.hits.application.model.taskanswer.TaskRateRequestModel;
 import com.example.hits.application.repository.FileRepository;
 import com.example.hits.application.repository.TaskAnswerRepository;
 import com.example.hits.application.repository.UserRepository;
 import com.example.hits.application.util.ExceptionUtility;
-import com.example.hits.domain.entity.attachment.Attachment;
 import com.example.hits.domain.entity.course.Course;
 import com.example.hits.domain.entity.file.File;
 import com.example.hits.domain.entity.post.Post;
@@ -316,7 +315,7 @@ public class TaskAnswerUploadServiceTests {
     }
 
     @Test
-    void appendFiles_whenFilesExistAndUserIsOwner_setsAttachmentsAndSavesTaskAnswer() {
+    void appendFiles_whenFilesExistAndUserIsOwner_setsFilesAndSavesTaskAnswer() {
         UUID taskAnswerId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
         UUID firstFileId = UUID.randomUUID();
@@ -335,41 +334,37 @@ public class TaskAnswerUploadServiceTests {
 
         taskAnswerUploadService.appendFiles(
                 taskAnswerId,
-                List.of(new AttachmentModel(firstFileId), new AttachmentModel(secondFileId)),
+                List.of(new FileModel(firstFileId, "name"), new FileModel(secondFileId, "name")),
                 userId
         );
 
-        assertEquals(2, taskAnswer.getAttachments().size());
-        assertEquals(firstFileId, taskAnswer.getAttachments().get(0).getFile().getId());
-        assertEquals(secondFileId, taskAnswer.getAttachments().get(1).getFile().getId());
+        assertEquals(2, taskAnswer.getFiles().size());
+        assertEquals(firstFileId, taskAnswer.getFiles().get(0).getId());
+        assertEquals(secondFileId, taskAnswer.getFiles().get(1).getId());
         verify(taskAnswerRepository).save(taskAnswer);
     }
 
     @Test
-    void unpinFiles_whenFileExistsInTaskAnswerAttachments_removesFileAndSavesTaskAnswer() {
+    void unpinFiles_whenFileExistsInTaskAnswerFiles_removesFileAndSavesTaskAnswer() {
         UUID taskAnswerId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
         UUID removableFileId = UUID.randomUUID();
         User user = new User().setId(userId);
-        Attachment removableAttachment = new Attachment()
-                .setId(UUID.randomUUID())
-                .setFile(new File().setId(removableFileId));
-        Attachment anotherAttachment = new Attachment()
-                .setId(UUID.randomUUID())
-                .setFile(new File().setId(UUID.randomUUID()));
+        File removableFile = new File().setId(removableFileId);
+        File anotherFile = new File().setId(UUID.randomUUID());
         TaskAnswer taskAnswer = new TaskAnswer()
                 .setId(taskAnswerId)
                 .setUser(user)
                 .setSubmittedAt(null)
-                .setAttachments(new java.util.ArrayList<>(List.of(removableAttachment, anotherAttachment)));
+                .setFiles(new java.util.ArrayList<>(List.of(removableFile, anotherFile)));
 
         when(taskAnswerRepository.findById(taskAnswerId)).thenReturn(Optional.of(taskAnswer));
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
         taskAnswerUploadService.unpinFiles(taskAnswerId, removableFileId, userId);
 
-        assertEquals(1, taskAnswer.getAttachments().size());
-        assertEquals(anotherAttachment.getId(), taskAnswer.getAttachments().getFirst().getId());
+        assertEquals(1, taskAnswer.getFiles().size());
+        assertEquals(anotherFile.getId(), taskAnswer.getFiles().getFirst().getId());
         verify(taskAnswerRepository).save(taskAnswer);
     }
 }

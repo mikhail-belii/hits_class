@@ -1,13 +1,12 @@
 package com.example.hits.domain.service.taskanswer;
 
-import com.example.hits.application.model.attachment.AttachmentModel;
+import com.example.hits.application.model.file.FileModel;
 import com.example.hits.application.model.taskanswer.TaskRateRequestModel;
 import com.example.hits.application.repository.FileRepository;
 import com.example.hits.application.repository.TaskAnswerRepository;
 import com.example.hits.application.repository.UserRepository;
 import com.example.hits.application.util.ExceptionUtility;
 import com.example.hits.application.util.PostUtility;
-import com.example.hits.domain.entity.attachment.Attachment;
 import com.example.hits.domain.entity.file.File;
 import com.example.hits.domain.entity.post.Post;
 import com.example.hits.domain.entity.taskanswer.TaskAnswer;
@@ -49,7 +48,7 @@ public class TaskAnswerUploadService {
         taskAnswerRepository.save(taskAnswer);
     }
 
-    public void appendFiles(UUID taskAnswerId, List<AttachmentModel> attachmentModels, UUID userId) {
+    public void appendFiles(UUID taskAnswerId, List<FileModel> fileModels, UUID userId) {
         TaskAnswer taskAnswer = getTaskAnswer(taskAnswerId);
         User user = getUser(userId);
 
@@ -61,8 +60,8 @@ public class TaskAnswerUploadService {
             throw ExceptionUtility.badRequestException("Task already submitted");
         }
 
-        taskAnswer.setAttachments(formAttachments(taskAnswer, attachmentModels.stream()
-                        .map(AttachmentModel::getId)
+        taskAnswer.setFiles(formFiles(taskAnswer, fileModels.stream()
+                        .map(FileModel::getId)
                         .toList()));
 
         taskAnswerRepository.save(taskAnswer);
@@ -80,8 +79,13 @@ public class TaskAnswerUploadService {
             throw ExceptionUtility.badRequestException("Task already submitted");
         }
 
-        boolean removed = taskAnswer.getAttachments().removeIf(attachment ->
-                attachment.getFile() != null && fileId.equals(attachment.getFile().getId())
+        boolean removed = taskAnswer.getFiles().removeIf(file -> {
+                    boolean shouldRemove = fileId.equals(file.getId());
+                    if (shouldRemove) {
+                        file.setTaskAnswer(null);
+                    }
+                    return shouldRemove;
+                }
         );
 
         if (!removed) {
@@ -131,7 +135,7 @@ public class TaskAnswerUploadService {
                 .orElseThrow(ExceptionUtility::userNotFoundException);
     }
 
-    private List<Attachment> formAttachments(TaskAnswer taskAnswer, List<UUID> fileIds) {
+    private List<File> formFiles(TaskAnswer taskAnswer, List<UUID> fileIds) {
         var files = fileRepository.findAllById(fileIds);
 
         if (files.size() != fileIds.size()) {
@@ -141,7 +145,11 @@ public class TaskAnswerUploadService {
         var filesById = files.stream()
                 .collect(Collectors.toMap(File::getId, Function.identity()));
 
-        List<Attachment> attachments = new ArrayList<>();
+        if (taskAnswer.getFiles() != null) {
+            taskAnswer.getFiles().forEach(file -> file.setTaskAnswer(null));
+        }
+
+        List<File> newFiles = new ArrayList<>();
 
         for (UUID fileId : fileIds) {
             var file = filesById.get(fileId);
@@ -149,12 +157,15 @@ public class TaskAnswerUploadService {
                 throw ExceptionUtility.badRequestException("One or more files not found");
             }
 
-            attachments.add(new Attachment()
-                    .setFile(file)
-                    .setTaskAnswer(taskAnswer)
-                    .setCreatedAt(LocalDateTime.now()));
+            if (file.getPost() != null || (file.getTaskAnswer() != null && !file.getTaskAnswer().equals(taskAnswer))) {
+                throw ExceptionUtility.badRequestException("File is already attached");
+            }
+
+            file.setPost(null);
+            file.setTaskAnswer(taskAnswer);
+            newFiles.add(file);
         }
 
-        return attachments;
+        return newFiles;
     }
 }

@@ -2,13 +2,11 @@ package com.example.hits.domain.service.post;
 
 import com.example.hits.application.handler.ExceptionWrapper;
 import com.example.hits.application.model.file.FileModel;
-import com.example.hits.application.repository.AttachmentRepository;
 import com.example.hits.application.model.post.PostUpdateModel;
 import com.example.hits.application.repository.CourseRepository;
 import com.example.hits.application.repository.FileRepository;
 import com.example.hits.application.repository.PostRepository;
 import com.example.hits.application.repository.UserRepository;
-import com.example.hits.domain.entity.attachment.Attachment;
 import com.example.hits.domain.entity.course.Course;
 import com.example.hits.domain.entity.file.File;
 import com.example.hits.domain.entity.post.Post;
@@ -47,8 +45,6 @@ public class PostServiceUpdatePostTests {
     private UserRepository userRepository;
     @Mock
     private FileRepository fileRepository;
-    @Mock
-    private AttachmentRepository attachmentRepository;
 
     @InjectMocks
     private PostService postService;
@@ -82,7 +78,7 @@ public class PostServiceUpdatePostTests {
     }
 
     @Test
-    void updatePost_withFiles_replacesAttachments() {
+    void updatePost_withFiles_replacesFiles() {
         UUID courseId = UUID.randomUUID();
         UUID postId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
@@ -94,8 +90,8 @@ public class PostServiceUpdatePostTests {
         Post post = createPost(postId, course, teacher, "old-text");
 
         File oldFile = new File().setId(UUID.randomUUID()).setUploader(teacher).setPath("files/uploads/old.txt").setOriginalName("old.txt").setCreatedAt(LocalDateTime.now());
-        Attachment oldAttachment = new Attachment().setFile(oldFile).setPost(post).setCreatedAt(LocalDateTime.now());
-        post.setAttachments(new ArrayList<>(Arrays.asList(oldAttachment)));
+        oldFile.setPost(post);
+        post.setFiles(new ArrayList<>(Arrays.asList(oldFile)));
 
         File newFile = new File().setId(newFileId).setUploader(teacher).setPath("files/uploads/new.txt").setOriginalName("new.txt").setCreatedAt(LocalDateTime.now());
         PostUpdateModel model = new PostUpdateModel("new-text", List.of(new FileModel(newFileId)));
@@ -112,10 +108,10 @@ public class PostServiceUpdatePostTests {
 
         Post savedPost = postCaptor.getValue();
         Assertions.assertEquals("new-text", savedPost.getText());
-        Assertions.assertNotNull(savedPost.getAttachments());
-        Assertions.assertEquals(1, savedPost.getAttachments().size());
-        Assertions.assertEquals(newFileId, savedPost.getAttachments().getFirst().getFile().getId());
-        Assertions.assertEquals(savedPost, savedPost.getAttachments().getFirst().getPost());
+        Assertions.assertNotNull(savedPost.getFiles());
+        Assertions.assertEquals(1, savedPost.getFiles().size());
+        Assertions.assertEquals(newFileId, savedPost.getFiles().getFirst().getId());
+        Assertions.assertEquals(savedPost, savedPost.getFiles().getFirst().getPost());
     }
 
     @Test

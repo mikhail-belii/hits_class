@@ -1,5 +1,7 @@
 package com.example.hits.domain.entity.file;
 
+import com.example.hits.domain.entity.post.Post;
+import com.example.hits.domain.entity.taskanswer.TaskAnswer;
 import com.example.hits.domain.entity.user.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -26,6 +28,12 @@ public class File {
     @ManyToOne
     @JoinColumn(name = "uploader_id")
     private User uploader;
+    @ManyToOne
+    @JoinColumn(name = "post_id")
+    private Post post;
+    @ManyToOne
+    @JoinColumn(name = "task_answer_id")
+    private TaskAnswer taskAnswer;
     @NotNull
     private LocalDateTime createdAt;
 }

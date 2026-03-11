@@ -1,6 +1,6 @@
 package com.example.hits.domain.mapper;
 
-import com.example.hits.application.model.attachment.AttachmentModel;
+import com.example.hits.application.model.file.FileModel;
 import com.example.hits.application.model.taskanswer.TaskAnswerModel;
 import com.example.hits.domain.entity.taskanswer.TaskAnswer;
 import com.example.hits.domain.entity.taskanswer.TaskAnswerStatus;
@@ -24,8 +24,8 @@ public class TaskAnswerMapper {
                 .setMaxScore(taskAnswer.getPost().getMaxScore())
                 .setSubmittedAt(taskAnswer.getSubmittedAt())
                 .setStatus(parseStatus(taskAnswer))
-                .setAttachments(taskAnswer.getAttachments().stream()
-                        .map(attach -> new AttachmentModel(attach.getId()))
+                .setFiles(taskAnswer.getFiles().stream()
+                        .map(file -> new FileModel(file.getId(), "name"))
                         .toList())
                 .setComments(taskAnswer.getComments().stream()
                         .map(TaskAnswerCommentMapper::toModel)

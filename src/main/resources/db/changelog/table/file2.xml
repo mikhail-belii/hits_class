@@ -1,0 +1,44 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="MoveAttachmentRelationsToFile" author="MSidorov">
+        <addColumn tableName="file">
+            <column name="post_id" type="UUID"/>
+            <column name="task_answer_id" type="UUID"/>
+        </addColumn>
+
+        <sql>
+            UPDATE file
+            SET post_id = (
+                SELECT attachment.post_id
+                FROM attachment
+                WHERE attachment.file_id = file.id
+            ),
+            task_answer_id = (
+                SELECT attachment.task_answer_id
+                FROM attachment
+                WHERE attachment.file_id = file.id
+            )
+            WHERE EXISTS (
+                SELECT 1
+                FROM attachment
+                WHERE attachment.file_id = file.id
+            );
+        </sql>
+
+        <addForeignKeyConstraint baseColumnNames="post_id"
+                                 baseTableName="file"
+                                 constraintName="FK_FILE_ON_POST"
+                                 referencedColumnNames="id"
+                                 referencedTableName="post"/>
+
+        <addForeignKeyConstraint baseColumnNames="task_answer_id"
+                                 baseTableName="file"
+                                 constraintName="FK_FILE_ON_TASK_ANSWER"
+                                 referencedColumnNames="id"
+                                 referencedTableName="task_answer"/>
+    </changeSet>
+
+</databaseChangeLog>

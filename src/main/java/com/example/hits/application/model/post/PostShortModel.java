@@ -1,7 +1,7 @@
 package com.example.hits.application.model.post;
 
-import com.example.hits.application.model.attachment.AttachmentModel;
 import com.example.hits.application.model.comment.postcomment.PostCommentModel;
+import com.example.hits.application.model.file.FileModel;
 import com.example.hits.application.model.user.UserModel;
 import com.example.hits.domain.entity.post.PostType;
 import lombok.AllArgsConstructor;
@@ -25,7 +25,7 @@ public class PostShortModel {
 
     private UserModel author;
 
-    private List<AttachmentModel> attachments;
+    private List<FileModel> files;
 
     private PostType postType;
 

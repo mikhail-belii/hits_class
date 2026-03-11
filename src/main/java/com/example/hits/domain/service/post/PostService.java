@@ -9,7 +9,6 @@ import com.example.hits.application.model.post.PostUpdateModel;
 import com.example.hits.application.repository.*;
 import com.example.hits.application.util.ExceptionUtility;
 import com.example.hits.application.util.PostUtility;
-import com.example.hits.domain.entity.attachment.Attachment;
 import com.example.hits.domain.entity.course.Course;
 import com.example.hits.domain.entity.file.File;
 import com.example.hits.domain.entity.post.Post;
@@ -54,7 +53,13 @@ public class PostService {
         }
 
         Post post = createPostFromModel(postCreateModel, user, course);
-        post.setAttachments(buildPostAttachments(postCreateModel.getFiles(), post, user, null));
+        post = postRepository.save(post);
+
+        var files = buildPostFiles(postCreateModel.getFiles(), post, user, null);
+        post.setFiles(files);
+        if (files != null && !files.isEmpty()) {
+            fileRepository.saveAll(files);
+        }
 
         postRepository.save(post);
 
@@ -109,7 +114,7 @@ public class PostService {
         }
 
         post.setText(postUpdateModel.getText());
-        post.setAttachments(buildPostAttachments(postUpdateModel.getFiles(), post, user, post.getId()));
+        post.setFiles(buildPostFiles(postUpdateModel.getFiles(), post, user, post.getId()));
         post.setUpdatedAt(LocalDateTime.now());
         postRepository.save(post);
     }
@@ -141,15 +146,13 @@ public class PostService {
                 .setCreatedAt(LocalDateTime.now());
     }
 
-    private List<Attachment> buildPostAttachments(List<FileModel> fileModels,
-                                                  Post post,
-                                                  User user,
-                                                  UUID currentPostId) {
-        var attachments = post.getAttachments();
-
+    private List<File> buildPostFiles(List<FileModel> fileModels,
+                                            Post post,
+                                            User user,
+                                            UUID currentPostId) {
         var fileIds = extractFileIds(fileModels);
         if (fileIds.isEmpty()) {
-            return attachments;
+            return post.getFiles();
         }
 
         var files = fileRepository.findAllById(fileIds);
@@ -160,12 +163,7 @@ public class PostService {
         var filesById = files.stream()
                 .collect(Collectors.toMap(File::getId, Function.identity()));
 
-
-        if (attachments == null) {
-            attachments = new ArrayList<>();
-        } else {
-            attachments.clear();
-        }
+        var newFiles = new ArrayList<File>();
 
         for (UUID fileId : fileIds) {
             var file = filesById.get(fileId);
@@ -177,20 +175,25 @@ public class PostService {
                 throw ExceptionUtility.badRequestException("You can attach only your files");
             }
 
-//            var isAlreadyAttached = currentPostId == null
-//                    ? attachmentRepository.existsByFile_Id(fileId)
-//                    : attachmentRepository.existsByFile_IdAndPost_IdNot(fileId, currentPostId);
-//            if (isAlreadyAttached) {
-//                throw ExceptionUtility.badRequestException("File is already attached");
-//            }
+            var attachedToAnotherPost = file.getPost() != null
+                    && (currentPostId == null || !file.getPost().getId().equals(currentPostId));
+            if (attachedToAnotherPost || file.getTaskAnswer() != null) {
+                throw ExceptionUtility.badRequestException("File is already attached");
+            }
 
-            attachments.add(new Attachment()
-                    .setFile(file)
-                    .setPost(post)
-                    .setCreatedAt(LocalDateTime.now()));
+            newFiles.add(file);
         }
 
-        return attachments;
+        if (post.getFiles() != null) {
+            post.getFiles().forEach(file -> file.setPost(null));
+        }
+
+        for (File file : newFiles) {
+            file.setPost(post);
+            file.setTaskAnswer(null);
+        }
+
+        return newFiles;
     }
 
     private List<UUID> extractFileIds(List<FileModel> fileModels) {

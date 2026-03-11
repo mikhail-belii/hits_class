@@ -1,6 +1,6 @@
 package com.example.hits.domain.mapper;
 
-import com.example.hits.application.model.attachment.AttachmentModel;
+import com.example.hits.application.model.file.FileModel;
 import com.example.hits.application.model.post.PostFullModel;
 import com.example.hits.application.model.post.PostShortModel;
 import com.example.hits.domain.entity.post.Post;
@@ -20,8 +20,8 @@ public class PostMapper {
                 .setId(postEntity.getId())
                 .setText(postEntity.getText())
                 .setAuthor(postEntity.getAuthor() != null ? postEntity.getAuthor().toModel() : null)
-                .setAttachments(postEntity.getAttachments() != null ?
-                        postEntity.getAttachments().stream().map(attachment -> new AttachmentModel(attachment.getId())).toList() :
+                .setFiles(postEntity.getFiles() != null ?
+                        postEntity.getFiles().stream().map(file -> new FileModel(file.getId(), file.getOriginalName())).toList() :
                         new ArrayList<>())
                 .setPostType(postEntity.getPostType())
                 .setCreatedAt(postEntity.getCreatedAt())
@@ -39,8 +39,8 @@ public class PostMapper {
                 .setId(postEntity.getId())
                 .setText(postEntity.getText())
                 .setAuthor(postEntity.getAuthor() != null ? postEntity.getAuthor().toModel() : null)
-                .setAttachments(postEntity.getAttachments() != null ?
-                        postEntity.getAttachments().stream().map(attachment -> new AttachmentModel(attachment.getId())).toList() :
+                .setFiles(postEntity.getFiles() != null ?
+                        postEntity.getFiles().stream().map(file -> new FileModel(file.getId(), file.getOriginalName())).toList() :
                         new ArrayList<>())
                 .setPostType(postEntity.getPostType())
                 .setCreatedAt(postEntity.getCreatedAt())

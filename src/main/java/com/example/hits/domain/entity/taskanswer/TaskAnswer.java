@@ -1,6 +1,6 @@
 package com.example.hits.domain.entity.taskanswer;
 
-import com.example.hits.domain.entity.attachment.Attachment;
+import com.example.hits.domain.entity.file.File;
 import com.example.hits.domain.entity.post.Post;
 import com.example.hits.domain.entity.taskanswercomment.TaskAnswerComment;
 import com.example.hits.domain.entity.user.User;
@@ -32,7 +32,7 @@ public class TaskAnswer {
     private TaskAnswerStatus status = TaskAnswerStatus.NOT_COMPLETED;
 
     @OneToMany(mappedBy = "taskAnswer")
-    private List<Attachment> attachments = new ArrayList<>();
+    private List<File> files = new ArrayList<>();
 
     @OneToMany(mappedBy = "taskAnswer")
     private List<TaskAnswerComment> comments = new ArrayList<>();

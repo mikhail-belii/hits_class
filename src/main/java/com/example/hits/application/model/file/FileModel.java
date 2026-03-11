@@ -11,4 +11,5 @@ import java.util.UUID;
 @NoArgsConstructor
 public class FileModel {
     private UUID id;
+    private String fileName;
 }

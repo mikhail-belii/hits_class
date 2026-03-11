@@ -1,0 +1,19 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="DropAttachmentTable" author="MSidorov">
+        <dropForeignKeyConstraint baseTableName="attachment"
+                                  constraintName="FK_ATTACHMENT_ON_FILE"/>
+
+        <dropForeignKeyConstraint baseTableName="attachment"
+                                  constraintName="FK_ATTACHMENT_ON_POST"/>
+
+        <dropForeignKeyConstraint baseTableName="attachment"
+                                  constraintName="FK_ATTACHMENT_ON_TASK_ANSWER"/>
+
+        <dropTable tableName="attachment"/>
+    </changeSet>
+
+</databaseChangeLog>

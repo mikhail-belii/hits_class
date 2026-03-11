@@ -1,6 +1,6 @@
 package com.example.hits.application.controller;
 
-import com.example.hits.application.model.attachment.AttachmentModel;
+import com.example.hits.application.model.file.FileModel;
 import com.example.hits.application.model.taskanswer.TaskAnswerModel;
 import com.example.hits.application.model.taskanswer.TaskRateRequestModel;
 import com.example.hits.domain.service.taskanswer.TaskAnswerGeneralService;
@@ -39,9 +39,9 @@ public class TaskAnswerController {
 
     @PostMapping("/pin-file/{taskAnswerId}")
     public void appendFiles(@PathVariable UUID taskAnswerId,
-                            @RequestBody List<AttachmentModel> attachmentModels,
+                            @RequestBody List<FileModel> fileModels,
                             @RequestAttribute("userId") UUID userId) {
-        taskAnswerUploadService.appendFiles(taskAnswerId, attachmentModels, userId);
+        taskAnswerUploadService.appendFiles(taskAnswerId, fileModels, userId);
     }
 
     @DeleteMapping("/unpin-file/{taskAnswerId}/file/{fileId}")

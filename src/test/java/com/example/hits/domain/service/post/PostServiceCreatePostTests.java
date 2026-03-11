@@ -3,7 +3,6 @@ package com.example.hits.domain.service.post;
 import com.example.hits.application.handler.ExceptionWrapper;
 import com.example.hits.application.model.common.IdResponseModel;
 import com.example.hits.application.model.file.FileModel;
-import com.example.hits.application.repository.AttachmentRepository;
 import com.example.hits.application.model.post.PostCreateModel;
 import com.example.hits.application.repository.CourseRepository;
 import com.example.hits.application.repository.FileRepository;
@@ -50,8 +49,6 @@ public class PostServiceCreatePostTests {
     @Mock
     private FileRepository fileRepository;
     @Mock
-    private AttachmentRepository attachmentRepository;
-    @Mock
     private TaskAnswerGeneralService taskAnswerGeneralService;
 
     @InjectMocks
@@ -93,7 +90,7 @@ public class PostServiceCreatePostTests {
     }
 
     @Test
-    void createPost_withFilesAndNonTaskType_createsAttachmentsAndDoesNotCreateTaskAnswers() {
+    void createPost_withFilesAndNonTaskType_createsFilesAndDoesNotCreateTaskAnswers() {
         UUID courseId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
         UUID firstFileId = UUID.randomUUID();
@@ -123,12 +120,12 @@ public class PostServiceCreatePostTests {
 
         Post savedPost = postCaptor.getValue();
         verify(taskAnswerGeneralService, never()).createTaskAnswerForEveryCourseMember(any(Course.class), any(Post.class));
-        Assertions.assertNotNull(savedPost.getAttachments());
-        Assertions.assertEquals(2, savedPost.getAttachments().size());
-        Assertions.assertEquals(firstFileId, savedPost.getAttachments().get(0).getFile().getId());
-        Assertions.assertEquals(secondFileId, savedPost.getAttachments().get(1).getFile().getId());
-        Assertions.assertEquals(savedPost, savedPost.getAttachments().get(0).getPost());
-        Assertions.assertEquals(savedPost, savedPost.getAttachments().get(1).getPost());
+        Assertions.assertNotNull(savedPost.getFiles());
+        Assertions.assertEquals(2, savedPost.getFiles().size());
+        Assertions.assertEquals(firstFileId, savedPost.getFiles().get(0).getId());
+        Assertions.assertEquals(secondFileId, savedPost.getFiles().get(1).getId());
+        Assertions.assertEquals(savedPost, savedPost.getFiles().get(0).getPost());
+        Assertions.assertEquals(savedPost, savedPost.getFiles().get(1).getPost());
     }
 
     @Test
