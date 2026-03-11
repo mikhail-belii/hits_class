@@ -179,6 +179,19 @@ public class CourseServiceImpl implements CourseService {
     }
 
     public void leaveFromCourse(UUID requestingUserId, UUID courseId) {
+        User requestingUser = userRepository.findById(requestingUserId)
+                .orElseThrow(ExceptionUtility::userNotFoundException);
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(ExceptionUtility::courseNotFoundException);
+
+        if (!CourseUtility.isUserAbleToLeaveCourse(course, requestingUser)) {
+            throw ExceptionUtility.userCannotLeaveCourseException();
+        }
+
+        UserCourse userCourse = CourseUtility.getUserCourse(course, requestingUser)
+                .orElseThrow(ExceptionUtility::forbiddenRightsException);
+
+        userCourseRepository.delete(userCourse);
     }
 
     private Course createCourseFromModel(CourseCreateModel courseCreateModel) {

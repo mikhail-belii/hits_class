@@ -20,6 +20,8 @@ public class CourseUtility {
     }
 
     public boolean isUserAbleToLeaveCourse(Course course, User user) {
+        var userCourse = getUserCourse(course, user);
+        return userCourse.isPresent() && UserCourseRole.isUserLowerThan(userCourse.get().getUserRole(), UserCourseRole.HEAD_TEACHER);
     }
 
     public boolean isUserAvailableToChangeOtherUserRoleOnCourse(
