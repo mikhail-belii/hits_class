@@ -23,10 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -80,6 +77,7 @@ public class PostService {
 
         return postRepository.findAll().stream()
                 .filter(post -> post.getCourse() != null && post.getCourse().equals(course))
+                .sorted(Comparator.comparing(Post::getCreatedAt).reversed())
                 .map(PostMapper::toModel)
                 .toList();
     }
