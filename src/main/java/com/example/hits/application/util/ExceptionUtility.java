@@ -42,6 +42,12 @@ public class ExceptionUtility {
         return notFoundException;
     }
 
+    public ExceptionWrapper userCannotLeaveCourseException() {
+        var notFoundException = new ExceptionWrapper(new BadRequestException("User cannot leave the course because he is creator or not participant of the course"));
+        notFoundException.addError("courseId", "Cannot leave course with requested courseId");
+        return notFoundException;
+    }
+
     public ExceptionWrapper forbiddenRightsException() {
         var forbiddenException = new ExceptionWrapper(
                 new ResponseStatusException(FORBIDDEN, "User has no rights to this action")

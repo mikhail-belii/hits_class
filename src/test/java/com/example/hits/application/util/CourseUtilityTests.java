@@ -225,6 +225,39 @@ public class CourseUtilityTests {
         assertTrue(result.isEmpty());
     }
 
+    @Test
+    void isUserAbleToLeaveCourse_whenUserIsHeadTeacher_returnsFalse() {
+        User user = createUser();
+        Course course = createCourse(List.of(createUserCourse(user, UserCourseRole.HEAD_TEACHER)));
+
+        assertFalse(CourseUtility.isUserAbleToLeaveCourse(course, user));
+    }
+
+    @Test
+    void isUserAbleToLeaveCourse_whenUserIsTeacher_returnsTue() {
+        User user = createUser();
+        Course course = createCourse(List.of(createUserCourse(user, UserCourseRole.TEACHER)));
+
+        assertTrue(CourseUtility.isUserAbleToLeaveCourse(course, user));
+    }
+
+    @Test
+    void isUserAbleToLeaveCourse_whenUserIsStudent_returnsTrue() {
+        User user = createUser();
+        Course course = createCourse(List.of(createUserCourse(user, UserCourseRole.STUDENT)));
+
+        assertTrue(CourseUtility.isUserAbleToLeaveCourse(course, user));
+    }
+
+    @Test
+    void isUserAbleToLeaveCourse_whenUserNotInCourse_returnsFalse() {
+        User user = createUser();
+        User anotherUser = createUser();
+        Course course = createCourse(List.of(createUserCourse(anotherUser, UserCourseRole.HEAD_TEACHER)));
+
+        assertFalse(CourseUtility.isUserAbleToLeaveCourse(course, user));
+    }
+
     private static User createUser() {
         User user = new User();
         user.setId(UUID.randomUUID());

@@ -19,6 +19,9 @@ public class CourseUtility {
         return isCourseAvailableForEditing(course, user);
     }
 
+    public boolean isUserAbleToLeaveCourse(Course course, User user) {
+    }
+
     public boolean isUserAvailableToChangeOtherUserRoleOnCourse(
             Course course,
             User user,

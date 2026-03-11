@@ -544,6 +544,7 @@ public class CourseServiceTest {
 
     @Test
     void leaveFromCourse_whenCanLeave_removeUserFromCourse() {
+        userCourse.setUserRole(UserCourseRole.TEACHER);
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
         when(courseRepository.findById(course.getId())).thenReturn(Optional.of(course));
 
@@ -574,12 +575,24 @@ public class CourseServiceTest {
     }
 
     @Test
-    void leaveFromCourse_whenUserNotInCourse_throwsUserCourseNotFoundException() {
+    void leaveFromCourse_whenUserNotInCourse_throwsUserCannotLeaveCourseException() {
+        userCourse.setUserRole(UserCourseRole.TEACHER);
         course.setCourseUsers(List.of());
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
         when(courseRepository.findById(course.getId())).thenReturn(Optional.of(course));
 
-        assertThrows(ExceptionUtility.userCourseNotFoundException().getClass(),
+        assertThrows(ExceptionUtility.userCannotLeaveCourseException().getClass(),
+                () -> courseService.leaveFromCourse(user.getId(), course.getId()));
+
+        verify(userCourseRepository, times(0)).delete(any());
+    }
+
+    @Test
+    void leaveFromCourse_whenUserIsHeadTeacher_throwsUserCannotLeaveCourseException() {
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(courseRepository.findById(course.getId())).thenReturn(Optional.of(course));
+
+        assertThrows(ExceptionUtility.userCannotLeaveCourseException().getClass(),
                 () -> courseService.leaveFromCourse(user.getId(), course.getId()));
 
         verify(userCourseRepository, times(0)).delete(any());
