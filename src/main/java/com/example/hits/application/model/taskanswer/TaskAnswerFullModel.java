@@ -2,6 +2,7 @@ package com.example.hits.application.model.taskanswer;
 
 import com.example.hits.application.model.comment.taskanswercomment.TaskAnswerCommentModel;
 import com.example.hits.application.model.file.FileModel;
+import com.example.hits.application.model.user.UserModel;
 import com.example.hits.domain.entity.taskanswer.TaskAnswerStatus;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -13,7 +14,7 @@ import java.util.UUID;
 
 @Data
 @Accessors(chain = true)
-public class TaskAnswerModel {
+public class TaskAnswerFullModel {
 
     private UUID id = UUID.randomUUID();
 
@@ -32,4 +33,6 @@ public class TaskAnswerModel {
     private String postName;
 
     private UUID postId;
+
+    private UserModel user;
 }

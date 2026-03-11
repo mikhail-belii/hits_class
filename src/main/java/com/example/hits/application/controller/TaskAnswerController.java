@@ -1,6 +1,7 @@
 package com.example.hits.application.controller;
 
 import com.example.hits.application.model.file.FileModel;
+import com.example.hits.application.model.taskanswer.TaskAnswerFullModel;
 import com.example.hits.application.model.taskanswer.TaskAnswerModel;
 import com.example.hits.application.model.taskanswer.TaskRateRequestModel;
 import com.example.hits.domain.service.taskanswer.TaskAnswerGeneralService;
@@ -27,7 +28,7 @@ public class TaskAnswerController {
 
     @GetMapping("/post/{postId}/all")
     @Operation(summary = "Get all post task answers [FOR TEACHER+]")
-    public List<TaskAnswerModel> getAllPostTaskAnswers(@PathVariable UUID postId, @RequestAttribute("userId") UUID userId) {
+    public List<TaskAnswerFullModel> getAllPostTaskAnswers(@PathVariable UUID postId, @RequestAttribute("userId") UUID userId) {
         return taskAnswerGeneralService.getAllPostTaskAnswers(postId, userId);
     }
 

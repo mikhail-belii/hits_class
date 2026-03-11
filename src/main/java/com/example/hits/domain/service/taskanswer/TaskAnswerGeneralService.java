@@ -1,5 +1,6 @@
 package com.example.hits.domain.service.taskanswer;
 
+import com.example.hits.application.model.taskanswer.TaskAnswerFullModel;
 import com.example.hits.application.model.taskanswer.TaskAnswerModel;
 import com.example.hits.application.repository.PostRepository;
 import com.example.hits.application.repository.TaskAnswerRepository;
@@ -56,29 +57,34 @@ public class TaskAnswerGeneralService {
         User user = userRepository.findById(userId)
                 .orElseThrow(ExceptionUtility::userNotFoundException);
 
-        return formAllUserTaskAnswers(user).stream().sorted(
+        return formAllUserTaskAnswers(user).stream()
+                .sorted(
                         Comparator
                                 .comparing((TaskAnswerModel a) -> priority.get(a.getStatus()))
                                 .thenComparing(TaskAnswerModel::getPostName))
                 .toList();
     }
 
-    public List<TaskAnswerModel> getAllPostTaskAnswers(UUID postId, UUID userId) {
+    public List<TaskAnswerFullModel> getAllPostTaskAnswers(UUID postId, UUID userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(ExceptionUtility::userNotFoundException);
         Post post = postRepository.findById(postId)
                 .orElseThrow(ExceptionUtility::postNotFoundException);
 
-        if (post.getPostType() != PostType.TASK) {
-            throw ExceptionUtility.badRequestException("Post is not a task type");
-        }
-
         if (post.getCourse() == null || !PostUtility.isAvailableForEditing(post.getCourse(), user)) {
             throw ExceptionUtility.forbiddenRightsException();
         }
 
+        if (post.getPostType() != PostType.TASK) {
+            throw ExceptionUtility.badRequestException("Post is not a task type");
+        }
+
         return taskAnswerRepository.findAllByPostId(postId).stream()
-                .map(TaskAnswerMapper::toModel)
+                .filter(taskAnswerModel -> taskAnswerModel.getSubmittedAt() != null)
+                .map(TaskAnswerMapper::toFullModel)
+                .sorted(Comparator
+                        .comparing((TaskAnswerFullModel model) -> model.getUser().getFirstName(), String.CASE_INSENSITIVE_ORDER)
+                        .thenComparing(model -> model.getUser().getLastName(), String.CASE_INSENSITIVE_ORDER))
                 .toList();
     }
 

@@ -213,6 +213,7 @@ public class TaskAnswerGeneralServiceTests {
         var result = taskAnswerGeneralService.getUserPostTaskAnswer(postId, userId);
 
         assertEquals(taskAnswerId, result.getId());
+        assertEquals(postId, result.getPostId());
         assertEquals("0123456789", result.getPostName());
         assertEquals(TaskAnswerStatus.NEW, result.getStatus());
         verify(taskAnswerRepository).findByUserIdAndPostId(userId, postId);
@@ -231,7 +232,7 @@ public class TaskAnswerGeneralServiceTests {
     }
 
     @Test
-    void getAllPostTaskAnswers_whenUserIsTeacherOnPostCourse_returnsAllPostTaskAnswers() {
+    void getAllPostTaskAnswers_whenUserIsTeacherOnPostCourse_returnsSubmittedTaskAnswersSortedByUserName() {
         UUID userId = UUID.randomUUID();
         UUID postId = UUID.randomUUID();
         UUID courseId = UUID.randomUUID();
@@ -249,32 +250,71 @@ public class TaskAnswerGeneralServiceTests {
                 .setPostType(PostType.TASK);
         TaskAnswer firstTaskAnswer = new TaskAnswer()
                 .setId(UUID.randomUUID())
+                .setUser(new User()
+                        .setId(UUID.randomUUID())
+                        .setFirstName("Zoe")
+                        .setLastName("Adams")
+                        .setEmail("zoe@aaa.com")
+                        .setCity("Tomsk")
+                        .setBirthday(java.time.LocalDate.of(2000, 1, 1)))
                 .setPost(new Post()
                         .setId(postId)
                         .setText("0123456789-first")
+                        .setMaxScore(100)
                         .setCreatedAt(LocalDateTime.now().minusDays(2)))
+                .setSubmittedAt(LocalDateTime.now())
                 .setFiles(List.of())
                 .setComments(List.of());
         TaskAnswer secondTaskAnswer = new TaskAnswer()
                 .setId(UUID.randomUUID())
+                .setUser(new User()
+                        .setId(UUID.randomUUID())
+                        .setFirstName("Alex")
+                        .setLastName("Brown")
+                        .setEmail("alex@aaa.com")
+                        .setCity("Tomsk")
+                        .setBirthday(java.time.LocalDate.of(2000, 1, 1)))
                 .setPost(new Post()
                         .setId(postId)
                         .setText("short")
+                        .setMaxScore(100)
                         .setCreatedAt(LocalDateTime.now().minusDays(10)))
+                .setSubmittedAt(LocalDateTime.now())
+                .setFiles(List.of())
+                .setComments(List.of());
+        TaskAnswer notSubmittedTaskAnswer = new TaskAnswer()
+                .setId(UUID.randomUUID())
+                .setUser(new User()
+                        .setId(UUID.randomUUID())
+                        .setFirstName("Bob")
+                        .setLastName("Clark")
+                        .setEmail("bob@aaa.com")
+                        .setCity("Tomsk")
+                        .setBirthday(java.time.LocalDate.of(2000, 1, 1)))
+                .setPost(new Post()
+                        .setId(postId)
+                        .setText("ignored")
+                        .setMaxScore(100)
+                        .setCreatedAt(LocalDateTime.now().minusDays(1)))
                 .setFiles(List.of())
                 .setComments(List.of());
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(postRepository.findById(postId)).thenReturn(Optional.of(post));
-        when(taskAnswerRepository.findAllByPostId(postId)).thenReturn(List.of(firstTaskAnswer, secondTaskAnswer));
+        when(taskAnswerRepository.findAllByPostId(postId))
+                .thenReturn(List.of(firstTaskAnswer, secondTaskAnswer, notSubmittedTaskAnswer));
 
         var result = taskAnswerGeneralService.getAllPostTaskAnswers(postId, userId);
 
         assertEquals(2, result.size());
-        assertEquals(firstTaskAnswer.getId(), result.get(0).getId());
-        assertEquals(secondTaskAnswer.getId(), result.get(1).getId());
-        assertEquals("0123456789", result.get(0).getPostName());
-        assertEquals("short", result.get(1).getPostName());
+        assertEquals(secondTaskAnswer.getId(), result.get(0).getId());
+        assertEquals(firstTaskAnswer.getId(), result.get(1).getId());
+        assertEquals(postId, result.get(0).getPostId());
+        assertEquals(postId, result.get(1).getPostId());
+        assertEquals("Alex", result.get(0).getUser().getFirstName());
+        assertEquals("Zoe", result.get(1).getUser().getFirstName());
+        assertEquals("short", result.get(0).getPostName());
+        assertEquals("0123456789", result.get(1).getPostName());
         verify(taskAnswerRepository).findAllByPostId(postId);
     }
 
@@ -306,8 +346,15 @@ public class TaskAnswerGeneralServiceTests {
         UUID userId = UUID.randomUUID();
         UUID postId = UUID.randomUUID();
         User user = new User().setId(userId);
+        Course course = new Course().setId(UUID.randomUUID());
+        UserCourse teacherOnCourse = new UserCourse()
+                .setUser(user)
+                .setCourse(course)
+                .setUserRole(UserCourseRole.TEACHER);
+        course.setCourseUsers(List.of(teacherOnCourse));
         Post post = new Post()
                 .setId(postId)
+                .setCourse(course)
                 .setPostType(PostType.ANNOUNCEMENT);
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));

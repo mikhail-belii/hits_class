@@ -1,5 +1,6 @@
 package com.example.hits.domain.mapper;
 
+import com.example.hits.application.model.taskanswer.TaskAnswerFullModel;
 import com.example.hits.application.model.taskanswer.TaskAnswerModel;
 import com.example.hits.domain.entity.post.Post;
 import com.example.hits.domain.entity.taskanswer.TaskAnswer;
@@ -26,12 +27,14 @@ public class TaskAnswerMapperTests {
     @Test
     void toModel_withRecentPostAndNoSubmittedAt_shouldMapNewStatus() {
         UUID id = UUID.randomUUID();
-        TaskAnswer taskAnswer = createTaskAnswer(id, LONG_POST_TEXT, LocalDateTime.now().minusDays(6), null, null);
+        UUID postId = UUID.randomUUID();
+        TaskAnswer taskAnswer = createTaskAnswer(id, postId, LONG_POST_TEXT, LocalDateTime.now().minusDays(6), null, null);
 
         TaskAnswerModel result = TaskAnswerMapper.toModel(taskAnswer);
 
         assertNotNull(result);
         assertEquals(id, result.getId());
+        assertEquals(postId, result.getPostId());
         assertEquals(MAX_SCORE, result.getMaxScore());
         assertEquals(TaskAnswerStatus.NEW, result.getStatus());
         assertEquals("0123456789", result.getPostName());
@@ -39,12 +42,14 @@ public class TaskAnswerMapperTests {
 
     @Test
     void toModel_withOldPostAndNoSubmittedAt_shouldMapNotCompletedStatus() {
-        TaskAnswer taskAnswer = createTaskAnswer(null, SHORT_POST_TEXT, LocalDateTime.now().minusDays(8), null, null);
+        UUID postId = UUID.randomUUID();
+        TaskAnswer taskAnswer = createTaskAnswer(null, postId, SHORT_POST_TEXT, LocalDateTime.now().minusDays(8), null, null);
 
         TaskAnswerModel result = TaskAnswerMapper.toModel(taskAnswer);
 
         assertNotNull(result);
         assertNull(result.getId());
+        assertEquals(postId, result.getPostId());
         assertEquals(MAX_SCORE, result.getMaxScore());
         assertEquals(TaskAnswerStatus.NOT_COMPLETED, result.getStatus());
         assertEquals(SHORT_POST_TEXT, result.getPostName());
@@ -54,6 +59,7 @@ public class TaskAnswerMapperTests {
     void toModel_withSubmittedAtBeforeDeadline_shouldMapCompletedStatus() {
         LocalDateTime deadline = LocalDateTime.now().plusDays(1);
         TaskAnswer taskAnswer = createTaskAnswer(
+                UUID.randomUUID(),
                 UUID.randomUUID(),
                 LONG_POST_TEXT,
                 LocalDateTime.now().minusDays(10),
@@ -72,6 +78,7 @@ public class TaskAnswerMapperTests {
         LocalDateTime deadline = LocalDateTime.now().minusHours(1);
         TaskAnswer taskAnswer = createTaskAnswer(
                 UUID.randomUUID(),
+                UUID.randomUUID(),
                 LONG_POST_TEXT,
                 LocalDateTime.now().minusDays(10),
                 LocalDateTime.now(),
@@ -87,13 +94,7 @@ public class TaskAnswerMapperTests {
     @Test
     void toModel_withComments_shouldMapComments() {
         UUID commentId = UUID.randomUUID();
-        User author = new User()
-                .setId(UUID.randomUUID())
-                .setEmail("user@aaa.com")
-                .setFirstName("Ivan")
-                .setLastName("Ivanov")
-                .setCity("Tomsk")
-                .setBirthday(LocalDate.of(2000, 1, 1));
+        User author = createUser(UUID.randomUUID(), "Ivan", "Ivanov");
         TaskAnswerComment comment = new TaskAnswerComment()
                 .setId(commentId)
                 .setText("comment text")
@@ -101,6 +102,7 @@ public class TaskAnswerMapperTests {
                 .setCreatedAt(LocalDateTime.now().minusHours(2))
                 .setUpdatedAt(LocalDateTime.now().minusHours(1));
         TaskAnswer taskAnswer = createTaskAnswer(
+                UUID.randomUUID(),
                 UUID.randomUUID(),
                 LONG_POST_TEXT,
                 LocalDateTime.now().minusDays(6),
@@ -118,14 +120,41 @@ public class TaskAnswerMapperTests {
         assertEquals(author.getEmail(), result.getComments().getFirst().getAuthor().getEmail());
     }
 
+    @Test
+    void toFullModel_shouldMapUserAndPostId() {
+        UUID taskAnswerId = UUID.randomUUID();
+        UUID postId = UUID.randomUUID();
+        User user = createUser(UUID.randomUUID(), "Alex", "Mercer");
+        TaskAnswer taskAnswer = createTaskAnswer(
+                taskAnswerId,
+                postId,
+                LONG_POST_TEXT,
+                LocalDateTime.now().minusDays(6),
+                LocalDateTime.now(),
+                LocalDateTime.now().plusDays(1)
+        ).setUser(user);
+
+        TaskAnswerFullModel result = TaskAnswerMapper.toFullModel(taskAnswer);
+
+        assertEquals(taskAnswerId, result.getId());
+        assertEquals(postId, result.getPostId());
+        assertEquals(MAX_SCORE, result.getMaxScore());
+        assertEquals(TaskAnswerStatus.COMPLETED, result.getStatus());
+        assertEquals(user.getId(), result.getUser().getId());
+        assertEquals(user.getFirstName(), result.getUser().getFirstName());
+        assertEquals(user.getLastName(), result.getUser().getLastName());
+    }
+
     private static TaskAnswer createTaskAnswer(
             UUID id,
+            UUID postId,
             String postText,
             LocalDateTime createdAt,
             LocalDateTime submittedAt,
             LocalDateTime deadline
     ) {
         Post post = new Post()
+                .setId(postId)
                 .setText(postText)
                 .setCreatedAt(createdAt)
                 .setDeadline(deadline)
@@ -135,5 +164,15 @@ public class TaskAnswerMapperTests {
                 .setId(id)
                 .setPost(post)
                 .setSubmittedAt(submittedAt);
+    }
+
+    private static User createUser(UUID id, String firstName, String lastName) {
+        return new User()
+                .setId(id)
+                .setEmail("user@aaa.com")
+                .setFirstName(firstName)
+                .setLastName(lastName)
+                .setCity("Tomsk")
+                .setBirthday(LocalDate.of(2000, 1, 1));
     }
 }
