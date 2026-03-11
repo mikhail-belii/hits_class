@@ -94,7 +94,7 @@ public class PostServiceUpdatePostTests {
         post.setFiles(new ArrayList<>(Arrays.asList(oldFile)));
 
         File newFile = new File().setId(newFileId).setUploader(teacher).setPath("files/uploads/new.txt").setOriginalName("new.txt").setCreatedAt(LocalDateTime.now());
-        PostUpdateModel model = new PostUpdateModel("new-text", List.of(new FileModel(newFileId)));
+        PostUpdateModel model = new PostUpdateModel("new-text", List.of(new FileModel(newFileId, "name")));
 
         when(courseRepository.findById(courseId)).thenReturn(Optional.of(course));
         when(userRepository.findById(userId)).thenReturn(Optional.of(teacher));
@@ -247,7 +247,7 @@ public class PostServiceUpdatePostTests {
         Course course = createCourseWithUserRole(teacher, UserCourseRole.TEACHER);
         course.setId(courseId);
         Post post = createPost(postId, course, teacher, "old");
-        PostUpdateModel model = new PostUpdateModel("new", List.of(new FileModel(fileId)));
+        PostUpdateModel model = new PostUpdateModel("new", List.of(new FileModel(fileId, "name")));
 
         when(courseRepository.findById(courseId)).thenReturn(Optional.of(course));
         when(userRepository.findById(userId)).thenReturn(Optional.of(teacher));
@@ -277,7 +277,7 @@ public class PostServiceUpdatePostTests {
         course.setId(courseId);
         Post post = createPost(postId, course, teacher, "old");
         File foreignFile = new File().setId(fileId).setUploader(anotherUser).setPath("files/uploads/foreign.txt").setOriginalName("foreign.txt").setCreatedAt(LocalDateTime.now());
-        PostUpdateModel model = new PostUpdateModel("new", List.of(new FileModel(fileId)));
+        PostUpdateModel model = new PostUpdateModel("new", List.of(new FileModel(fileId, "name")));
 
         when(courseRepository.findById(courseId)).thenReturn(Optional.of(course));
         when(userRepository.findById(userId)).thenReturn(Optional.of(teacher));

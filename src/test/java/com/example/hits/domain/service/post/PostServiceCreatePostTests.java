@@ -100,7 +100,7 @@ public class PostServiceCreatePostTests {
         Course course = createCourseWithUserRole(teacher, UserCourseRole.TEACHER);
         PostCreateModel postCreateModel = new PostCreateModel(
                 "text",
-                List.of(new FileModel(firstFileId), new FileModel(secondFileId)),
+                List.of(new FileModel(firstFileId, "name"), new FileModel(secondFileId, "name")),
                 PostType.ANNOUNCEMENT,
                 null
         );
