@@ -17,4 +17,8 @@ public enum UserCourseRole {
     public static boolean isUserHigherThan(UserCourseRole role1, UserCourseRole role2) {
         return role1.importance > role2.importance;
     }
+
+    public static boolean isUserLowerThan(UserCourseRole role1, UserCourseRole role2) {
+        return role1.importance < role2.importance;
+    }
 }
