@@ -20,10 +20,11 @@ public class CourseMapper {
                 .setCurrentUserCourseRole(userCourseRole);
     }
 
-    public CourseShortModel toShortModel(Course courseEntity) {
+    public CourseShortModel toShortModel(Course courseEntity, UserCourseRole currentUserCourseRole) {
         return new CourseShortModel()
                 .setId(courseEntity.getId())
                 .setName(courseEntity.getName())
-                .setDescription(courseEntity.getDescription());
+                .setDescription(courseEntity.getDescription())
+                .setCurrentUserCourseRole(currentUserCourseRole);
     }
 }

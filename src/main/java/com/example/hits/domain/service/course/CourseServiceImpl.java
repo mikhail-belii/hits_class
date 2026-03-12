@@ -113,7 +113,7 @@ public class CourseServiceImpl implements CourseService {
         return requestingUser.getUserCourses()
                 .stream()
                 .filter(c -> c.getCourse().getIsArchived() == isArchived)
-                .map(c -> CourseMapper.toShortModel(c.getCourse()))
+                .map(c -> CourseMapper.toShortModel(c.getCourse(), c.getUserRole()))
                 .toList();
     }
 
