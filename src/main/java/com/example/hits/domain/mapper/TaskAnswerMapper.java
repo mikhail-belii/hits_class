@@ -17,7 +17,7 @@ import java.util.List;
 @ExtensionMethod({ TaskAnswerCommentMapper.class, SimpleUserMapper.class })
 public class TaskAnswerMapper {
 
-    private static final int MAX_POST_NAME_LENGTH = 10;
+    private static final int MAX_POST_NAME_LENGTH = 30;
 
     public TaskAnswerModel toModel(TaskAnswer taskAnswer) {
         String postText = extractPostText(taskAnswer);
@@ -30,7 +30,7 @@ public class TaskAnswerMapper {
                 .setSubmittedAt(taskAnswer.getSubmittedAt())
                 .setStatus(parseStatus(taskAnswer))
                 .setFiles(safeFiles(taskAnswer).stream()
-                        .map(file -> new FileModel(file.getId(), "name"))
+                        .map(file -> new FileModel(file.getId(), "answer"))
                         .toList())
                 .setComments(safeComments(taskAnswer).stream()
                         .map(TaskAnswerCommentMapper::toModel)
@@ -51,7 +51,7 @@ public class TaskAnswerMapper {
                 .setSubmittedAt(taskAnswer.getSubmittedAt())
                 .setStatus(parseStatus(taskAnswer))
                 .setFiles(safeFiles(taskAnswer).stream()
-                        .map(file -> new FileModel(file.getId(), "name"))
+                        .map(file -> new FileModel(file.getId(), "answer"))
                         .toList())
                 .setComments(safeComments(taskAnswer).stream()
                         .map(TaskAnswerCommentMapper::toModel)

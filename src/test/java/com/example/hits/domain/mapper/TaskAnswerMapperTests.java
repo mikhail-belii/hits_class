@@ -7,6 +7,7 @@ import com.example.hits.domain.entity.taskanswer.TaskAnswer;
 import com.example.hits.domain.entity.taskanswer.TaskAnswerStatus;
 import com.example.hits.domain.entity.taskanswercomment.TaskAnswerComment;
 import com.example.hits.domain.entity.user.User;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -20,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class TaskAnswerMapperTests {
 
-    private static final String LONG_POST_TEXT = "0123456789тест";
+    private static final String LONG_POST_TEXT = generateLongText(35);
     private static final String SHORT_POST_TEXT = "бебе";
     private static final int MAX_SCORE = 100;
 
@@ -37,7 +38,7 @@ public class TaskAnswerMapperTests {
         assertEquals(postId, result.getPostId());
         assertEquals(MAX_SCORE, result.getMaxScore());
         assertEquals(TaskAnswerStatus.NEW, result.getStatus());
-        assertEquals("0123456789...", result.getPostName());
+        assertEquals(LONG_POST_TEXT.substring(0, 30) + "...", result.getPostName());
     }
 
     @Test
@@ -174,5 +175,9 @@ public class TaskAnswerMapperTests {
                 .setLastName(lastName)
                 .setCity("Tomsk")
                 .setBirthday(LocalDate.of(2000, 1, 1));
+    }
+
+    private static String generateLongText(int len) {
+        return RandomStringUtils.randomAlphanumeric(len);
     }
 }
