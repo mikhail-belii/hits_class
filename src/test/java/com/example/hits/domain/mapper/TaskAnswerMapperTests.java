@@ -37,7 +37,7 @@ public class TaskAnswerMapperTests {
         assertEquals(postId, result.getPostId());
         assertEquals(MAX_SCORE, result.getMaxScore());
         assertEquals(TaskAnswerStatus.NEW, result.getStatus());
-        assertEquals("0123456789", result.getPostName());
+        assertEquals("0123456789...", result.getPostName());
     }
 
     @Test

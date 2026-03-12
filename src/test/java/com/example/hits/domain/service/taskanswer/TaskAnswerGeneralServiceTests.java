@@ -199,8 +199,8 @@ public class TaskAnswerGeneralServiceTests {
         assertEquals(2, result.size());
         assertEquals(firstTaskAnswer.getId(), result.get(0).getId());
         assertEquals(secondTaskAnswer.getId(), result.get(1).getId());
-        assertEquals("0123456789", result.get(0).getPostName());
-        assertEquals("0123456789", result.get(1).getPostName());
+        assertEquals("0123456789...", result.get(0).getPostName());
+        assertEquals("0123456789...", result.get(1).getPostName());
         verify(taskAnswerRepository).findAllByUserIdAndPostCourseId(userId, courseId);
     }
 
@@ -245,7 +245,7 @@ public class TaskAnswerGeneralServiceTests {
 
         assertEquals(taskAnswerId, result.getId());
         assertEquals(postId, result.getPostId());
-        assertEquals("0123456789", result.getPostName());
+        assertEquals("0123456789...", result.getPostName());
         assertEquals(TaskAnswerStatus.NEW, result.getStatus());
         verify(taskAnswerRepository).findByUserIdAndPostId(userId, postId);
     }

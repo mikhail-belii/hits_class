@@ -21,6 +21,7 @@ public class TaskAnswerMapper {
 
     public TaskAnswerModel toModel(TaskAnswer taskAnswer) {
         String postText = extractPostText(taskAnswer);
+        postText = postText.length() > MAX_POST_NAME_LENGTH ? postText.substring(0, MAX_POST_NAME_LENGTH) + "..." : postText;
 
         return new TaskAnswerModel()
                 .setId(taskAnswer.getId())
@@ -34,7 +35,7 @@ public class TaskAnswerMapper {
                 .setComments(safeComments(taskAnswer).stream()
                         .map(TaskAnswerCommentMapper::toModel)
                         .toList())
-                .setPostName(postText.substring(0, Math.min(MAX_POST_NAME_LENGTH, postText.length())))
+                .setPostName(postText)
                 .setPostId(taskAnswer.getPost() != null ? taskAnswer.getPost().getId() : null)
                 .setCourseId(taskAnswer.getPost() != null && taskAnswer.getPost().getCourse() != null
                         ? taskAnswer.getPost().getCourse().getId() : null);
