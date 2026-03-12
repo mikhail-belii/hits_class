@@ -85,6 +85,7 @@ public class PostService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public PostFullModel getPostInfo(UUID courseId, UUID postId, UUID userId) {
         Course course = getCourseById(courseId);
         User user = findUserById(userId);
