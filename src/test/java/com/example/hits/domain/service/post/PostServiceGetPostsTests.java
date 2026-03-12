@@ -164,6 +164,38 @@ public class PostServiceGetPostsTests {
     }
 
     @Test
+    void getPostInfo_whenTaskAnswerHasNullCollections_returnsPostFullModelWithTaskAnswer() {
+        UUID courseId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        UUID postId = UUID.randomUUID();
+        UUID taskAnswerId = UUID.randomUUID();
+
+        User user = createUser(userId);
+        Course course = createCourseWithUserRole(user, UserCourseRole.STUDENT);
+        course.setId(courseId);
+        Post post = createPost(postId, course, createUser(UUID.randomUUID()), "student post");
+        TaskAnswer taskAnswer = new TaskAnswer()
+                .setId(taskAnswerId)
+                .setUser(user)
+                .setPost(post)
+                .setFiles(null)
+                .setComments(null);
+
+        when(courseRepository.findById(courseId)).thenReturn(Optional.of(course));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(postRepository.findById(postId)).thenReturn(Optional.of(post));
+        when(taskAnswerRepository.findByUserIdAndPostId(userId, postId)).thenReturn(Optional.of(taskAnswer));
+
+        PostFullModel postFullModel = postService.getPostInfo(courseId, postId, userId);
+
+        Assertions.assertEquals(postId, postFullModel.getId());
+        Assertions.assertNotNull(postFullModel.getTaskAnswer());
+        Assertions.assertEquals(taskAnswerId, postFullModel.getTaskAnswer().getId());
+        Assertions.assertEquals(List.of(), postFullModel.getTaskAnswer().getFiles());
+        Assertions.assertEquals(List.of(), postFullModel.getTaskAnswer().getComments());
+    }
+
+    @Test
     void getPostInfo_whenTaskAnswerIsMissing_returnsPostFullModelWithNullTaskAnswer() {
         UUID courseId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
