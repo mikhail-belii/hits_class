@@ -56,7 +56,7 @@ public class TaskAnswerUploadServiceTests {
                 .setCourse(course)
                 .setUserRole(UserCourseRole.TEACHER)));
         Post post = new Post().setCourse(course).setMaxScore(10);
-        TaskAnswer taskAnswer = new TaskAnswer().setId(taskAnswerId).setPost(post).setScore(0);
+        TaskAnswer taskAnswer = new TaskAnswer().setId(taskAnswerId).setPost(post).setScore(1);
         TaskRateRequestModel taskRate = new TaskRateRequestModel();
         taskRate.setRate(7);
 
@@ -81,7 +81,7 @@ public class TaskAnswerUploadServiceTests {
                 .setCourse(course)
                 .setUserRole(UserCourseRole.STUDENT)));
         Post post = new Post().setCourse(course).setMaxScore(10);
-        TaskAnswer taskAnswer = new TaskAnswer().setId(taskAnswerId).setPost(post).setScore(0);
+        TaskAnswer taskAnswer = new TaskAnswer().setId(taskAnswerId).setPost(post).setScore(1);
         TaskRateRequestModel taskRate = new TaskRateRequestModel();
         taskRate.setRate(7);
 
@@ -103,7 +103,7 @@ public class TaskAnswerUploadServiceTests {
                 .setCourse(course)
                 .setUserRole(UserCourseRole.TEACHER)));
         Post post = new Post().setCourse(course).setMaxScore(5);
-        TaskAnswer taskAnswer = new TaskAnswer().setId(taskAnswerId).setPost(post).setScore(0);
+        TaskAnswer taskAnswer = new TaskAnswer().setId(taskAnswerId).setPost(post).setScore(1);
         TaskRateRequestModel taskRate = new TaskRateRequestModel();
         taskRate.setRate(7);
 
@@ -237,7 +237,7 @@ public class TaskAnswerUploadServiceTests {
         TaskAnswer taskAnswer = new TaskAnswer()
                 .setId(taskAnswerId)
                 .setUser(user)
-                .setScore(null)
+                .setScore(0)
                 .setSubmittedAt(LocalDateTime.now());
 
         when(taskAnswerRepository.findById(taskAnswerId)).thenReturn(Optional.of(taskAnswer));
@@ -286,7 +286,7 @@ public class TaskAnswerUploadServiceTests {
         TaskAnswer taskAnswer = new TaskAnswer()
                 .setId(taskAnswerId)
                 .setUser(new User().setId(userId))
-                .setScore(null)
+                .setScore(0)
                 .setSubmittedAt(LocalDateTime.now());
 
         when(taskAnswerRepository.findById(taskAnswerId)).thenReturn(Optional.of(taskAnswer));
