@@ -1,5 +1,6 @@
 package com.example.hits.application.model.course;
 
+import com.example.hits.domain.entity.user.UserCourseRole;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,5 +21,7 @@ public class CourseShortModel {
     private String name;
 
     private String description;
+
+    private UserCourseRole currentUserCourseRole;
 
 }

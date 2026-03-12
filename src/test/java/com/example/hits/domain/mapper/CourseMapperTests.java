@@ -59,15 +59,17 @@ public class CourseMapperTests {
         UUID id = UUID.randomUUID();
         String name = "Test Course";
         String description = "Test Description";
+        UserCourseRole userCourseRole = UserCourseRole.HEAD_TEACHER;
 
         Course courseEntity = createCourseWithFields(
                 id, name, description, LocalDateTime.now(), "CODE", false);
 
-        CourseShortModel result = CourseMapper.toShortModel(courseEntity);
+        CourseShortModel result = CourseMapper.toShortModel(courseEntity, userCourseRole);
 
         assertEquals(id, result.getId());
         assertEquals(name, result.getName());
         assertEquals(description, result.getDescription());
+        assertEquals(userCourseRole, result.getCurrentUserCourseRole());
     }
 
     @Test
@@ -77,11 +79,12 @@ public class CourseMapperTests {
                 id, null, null, LocalDateTime.now(), "CODE", false
         );
 
-        CourseShortModel result = CourseMapper.toShortModel(courseEntity);
+        CourseShortModel result = CourseMapper.toShortModel(courseEntity, null);
 
         assertNotNull(result.getId());
         assertNull(result.getName());
         assertNull(result.getDescription());
+        assertNull(result.getCurrentUserCourseRole());
     }
 
     private static Course createCourseWithFields(
