@@ -2,7 +2,11 @@ package com.example.hits.domain.service.post;
 
 import com.example.hits.application.handler.ExceptionWrapper;
 import com.example.hits.application.repository.CourseRepository;
+import com.example.hits.application.repository.FileRepository;
 import com.example.hits.application.repository.PostRepository;
+import com.example.hits.application.repository.PostCommentRepository;
+import com.example.hits.application.repository.TaskAnswerCommentRepository;
+import com.example.hits.application.repository.TaskAnswerRepository;
 import com.example.hits.application.repository.UserRepository;
 import com.example.hits.domain.entity.course.Course;
 import com.example.hits.domain.entity.post.Post;
@@ -19,6 +23,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -34,6 +39,14 @@ public class PostServiceDeletePostTests {
     private PostRepository postRepository;
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private FileRepository fileRepository;
+    @Mock
+    private PostCommentRepository postCommentRepository;
+    @Mock
+    private TaskAnswerRepository taskAnswerRepository;
+    @Mock
+    private TaskAnswerCommentRepository taskAnswerCommentRepository;
 
     @InjectMocks
     private PostService postService;
@@ -52,6 +65,7 @@ public class PostServiceDeletePostTests {
         when(courseRepository.findById(courseId)).thenReturn(Optional.of(course));
         when(userRepository.findById(userId)).thenReturn(Optional.of(teacher));
         when(postRepository.findById(postId)).thenReturn(Optional.of(post));
+        when(taskAnswerRepository.findAllByPostId(postId)).thenReturn(List.of());
 
         postService.deletePost(courseId, postId, userId);
 

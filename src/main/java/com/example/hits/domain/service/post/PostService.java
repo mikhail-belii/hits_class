@@ -13,6 +13,7 @@ import com.example.hits.domain.entity.course.Course;
 import com.example.hits.domain.entity.file.File;
 import com.example.hits.domain.entity.post.Post;
 import com.example.hits.domain.entity.post.PostType;
+import com.example.hits.domain.entity.taskanswercomment.TaskAnswerComment;
 import com.example.hits.domain.entity.user.User;
 import com.example.hits.domain.mapper.PostMapper;
 import com.example.hits.domain.service.taskanswer.TaskAnswerGeneralService;
@@ -38,7 +39,9 @@ public class PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final FileRepository fileRepository;
+    private final PostCommentRepository postCommentRepository;
     private final TaskAnswerRepository taskAnswerRepository;
+    private final TaskAnswerCommentRepository taskAnswerCommentRepository;
 
     @Transactional
     public IdResponseModel createPost(UUID courseId, UUID userId, PostCreateModel postCreateModel) {
@@ -117,6 +120,7 @@ public class PostService {
         postRepository.save(post);
     }
 
+    @Transactional
     public void deletePost(UUID courseId, UUID postId, UUID userId) {
         Course course = getCourseById(courseId);
         User user = findUserById(userId);
@@ -130,7 +134,58 @@ public class PostService {
             throw ExceptionUtility.badRequestException("You can't delete this post");
         }
 
+        detachPostFiles(post);
+        deletePostComments(post);
+        deleteTaskAnswers(postId);
         postRepository.delete(post);
+    }
+
+    private void detachPostFiles(Post post) {
+        if (post.getFiles() == null || post.getFiles().isEmpty()) {
+            return;
+        }
+
+        post.getFiles().forEach(file -> file.setPost(null));
+        fileRepository.saveAll(post.getFiles());
+    }
+
+    private void deletePostComments(Post post) {
+        if (post.getComments() == null || post.getComments().isEmpty()) {
+            return;
+        }
+
+        postCommentRepository.deleteAll(post.getComments());
+    }
+
+    private void deleteTaskAnswers(UUID postId) {
+        var taskAnswers = taskAnswerRepository.findAllByPostId(postId);
+        if (taskAnswers.isEmpty()) {
+            return;
+        }
+
+        var attachedFiles = new ArrayList<File>();
+        var comments = new ArrayList<TaskAnswerComment>();
+
+        for (var taskAnswer : taskAnswers) {
+            if (taskAnswer.getFiles() != null && !taskAnswer.getFiles().isEmpty()) {
+                taskAnswer.getFiles().forEach(file -> file.setTaskAnswer(null));
+                attachedFiles.addAll(taskAnswer.getFiles());
+            }
+
+            if (taskAnswer.getComments() != null && !taskAnswer.getComments().isEmpty()) {
+                comments.addAll(taskAnswer.getComments());
+            }
+        }
+
+        if (!attachedFiles.isEmpty()) {
+            fileRepository.saveAll(attachedFiles);
+        }
+
+        if (!comments.isEmpty()) {
+            taskAnswerCommentRepository.deleteAll(comments);
+        }
+
+        taskAnswerRepository.deleteAll(taskAnswers);
     }
 
     private Post createPostFromModel(PostCreateModel postCreateModel, User author, Course course) {
