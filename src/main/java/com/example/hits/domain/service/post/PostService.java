@@ -189,12 +189,17 @@ public class PostService {
     }
 
     private Post createPostFromModel(PostCreateModel postCreateModel, User author, Course course) {
+        LocalDateTime deadline = postCreateModel.getPostType() == PostType.TASK
+                ? postCreateModel.getDeadline()
+                : null;
+
         return new Post()
                 .setId(UUID.randomUUID())
                 .setText(postCreateModel.getText())
                 .setCourse(course)
                 .setAuthor(author)
                 .setPostType(postCreateModel.getPostType())
+                .setDeadline(deadline)
                 .setMaxScore(postCreateModel.getMaxScore())
                 .setCreatedAt(LocalDateTime.now());
     }

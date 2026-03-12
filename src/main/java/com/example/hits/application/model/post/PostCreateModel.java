@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -20,4 +21,6 @@ public class PostCreateModel {
     private PostType postType;
 
     private Integer maxScore;
+
+    private LocalDateTime deadline;
 }

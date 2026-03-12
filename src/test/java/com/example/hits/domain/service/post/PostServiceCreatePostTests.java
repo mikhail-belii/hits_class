@@ -8,8 +8,8 @@ import com.example.hits.application.repository.CourseRepository;
 import com.example.hits.application.repository.FileRepository;
 import com.example.hits.application.repository.PostRepository;
 import com.example.hits.application.repository.UserRepository;
-import com.example.hits.domain.entity.file.File;
 import com.example.hits.domain.entity.course.Course;
+import com.example.hits.domain.entity.file.File;
 import com.example.hits.domain.entity.post.Post;
 import com.example.hits.domain.entity.post.PostType;
 import com.example.hits.domain.entity.user.User;
@@ -59,13 +59,15 @@ public class PostServiceCreatePostTests {
     void createPost_validTeacher_savesPostAndReturnsId() {
         UUID courseId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
+        LocalDateTime deadline = LocalDateTime.now().plusDays(7);
         User user = createUser(userId);
         Course course = createCourseWithUserRole(user, UserCourseRole.TEACHER);
         PostCreateModel postCreateModel = new PostCreateModel(
                 "Текст поста",
                 List.of(),
                 PostType.TASK,
-                100
+                100,
+                deadline
         );
 
         when(courseRepository.findById(courseId)).thenReturn(Optional.of(course));
@@ -85,6 +87,7 @@ public class PostServiceCreatePostTests {
         Assertions.assertEquals("Текст поста", savedPost.getText());
         Assertions.assertEquals(PostType.TASK, savedPost.getPostType());
         Assertions.assertEquals(100, savedPost.getMaxScore());
+        Assertions.assertEquals(deadline, savedPost.getDeadline());
         Assertions.assertEquals(course, savedPost.getCourse());
         Assertions.assertEquals(user, savedPost.getAuthor());
         Assertions.assertNotNull(savedPost.getCreatedAt());
@@ -96,6 +99,7 @@ public class PostServiceCreatePostTests {
         UUID userId = UUID.randomUUID();
         UUID firstFileId = UUID.randomUUID();
         UUID secondFileId = UUID.randomUUID();
+        LocalDateTime deadline = LocalDateTime.now().plusDays(3);
 
         User teacher = createUser(userId);
         Course course = createCourseWithUserRole(teacher, UserCourseRole.TEACHER);
@@ -103,7 +107,8 @@ public class PostServiceCreatePostTests {
                 "text",
                 List.of(new FileModel(firstFileId, "name"), new FileModel(secondFileId, "name")),
                 PostType.ANNOUNCEMENT,
-                null
+                null,
+                deadline
         );
 
         File firstFile = new File().setId(firstFileId).setUploader(teacher).setPath("files/uploads/a.txt").setOriginalName("a.txt").setCreatedAt(LocalDateTime.now());
@@ -127,13 +132,14 @@ public class PostServiceCreatePostTests {
         Assertions.assertEquals(secondFileId, savedPost.getFiles().get(1).getId());
         Assertions.assertEquals(savedPost, savedPost.getFiles().get(0).getPost());
         Assertions.assertEquals(savedPost, savedPost.getFiles().get(1).getPost());
+        Assertions.assertNull(savedPost.getDeadline());
     }
 
     @Test
     void createPost_courseNotFound_throwsEntityNotFoundException() {
         UUID courseId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
-        PostCreateModel postCreateModel = new PostCreateModel("текст", List.of(), PostType.ANNOUNCEMENT, null);
+        PostCreateModel postCreateModel = new PostCreateModel("текст", List.of(), PostType.ANNOUNCEMENT, null, null);
         when(courseRepository.findById(courseId)).thenReturn(Optional.empty());
 
         ExceptionWrapper exception = Assertions.assertThrows(
@@ -151,7 +157,7 @@ public class PostServiceCreatePostTests {
         UUID courseId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
         Course course = createCourseWithUserRole(createUser(UUID.randomUUID()), UserCourseRole.TEACHER);
-        PostCreateModel postCreateModel = new PostCreateModel("текст", List.of(), PostType.ANNOUNCEMENT, null);
+        PostCreateModel postCreateModel = new PostCreateModel("текст", List.of(), PostType.ANNOUNCEMENT, null, null);
 
         when(courseRepository.findById(courseId)).thenReturn(Optional.of(course));
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
@@ -172,7 +178,7 @@ public class PostServiceCreatePostTests {
         UUID userId = UUID.randomUUID();
         User student = createUser(userId);
         Course course = createCourseWithUserRole(student, UserCourseRole.STUDENT);
-        PostCreateModel postCreateModel = new PostCreateModel("текст", List.of(), PostType.ANNOUNCEMENT, null);
+        PostCreateModel postCreateModel = new PostCreateModel("текст", List.of(), PostType.ANNOUNCEMENT, null, null);
 
         when(courseRepository.findById(courseId)).thenReturn(Optional.of(course));
         when(userRepository.findById(userId)).thenReturn(Optional.of(student));
@@ -184,5 +190,34 @@ public class PostServiceCreatePostTests {
         Assertions.assertEquals(ResponseStatusException.class, exception.getExceptionClass());
         Assertions.assertEquals("User has no rights to this action", exception.getErrors().get("forbidden"));
         verifyNoInteractions(postRepository, taskAnswerGeneralService);
+    }
+
+    @Test
+    void createPost_nonTaskType_ignoresDeadlineFromModel() {
+        UUID courseId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        LocalDateTime deadline = LocalDateTime.now().plusDays(5);
+        User teacher = createUser(userId);
+        Course course = createCourseWithUserRole(teacher, UserCourseRole.TEACHER);
+        PostCreateModel postCreateModel = new PostCreateModel(
+                "текст",
+                List.of(),
+                PostType.ANNOUNCEMENT,
+                50,
+                deadline
+        );
+
+        when(courseRepository.findById(courseId)).thenReturn(Optional.of(course));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(teacher));
+        when(postRepository.save(any(Post.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        postService.createPost(courseId, userId, postCreateModel);
+
+        ArgumentCaptor<Post> postCaptor = ArgumentCaptor.forClass(Post.class);
+        verify(postRepository, times(2)).save(postCaptor.capture());
+
+        Post savedPost = postCaptor.getAllValues().getLast();
+        Assertions.assertEquals(PostType.ANNOUNCEMENT, savedPost.getPostType());
+        Assertions.assertNull(savedPost.getDeadline());
     }
 }
