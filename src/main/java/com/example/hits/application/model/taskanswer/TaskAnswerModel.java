@@ -32,4 +32,6 @@ public class TaskAnswerModel {
     private String postName;
 
     private UUID postId;
+
+    private UUID courseId;
 }

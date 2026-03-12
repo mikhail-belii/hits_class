@@ -35,4 +35,6 @@ public class TaskAnswerFullModel {
     private UUID postId;
 
     private UserModel user;
+
+    private UUID courseId;
 }

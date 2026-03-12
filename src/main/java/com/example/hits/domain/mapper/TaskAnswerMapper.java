@@ -35,7 +35,9 @@ public class TaskAnswerMapper {
                         .map(TaskAnswerCommentMapper::toModel)
                         .toList())
                 .setPostName(postText.substring(0, Math.min(MAX_POST_NAME_LENGTH, postText.length())))
-                .setPostId(taskAnswer.getPost() != null ? taskAnswer.getPost().getId() : null);
+                .setPostId(taskAnswer.getPost() != null ? taskAnswer.getPost().getId() : null)
+                .setCourseId(taskAnswer.getPost() != null && taskAnswer.getPost().getCourse() != null
+                        ? taskAnswer.getPost().getCourse().getId() : null);
     }
 
     public TaskAnswerFullModel toFullModel(TaskAnswer taskAnswer) {
@@ -55,7 +57,9 @@ public class TaskAnswerMapper {
                         .toList())
                 .setPostName(postText.substring(0, Math.min(MAX_POST_NAME_LENGTH, postText.length())))
                 .setPostId(taskAnswer.getPost() != null ? taskAnswer.getPost().getId() : null)
-                .setUser(taskAnswer.getUser() != null ? taskAnswer.getUser().toModel() : null);
+                .setUser(taskAnswer.getUser() != null ? taskAnswer.getUser().toModel() : null)
+                .setCourseId(taskAnswer.getPost() != null && taskAnswer.getPost().getCourse() != null
+                        ? taskAnswer.getPost().getCourse().getId() : null);
     }
 
     private TaskAnswerStatus parseStatus(TaskAnswer taskAnswer) {
