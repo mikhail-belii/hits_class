@@ -127,7 +127,7 @@ public class TaskAnswerUploadServiceTests {
         Post post = new Post().setCourse(course).setMaxScore(10);
         TaskAnswer taskAnswer = new TaskAnswer().setId(taskAnswerId).setPost(post).setScore(-1);
         TaskRateRequestModel taskRate = new TaskRateRequestModel();
-        taskRate.setRate(7);
+        taskRate.setRate(-1);
 
         when(taskAnswerRepository.findById(taskAnswerId)).thenReturn(Optional.of(taskAnswer));
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));

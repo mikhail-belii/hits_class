@@ -39,7 +39,7 @@ public class TaskAnswerUploadService {
             throw ExceptionUtility.forbiddenRightsException();
         }
 
-        if (post.getMaxScore() < taskRate.getRate() || taskAnswer.getScore() < 1) {
+        if (post.getMaxScore() < taskRate.getRate() || taskRate.getRate() < 1) {
             throw ExceptionUtility.badRequestException("Invalid score");
         }
 
