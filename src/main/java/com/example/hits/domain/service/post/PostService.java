@@ -52,6 +52,8 @@ public class PostService {
             throw ExceptionUtility.forbiddenRightsException();
         }
 
+        validateDeadline(postCreateModel);
+
         Post post = createPostFromModel(postCreateModel, user, course);
         post = postRepository.save(post);
 
@@ -68,6 +70,17 @@ public class PostService {
         }
 
         return new IdResponseModel(post.getId());
+    }
+
+    private void validateDeadline(PostCreateModel postCreateModel) {
+        if (postCreateModel.getPostType() != PostType.TASK) {
+            return;
+        }
+
+        var deadline = postCreateModel.getDeadline();
+        if (deadline != null && deadline.isBefore(LocalDateTime.now())) {
+            throw ExceptionUtility.badRequestException("Deadline cannot be earlier than current moment");
+        }
     }
 
     public List<PostShortModel> getClassPosts(UUID courseId, UUID userId) {

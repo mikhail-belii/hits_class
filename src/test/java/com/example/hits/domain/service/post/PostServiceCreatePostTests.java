@@ -220,4 +220,61 @@ public class PostServiceCreatePostTests {
         Assertions.assertEquals(PostType.ANNOUNCEMENT, savedPost.getPostType());
         Assertions.assertNull(savedPost.getDeadline());
     }
+
+    @Test
+    void createPost_taskWithPastDeadline_throwsBadRequestException() {
+        UUID courseId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        User teacher = createUser(userId);
+        Course course = createCourseWithUserRole(teacher, UserCourseRole.TEACHER);
+        PostCreateModel postCreateModel = new PostCreateModel(
+                "текст",
+                List.of(),
+                PostType.TASK,
+                100,
+                LocalDateTime.now().minusMinutes(1)
+        );
+
+        when(courseRepository.findById(courseId)).thenReturn(Optional.of(course));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(teacher));
+
+        ExceptionWrapper exception = Assertions.assertThrows(
+                ExceptionWrapper.class,
+                () -> postService.createPost(courseId, userId, postCreateModel)
+        );
+
+        Assertions.assertEquals(org.apache.coyote.BadRequestException.class, exception.getExceptionClass());
+        Assertions.assertEquals(
+                "Deadline cannot be earlier than current moment",
+                exception.getErrors().get("Bad request")
+        );
+        verifyNoInteractions(postRepository, fileRepository, taskAnswerGeneralService);
+    }
+
+    @Test
+    void createPost_taskWithNullDeadline_savesPost() {
+        UUID courseId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        User teacher = createUser(userId);
+        Course course = createCourseWithUserRole(teacher, UserCourseRole.TEACHER);
+        PostCreateModel postCreateModel = new PostCreateModel(
+                "текст",
+                List.of(),
+                PostType.TASK,
+                100,
+                null
+        );
+
+        when(courseRepository.findById(courseId)).thenReturn(Optional.of(course));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(teacher));
+        when(postRepository.save(any(Post.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        postService.createPost(courseId, userId, postCreateModel);
+
+        ArgumentCaptor<Post> postCaptor = ArgumentCaptor.forClass(Post.class);
+        verify(postRepository, times(2)).save(postCaptor.capture());
+        Post savedPost = postCaptor.getAllValues().getLast();
+        verify(taskAnswerGeneralService).createTaskAnswerForEveryCourseMember(course, savedPost);
+        Assertions.assertNull(savedPost.getDeadline());
+    }
 }
