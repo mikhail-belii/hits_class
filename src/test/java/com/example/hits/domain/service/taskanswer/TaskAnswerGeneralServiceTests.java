@@ -112,11 +112,41 @@ public class TaskAnswerGeneralServiceTests {
 
         when(postRepository.findAllByCourseAndPostType(course, PostType.TASK))
                 .thenReturn(List.of(firstTaskPost, secondTaskPost));
+        when(taskAnswerRepository.findByUserIdAndPostId(user.getId(), firstTaskPost.getId()))
+                .thenReturn(Optional.empty());
+        when(taskAnswerRepository.findByUserIdAndPostId(user.getId(), secondTaskPost.getId()))
+                .thenReturn(Optional.empty());
 
         taskAnswerGeneralService.createTaskAnswersForNewCourseUser(user, course);
 
         verify(postRepository).findAllByCourseAndPostType(course, PostType.TASK);
+        verify(taskAnswerRepository).findByUserIdAndPostId(user.getId(), firstTaskPost.getId());
+        verify(taskAnswerRepository).findByUserIdAndPostId(user.getId(), secondTaskPost.getId());
         verify(taskAnswerRepository).save(argThat(taskAnswer ->
+                firstTaskPost.equals(taskAnswer.getPost()) && user.equals(taskAnswer.getUser())));
+        verify(taskAnswerRepository).save(argThat(taskAnswer ->
+                secondTaskPost.equals(taskAnswer.getPost()) && user.equals(taskAnswer.getUser())));
+    }
+
+    @Test
+    void createTaskAnswersForNewCourseUser_whenTaskAnswerAlreadyExists_skipsExistingTaskPost() {
+        User user = new User().setId(UUID.randomUUID());
+        Course course = new Course().setId(UUID.randomUUID());
+        Post firstTaskPost = new Post().setId(UUID.randomUUID()).setCourse(course).setPostType(PostType.TASK);
+        Post secondTaskPost = new Post().setId(UUID.randomUUID()).setCourse(course).setPostType(PostType.TASK);
+
+        when(postRepository.findAllByCourseAndPostType(course, PostType.TASK))
+                .thenReturn(List.of(firstTaskPost, secondTaskPost));
+        when(taskAnswerRepository.findByUserIdAndPostId(user.getId(), firstTaskPost.getId()))
+                .thenReturn(Optional.of(new TaskAnswer().setId(UUID.randomUUID()).setUser(user).setPost(firstTaskPost)));
+        when(taskAnswerRepository.findByUserIdAndPostId(user.getId(), secondTaskPost.getId()))
+                .thenReturn(Optional.empty());
+
+        taskAnswerGeneralService.createTaskAnswersForNewCourseUser(user, course);
+
+        verify(taskAnswerRepository).findByUserIdAndPostId(user.getId(), firstTaskPost.getId());
+        verify(taskAnswerRepository).findByUserIdAndPostId(user.getId(), secondTaskPost.getId());
+        verify(taskAnswerRepository, never()).save(argThat(taskAnswer ->
                 firstTaskPost.equals(taskAnswer.getPost()) && user.equals(taskAnswer.getUser())));
         verify(taskAnswerRepository).save(argThat(taskAnswer ->
                 secondTaskPost.equals(taskAnswer.getPost()) && user.equals(taskAnswer.getUser())));
@@ -133,6 +163,7 @@ public class TaskAnswerGeneralServiceTests {
         taskAnswerGeneralService.createTaskAnswersForNewCourseUser(user, course);
 
         verify(postRepository).findAllByCourseAndPostType(course, PostType.TASK);
+        verify(taskAnswerRepository, never()).findByUserIdAndPostId(any(UUID.class), any(UUID.class));
         verify(taskAnswerRepository, never()).save(any(TaskAnswer.class));
     }
 

@@ -99,7 +99,9 @@ public class TaskAnswerGeneralService {
         List<Post> coursePosts = postRepository.findAllByCourseAndPostType(course, PostType.TASK);
 
         for (Post post : coursePosts) {
-            createTaskAnswerForUser(post, user);
+            if (taskAnswerRepository.findByUserIdAndPostId(user.getId(), post.getId()).isEmpty()) {
+                createTaskAnswerForUser(post, user);
+            }
         }
     }
 
