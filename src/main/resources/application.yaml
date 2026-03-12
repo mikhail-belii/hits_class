@@ -38,4 +38,4 @@ jwt:
     access-minutes: 50
     refresh-days: 30
 
-file-storage-root: files/uploads
+file-storage-root: ${FILE_STORAGE_ROOT:files/uploads}

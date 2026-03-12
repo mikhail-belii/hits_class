@@ -12,6 +12,8 @@ WORKDIR /app
 
 COPY --from=builder /build/target/*.jar app.jar
 
+RUN mkdir -p /data/uploads
+
 EXPOSE 8079
 
 ENTRYPOINT ["java","-jar","/app/app.jar"]
