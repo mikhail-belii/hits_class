@@ -46,7 +46,7 @@ public class CourseController {
     ) {
         courseService.archiveCourse(requestingUserId, isArchived, courseId);
     }
-
+ 
     @GetMapping(value = "/{courseId}/users")
     @Operation(summary = "Get course users")
     public List<UserCourseModel> getCourseUsers(
