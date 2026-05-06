@@ -1,7 +1,7 @@
 package com.example.hits.application.util;
 
 import com.example.hits.application.handler.ExceptionWrapper;
-import com.example.hits.domain.entity.user.User;
+import com.example.hits.infrastructure.persistence.entity.UserEntity;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import jakarta.security.auth.message.AuthException;
@@ -29,22 +29,22 @@ public class JwtUtil {
     @Value("${jwt.lifetime.refresh-days}")
     private long refreshLifetimeDays;
 
-    public String generateAccessToken(User user) {
+    public String generateAccessToken(UserEntity userEntity) {
         return Jwts.builder()
                 .issuedAt(Date.from(Instant.now()))
                 .expiration(Date.from(getAccessTokenExpirationDate()))
                 .signWith(jwtAccessSecret)
-                .claim("user_id", user.getId().toString())
+                .claim("user_id", userEntity.getId().toString())
                 .claim("token_id", UUID.randomUUID().toString())
                 .compact();
     }
 
-    public String generateRefreshToken(User user) {
+    public String generateRefreshToken(UserEntity userEntity) {
         return Jwts.builder()
                 .issuedAt(Date.from(Instant.now()))
                 .expiration(Date.from(getRefreshTokenExpirationDate()))
                 .signWith(jwtRefreshSecret)
-                .claim("user_id", user.getId().toString())
+                .claim("user_id", userEntity.getId().toString())
                 .compact();
     }
 

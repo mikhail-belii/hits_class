@@ -1,11 +1,11 @@
 package com.example.hits.application.util;
 
-import com.example.hits.domain.entity.course.Course;
-import com.example.hits.domain.entity.taskanswer.TaskAnswer;
-import com.example.hits.domain.entity.taskanswercomment.TaskAnswerComment;
-import com.example.hits.domain.entity.user.User;
+import com.example.hits.infrastructure.persistence.entity.CourseEntity;
+import com.example.hits.infrastructure.persistence.entity.TaskAnswerCommentEntity;
+import com.example.hits.infrastructure.persistence.entity.UserEntity;
 import com.example.hits.domain.entity.user.UserCourseRole;
-import com.example.hits.domain.entity.usercourse.UserCourse;
+import com.example.hits.infrastructure.persistence.entity.TaskAnswerEntity;
+import com.example.hits.infrastructure.persistence.entity.UserCourseEntity;
 import lombok.experimental.UtilityClass;
 
 import java.util.Objects;
@@ -14,19 +14,19 @@ import java.util.Optional;
 @UtilityClass
 public class TaskAnswerCommentUtility {
 
-    public boolean isCommentAvailableForEditing(TaskAnswerComment taskAnswerComment, User user) {
-        return Objects.equals(user, taskAnswerComment.getAuthor());
+    public boolean isCommentAvailableForEditing(TaskAnswerCommentEntity taskAnswerCommentEntity, UserEntity userEntity) {
+        return Objects.equals(userEntity, taskAnswerCommentEntity.getAuthor());
     }
 
-    public boolean isTaskAnswerCommentsAvailableForUser(TaskAnswer taskAnswer, User user) {
-        Course course = taskAnswer.getPost().getCourse();
-        Optional<UserCourse> userCourse = CourseUtility.getUserCourse(course, user);
+    public boolean isTaskAnswerCommentsAvailableForUser(TaskAnswerEntity taskAnswer, com.example.hits.infrastructure.persistence.entity.UserEntity userEntity) {
+        CourseEntity course = taskAnswer.getPostEntity().getCourseEntity();
+        Optional<UserCourseEntity> userCourse = CourseUtility.getUserCourse(course, userEntity);
 
         if (userCourse.isEmpty()) {
             return false;
         }
 
-        return Objects.equals(taskAnswer.getUser(), userCourse.get().getUser())
+        return Objects.equals(taskAnswer.getUserEntity(), userCourse.get().getUserEntity())
                 || UserCourseRole.isUserHigherThan(userCourse.get().getUserRole(), UserCourseRole.STUDENT);
     }
 

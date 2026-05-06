@@ -1,38 +1,38 @@
 package com.example.hits.application.util;
 
-import com.example.hits.domain.entity.course.Course;
-import com.example.hits.domain.entity.post.Post;
-import com.example.hits.domain.entity.user.User;
+import com.example.hits.infrastructure.persistence.entity.CourseEntity;
 import com.example.hits.domain.entity.user.UserCourseRole;
-import com.example.hits.domain.entity.usercourse.UserCourse;
+import com.example.hits.infrastructure.persistence.entity.PostEntity;
+import com.example.hits.infrastructure.persistence.entity.UserCourseEntity;
+import com.example.hits.infrastructure.persistence.entity.UserEntity;
 import lombok.experimental.UtilityClass;
 
 import java.util.Optional;
 
 @UtilityClass
 public class PostUtility {
-    public boolean isPostAvailableForReading(Course course, Post post, User user) {
-        return isUserInCourse(course, user) && post.getCourse().equals(course);
+    public boolean isPostAvailableForReading(CourseEntity course, PostEntity post, UserEntity user) {
+        return isUserInCourse(course, user) && post.getCourseEntity().equals(course);
     }
 
-    public boolean isAvailableForEditing(Course course, User user) {
+    public boolean isAvailableForEditing(CourseEntity course, UserEntity user) {
         return getUserCourse(course, user)
                 .map(PostUtility::isUserTeacher)
                 .orElse(false);
     }
 
-    public boolean isUserInCourse(Course course, User user) {
+    public boolean isUserInCourse(CourseEntity course, UserEntity user) {
         return course.getCourseUsers().stream()
-                .anyMatch(uc -> uc.getUser().equals(user));
+                .anyMatch(uc -> uc.getUserEntity().equals(user));
     }
 
-    private Optional<UserCourse> getUserCourse(Course course, User user) {
+    public Optional<UserCourseEntity> getUserCourse(CourseEntity course, UserEntity user) {
         return course.getCourseUsers().stream()
-                .filter(uc -> uc.getUser().equals(user))
+                .filter(uc -> uc.getUserEntity().equals(user))
                 .findFirst();
     }
 
-    private boolean isUserTeacher(UserCourse userCourse) {
+    private boolean isUserTeacher(UserCourseEntity userCourse) {
         return userCourse.getUserRole() == UserCourseRole.TEACHER ||
                 userCourse.getUserRole() == UserCourseRole.HEAD_TEACHER;
     }

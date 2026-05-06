@@ -1,7 +1,7 @@
 package com.example.hits.application.handler;
 
-import com.example.hits.application.model.common.Pair;
-import com.example.hits.application.model.common.ResponseModel;
+import com.example.hits.presentation.dto.common.Pair;
+import com.example.hits.presentation.dto.common.ResponseModel;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.security.auth.message.AuthException;
 import jakarta.validation.ConstraintViolationException;

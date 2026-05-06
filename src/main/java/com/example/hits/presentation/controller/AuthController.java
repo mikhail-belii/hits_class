@@ -1,0 +1,96 @@
+package com.example.hits.presentation.controller;
+
+import com.example.hits.application.service.auth.AuthService;
+import com.example.hits.presentation.request.auth.RefreshTokenRequestModel;
+import com.example.hits.presentation.dto.auth.TokenResponseModel;
+import com.example.hits.presentation.dto.common.ResponseModel;
+import com.example.hits.presentation.request.user.UserLoginModel;
+import com.example.hits.presentation.request.user.UserRegisterModel;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
+
+@RestController
+@RequestMapping("api/v1/auth")
+@AllArgsConstructor
+public class AuthController {
+    private final AuthService authService;
+
+    @PostMapping("/register")
+    @Operation(summary = "Register")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "User was successfully registered",
+                    content = {@Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = TokenResponseModel.class)
+                    )}),
+            @ApiResponse(responseCode = "400",
+                    description = "Bad request",
+                    content = {@Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ResponseModel.class)
+                    )})
+    })
+    public TokenResponseModel register(@Valid @RequestBody UserRegisterModel userRegisterModel) {
+        return authService.register(userRegisterModel);
+    }
+
+    @PostMapping("/login")
+    @Operation(summary = "Login")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "User successfully logged in",
+                    content = {@Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = TokenResponseModel.class)
+                    )}),
+            @ApiResponse(responseCode = "400",
+                    description = "Bad request",
+                    content = {@Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ResponseModel.class)
+                    )})
+    })
+    public TokenResponseModel login(@Valid @RequestBody UserLoginModel userLoginModel) {
+        return  authService.login(userLoginModel);
+    }
+
+    @PostMapping("/refresh-tokens")
+    @Operation(summary = "Refresh tokens")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Tokens ware refreshed",
+                    content = {@Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = TokenResponseModel.class)
+                    )}),
+            @ApiResponse(responseCode = "400",
+                    description = "Bad request",
+                    content = {@Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ResponseModel.class)
+                    )})
+    })
+    public TokenResponseModel refreshTokens(@Valid @RequestBody RefreshTokenRequestModel model) {
+        return authService.refreshTokens(model.getRefreshToken());
+    }
+
+    @PostMapping("/logout")
+    @Operation(summary = "Logout")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Logout succeed")
+    })
+    public void logout(@RequestAttribute("userId") String userId,
+                       @RequestAttribute("accessToken") String accessToken) {
+        authService.logout(UUID.fromString(userId), accessToken);
+    }
+}
