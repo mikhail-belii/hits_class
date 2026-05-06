@@ -1,39 +1,29 @@
 package com.example.hits.domain.entity.file;
 
-import com.example.hits.domain.entity.post.Post;
-import com.example.hits.domain.entity.taskanswer.TaskAnswer;
-import com.example.hits.domain.entity.user.User;
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
+import com.example.hits.infrastructure.persistence.entity.PostEntity;
+import com.example.hits.infrastructure.persistence.entity.TaskAnswerEntity;
+import com.example.hits.infrastructure.persistence.entity.UserEntity;
 import lombok.Data;
 import lombok.experimental.Accessors;
-import org.hibernate.validator.constraints.Length;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Entity
-@Table(name = "file")
 @Data
 @Accessors(chain = true)
 public class File {
-    @Id
+
     private UUID id;
-    @NotNull
-    @Length(max = 256)
+
     private String path;
-    @NotNull
-    @Length(max = 256)
+
     private String originalName;
-    @ManyToOne
-    @JoinColumn(name = "uploader_id")
-    private User uploader;
-    @ManyToOne
-    @JoinColumn(name = "post_id")
-    private Post post;
-    @ManyToOne
-    @JoinColumn(name = "task_answer_id")
-    private TaskAnswer taskAnswer;
-    @NotNull
+
+    private UserEntity uploader;
+
+    private PostEntity postEntity;
+
+    private TaskAnswerEntity taskAnswerEntity;
+
     private LocalDateTime createdAt;
 }

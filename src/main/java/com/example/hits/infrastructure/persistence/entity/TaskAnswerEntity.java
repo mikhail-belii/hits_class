@@ -1,0 +1,45 @@
+package com.example.hits.infrastructure.persistence.entity;
+
+import com.example.hits.domain.entity.taskanswer.TaskAnswerStatus;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
+import lombok.experimental.Accessors;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+@Entity
+@Table(name = "task_answer")
+@Data
+@Accessors(chain = true)
+public class TaskAnswerEntity {
+
+    @Id
+    private UUID id = UUID.randomUUID();
+
+    private Integer score = 0;
+
+    private LocalDateTime submittedAt = null;
+
+    @Enumerated(EnumType.STRING)
+    @NotNull
+    private TaskAnswerStatus status = TaskAnswerStatus.NOT_COMPLETED;
+
+    @OneToMany(mappedBy = "taskAnswerEntity")
+    private List<FileEntity> fileEntities = new ArrayList<>();
+
+    @OneToMany(mappedBy = "taskAnswerEntity")
+    private List<TaskAnswerCommentEntity> comments = new ArrayList<>();
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private UserEntity userEntity;
+
+    @ManyToOne
+    @JoinColumn(name = "post_id")
+    private PostEntity postEntity;
+
+}

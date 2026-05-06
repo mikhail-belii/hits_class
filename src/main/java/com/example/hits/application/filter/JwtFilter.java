@@ -1,6 +1,6 @@
 package com.example.hits.application.filter;
 
-import com.example.hits.application.service.LoggedOutTokenService;
+import com.example.hits.application.service.auth.LoggedOutTokenService;
 import com.example.hits.application.util.JwtUtil;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;

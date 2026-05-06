@@ -1,48 +1,30 @@
 package com.example.hits.domain.entity.taskanswer;
 
-import com.example.hits.domain.entity.file.File;
-import com.example.hits.domain.entity.post.Post;
-import com.example.hits.domain.entity.taskanswercomment.TaskAnswerComment;
-import com.example.hits.domain.entity.user.User;
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-@Entity
-@Table(name = "task_answer")
 @Data
 @Accessors(chain = true)
 public class TaskAnswer {
 
-    @Id
-    private UUID id = UUID.randomUUID();
+    private UUID id;
 
-    private Integer score = 0;
+    private Integer score;
 
-    private LocalDateTime submittedAt = null;
+    private LocalDateTime submittedAt;
 
-    @Enumerated(EnumType.STRING)
-    @NotNull
-    private TaskAnswerStatus status = TaskAnswerStatus.NOT_COMPLETED;
+    private TaskAnswerStatus status;
 
-    @OneToMany(mappedBy = "taskAnswer")
-    private List<File> files = new ArrayList<>();
+    private List<UUID> fileEntityIds;
 
-    @OneToMany(mappedBy = "taskAnswer")
-    private List<TaskAnswerComment> comments = new ArrayList<>();
+    private List<UUID> commentIds;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    private UUID userId;
 
-    @ManyToOne
-    @JoinColumn(name = "post_id")
-    private Post post;
+    private UUID postId;
 
 }
