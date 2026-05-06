@@ -6,7 +6,7 @@ import com.example.hits.infrastructure.persistence.entity.UserEntity;
 import com.example.hits.presentation.dto.taskanswer.TaskAnswerFullModel;
 import com.example.hits.presentation.dto.taskanswer.TaskAnswerModel;
 import com.example.hits.infrastructure.persistence.repository.PostRepository;
-import com.example.hits.infrastructure.persistence.repository.TaskAnswerRepository;
+import com.example.hits.infrastructure.persistence.repository.JpaTaskAnswerRepository;
 import com.example.hits.infrastructure.persistence.repository.UserRepository;
 import com.example.hits.application.util.ExceptionUtility;
 import com.example.hits.application.util.PostUtility;
@@ -26,7 +26,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class TaskAnswerGeneralService {
 
-    private final TaskAnswerRepository taskAnswerRepository;
+    private final JpaTaskAnswerRepository jpaTaskAnswerRepository;
     private final UserRepository userRepository;
     private final PostRepository postRepository;
 
@@ -50,7 +50,7 @@ public class TaskAnswerGeneralService {
             taskAnswers.add(createTaskAnswerForDefiniteUser(postEntity, userEntity));
         }
 
-        taskAnswerRepository.saveAll(taskAnswers);
+        jpaTaskAnswerRepository.saveAll(taskAnswers);
     }
 
     public List<TaskAnswerModel> getAllUserTaskAnswers(UUID userId) {
@@ -79,7 +79,7 @@ public class TaskAnswerGeneralService {
             throw ExceptionUtility.badRequestException("Post is not a task type");
         }
 
-        return taskAnswerRepository.findAllByPostEntityId(postId).stream()
+        return jpaTaskAnswerRepository.findAllByPostEntityId(postId).stream()
                 .filter(taskAnswerModel -> taskAnswerModel.getSubmittedAt() != null)
                 .map(TaskAnswerMapper::toFullModel)
                 .sorted(Comparator
@@ -89,7 +89,7 @@ public class TaskAnswerGeneralService {
     }
 
     public TaskAnswerModel getUserPostTaskAnswer(UUID postId, UUID userId) {
-        var taskAnswer = taskAnswerRepository.findByUserEntityIdAndPostEntityId(userId, postId)
+        var taskAnswer = jpaTaskAnswerRepository.findByUserEntityIdAndPostEntityId(userId, postId)
                 .orElseThrow(ExceptionUtility::taskAnswerNotFoundException);
 
         return TaskAnswerMapper.toModel(taskAnswer);
@@ -99,7 +99,7 @@ public class TaskAnswerGeneralService {
         List<PostEntity> coursePostEntities = postRepository.findAllByCourseEntityAndPostType(courseEntity, PostType.TASK);
 
         for (PostEntity postEntity : coursePostEntities) {
-            if (taskAnswerRepository.findByUserEntityIdAndPostEntityId(userEntity.getId(), postEntity.getId()).isEmpty()) {
+            if (jpaTaskAnswerRepository.findByUserEntityIdAndPostEntityId(userEntity.getId(), postEntity.getId()).isEmpty()) {
                 createTaskAnswerForUser(postEntity, userEntity);
             }
         }
@@ -108,7 +108,7 @@ public class TaskAnswerGeneralService {
     public void createTaskAnswerForUser(PostEntity postEntity, UserEntity userEntity) {
         TaskAnswerEntity newUserTaskAnswerEntity = createTaskAnswerForDefiniteUser(postEntity, userEntity);
 
-        taskAnswerRepository.save(newUserTaskAnswerEntity);
+        jpaTaskAnswerRepository.save(newUserTaskAnswerEntity);
     }
 
     private List<TaskAnswerModel> formAllUserTaskAnswers(UserEntity userEntity) {
@@ -124,7 +124,7 @@ public class TaskAnswerGeneralService {
     }
 
     private List<TaskAnswerModel> getAllUserCourseTaskAnswer(UserEntity userEntity, CourseEntity courseEntity) {
-        return taskAnswerRepository.findAllByUserEntityIdAndPostEntityCourseEntityId(userEntity.getId(), courseEntity.getId()).stream()
+        return jpaTaskAnswerRepository.findAllByUserEntityIdAndPostEntityCourseEntityId(userEntity.getId(), courseEntity.getId()).stream()
                 .map(TaskAnswerMapper::toModel)
                 .toList();
     }

@@ -2,16 +2,14 @@ package com.example.hits.application.service.taskanswer;
 
 import com.example.hits.domain.aggregate.TaskEvaluationAggregate;
 import com.example.hits.infrastructure.persistence.entity.FileEntity;
-import com.example.hits.infrastructure.persistence.entity.PostEntity;
 import com.example.hits.infrastructure.persistence.entity.UserEntity;
-import com.example.hits.infrastructure.persistence.repository.TaskAnswerRepositoryImpl;
+import com.example.hits.infrastructure.persistence.repository.TaskAnswerRepository;
 import com.example.hits.presentation.dto.file.FileModel;
 import com.example.hits.presentation.request.taskanswer.TaskRateRequestModel;
 import com.example.hits.infrastructure.persistence.repository.FileRepository;
-import com.example.hits.infrastructure.persistence.repository.TaskAnswerRepository;
+import com.example.hits.infrastructure.persistence.repository.JpaTaskAnswerRepository;
 import com.example.hits.infrastructure.persistence.repository.UserRepository;
 import com.example.hits.application.util.ExceptionUtility;
-import com.example.hits.application.util.PostUtility;
 import com.example.hits.infrastructure.persistence.entity.TaskAnswerEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,17 +25,17 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TaskAnswerUploadService {
 
+    private final JpaTaskAnswerRepository jpaTaskAnswerRepository;
     private final TaskAnswerRepository taskAnswerRepository;
-    private final TaskAnswerRepositoryImpl taskAnswerRepositoryImpl;
     private final UserRepository userRepository;
     private final FileRepository fileRepository;
 
     public void evaluateTask(UUID taskAnswerId, TaskRateRequestModel taskScore, UUID userId) {
-        TaskEvaluationAggregate taskEvaluationAggregate = taskAnswerRepositoryImpl.getTaskEvaluationAggregate(taskAnswerId, userId);
+        TaskEvaluationAggregate taskEvaluationAggregate = taskAnswerRepository.getTaskEvaluationAggregate(taskAnswerId, userId);
 
         taskEvaluationAggregate.evaluateTask(taskScore.getRate());
 
-        taskAnswerRepositoryImpl.saveTaskEvaluationAggregate(taskEvaluationAggregate);
+        taskAnswerRepository.saveTaskEvaluationAggregate(taskEvaluationAggregate);
     }
 
     public void appendFiles(UUID taskAnswerId, List<FileModel> fileModels, UUID userId) {
@@ -56,7 +54,7 @@ public class TaskAnswerUploadService {
                         .map(FileModel::getId)
                         .toList()));
 
-        taskAnswerRepository.save(taskAnswerEntity);
+        jpaTaskAnswerRepository.save(taskAnswerEntity);
     }
 
     public void unpinFiles(UUID taskAnswerId, UUID fileId, UUID userId) {
@@ -84,7 +82,7 @@ public class TaskAnswerUploadService {
             throw ExceptionUtility.badRequestException("File not found in attachments");
         }
 
-        taskAnswerRepository.save(taskAnswerEntity);
+        jpaTaskAnswerRepository.save(taskAnswerEntity);
     }
 
     public void submitTask(UUID taskAnswerId, UUID userId) {
@@ -97,7 +95,7 @@ public class TaskAnswerUploadService {
 
         taskAnswerEntity.setSubmittedAt(LocalDateTime.now());
 
-        taskAnswerRepository.save(taskAnswerEntity);
+        jpaTaskAnswerRepository.save(taskAnswerEntity);
     }
 
     public void unsubmitTask(UUID taskAnswerId, UUID userId) {
@@ -114,11 +112,11 @@ public class TaskAnswerUploadService {
 
         taskAnswerEntity.setSubmittedAt(null);
 
-        taskAnswerRepository.save(taskAnswerEntity);
+        jpaTaskAnswerRepository.save(taskAnswerEntity);
     }
 
     private TaskAnswerEntity getTaskAnswer(UUID taskAnswerId) {
-        return taskAnswerRepository.findById(taskAnswerId)
+        return jpaTaskAnswerRepository.findById(taskAnswerId)
                 .orElseThrow(ExceptionUtility::taskAnswerNotFoundException);
     }
 

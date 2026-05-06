@@ -34,7 +34,7 @@ public class CommentService {
 
     private final PostRepository postRepository;
 
-    private final TaskAnswerRepository taskAnswerRepository;
+    private final JpaTaskAnswerRepository jpaTaskAnswerRepository;
 
     public List<PostCommentModel> getPostComments(UUID requestingUserId, UUID postId) {
         com.example.hits.infrastructure.persistence.entity.UserEntity requestingUserEntity = userRepository.findById(requestingUserId)
@@ -88,7 +88,7 @@ public class CommentService {
     public List<TaskAnswerCommentModel> getTaskAnswerComments(UUID requestingUserId, UUID taskAnswerId) {
         com.example.hits.infrastructure.persistence.entity.UserEntity requestingUserEntity = userRepository.findById(requestingUserId)
                 .orElseThrow(ExceptionUtility::userNotFoundException);
-        com.example.hits.infrastructure.persistence.entity.TaskAnswerEntity taskAnswerEntity = taskAnswerRepository.findById(taskAnswerId)
+        com.example.hits.infrastructure.persistence.entity.TaskAnswerEntity taskAnswerEntity = jpaTaskAnswerRepository.findById(taskAnswerId)
                 .orElseThrow(ExceptionUtility::taskAnswerNotFoundException);
         if (!TaskAnswerCommentUtility.isTaskAnswerCommentsAvailableForUser(taskAnswerEntity, requestingUserEntity)) {
             throw ExceptionUtility.forbiddenRightsException();
@@ -106,7 +106,7 @@ public class CommentService {
     ) {
         UserEntity requestingUserEntity = userRepository.findById(requestingUserId)
                 .orElseThrow(ExceptionUtility::userNotFoundException);
-        TaskAnswerEntity taskAnswerEntity = taskAnswerRepository.findById(taskAnswerId)
+        TaskAnswerEntity taskAnswerEntity = jpaTaskAnswerRepository.findById(taskAnswerId)
                 .orElseThrow(ExceptionUtility::taskAnswerNotFoundException);
         if (!TaskAnswerCommentUtility.isTaskAnswerCommentsAvailableForUser(taskAnswerEntity, requestingUserEntity)) {
             throw ExceptionUtility.forbiddenRightsException();

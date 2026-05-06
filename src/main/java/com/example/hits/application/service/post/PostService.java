@@ -40,7 +40,7 @@ public class PostService {
     private final UserRepository userRepository;
     private final FileRepository fileRepository;
     private final PostCommentRepository postCommentRepository;
-    private final TaskAnswerRepository taskAnswerRepository;
+    private final JpaTaskAnswerRepository jpaTaskAnswerRepository;
     private final TaskAnswerCommentRepository taskAnswerCommentRepository;
 
     @Transactional
@@ -108,7 +108,7 @@ public class PostService {
             throw ExceptionUtility.badRequestException("You can't read this post");
         }
 
-        var taskAnswer = taskAnswerRepository.findByUserEntityIdAndPostEntityId(userId, postId)
+        var taskAnswer = jpaTaskAnswerRepository.findByUserEntityIdAndPostEntityId(userId, postId)
                 .orElse(null);
 
         return PostMapper.toModel(postEntity, taskAnswer);
@@ -172,7 +172,7 @@ public class PostService {
     }
 
     private void deleteTaskAnswers(UUID postId) {
-        var taskAnswers = taskAnswerRepository.findAllByPostEntityId(postId);
+        var taskAnswers = jpaTaskAnswerRepository.findAllByPostEntityId(postId);
         if (taskAnswers.isEmpty()) {
             return;
         }
@@ -199,7 +199,7 @@ public class PostService {
             taskAnswerCommentRepository.deleteAll(comments);
         }
 
-        taskAnswerRepository.deleteAll(taskAnswers);
+        jpaTaskAnswerRepository.deleteAll(taskAnswers);
     }
 
     private PostEntity createPostFromModel(PostCreateModel postCreateModel, UserEntity author, CourseEntity courseEntity) {

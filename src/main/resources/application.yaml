@@ -1,19 +1,4 @@
-logging:
-  level:
-    # Покажет все бины и их зависимости
-    org.springframework.beans.factory.support.DefaultListableBeanFactory: DEBUG
-
-    # Покажет процесс создания бинов
-    org.springframework.beans.factory: DEBUG
-
-    # Покажет циклические зависимости
-    org.springframework.context.annotation: DEBUG
-
-    # Для Spring Boot
-    org.springframework.boot: DEBUG
 spring:
-  main:
-    allow-circular-references: true
   config:
     import: optional:file:.env[.properties]
   application:

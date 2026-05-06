@@ -19,7 +19,7 @@ public class TaskEvaluationAggregate {
     private final Post post;
 
     public void evaluateTask(int score) {
-        if (userCourse.getUserRole() != UserCourseRole.TEACHER) {
+        if (userCourse.getUserRole() == UserCourseRole.STUDENT) {
             throw ExceptionUtility.forbiddenRightsException();
         }
 
