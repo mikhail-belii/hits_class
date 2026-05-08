@@ -51,6 +51,9 @@
         <addColumn tableName="post">
             <column name="evaluation_function" type="VARCHAR(16)"/>
         </addColumn>
+        <addColumn tableName="post">
+            <column name="task_mark_evaluation_type" type="VARCHAR(16)"/>
+        </addColumn>
     </changeSet>
 
 </databaseChangeLog>

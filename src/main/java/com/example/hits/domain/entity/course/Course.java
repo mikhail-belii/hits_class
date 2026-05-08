@@ -18,6 +18,8 @@ public class Course {
 
     private String joinCode;
 
+    private CourseMarkEvaluationType courseMarkEvaluationType;
+
     private String description;
 
     private List<UserCourseEntity> courseUsers;

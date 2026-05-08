@@ -1,5 +1,6 @@
 package com.example.hits.infrastructure.persistence.entity;
 
+import com.example.hits.domain.entity.course.CourseMarkEvaluationType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -27,6 +28,9 @@ public class CourseEntity {
     @Length(min = 8, max = 8)
     @Column(unique = true)
     private String joinCode;
+
+    @Enumerated(EnumType.STRING)
+    private CourseMarkEvaluationType courseMarkEvaluationType;
 
     @NotNull
     @Length(max = 512)

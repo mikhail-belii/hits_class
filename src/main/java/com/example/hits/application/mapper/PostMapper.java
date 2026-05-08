@@ -14,8 +14,6 @@ import lombok.experimental.UtilityClass;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.util.stream.Collectors.toList;
-
 @UtilityClass
 @ExtensionMethod({SimpleUserMapper.class, PostCommentMapper.class, TaskAnswerMapper.class})
 public class PostMapper {
@@ -47,6 +45,7 @@ public class PostMapper {
                 .setCreatedAt(postEntity.getCreatedAt())
                 .setDeadline(postEntity.getDeadline())
                 .setMaxScore(postEntity.getMaxScore())
+                .setTaskMarkEvaluationType(postEntity.getTaskMarkEvaluationType())
                 .setComments(postEntity.getComments() == null ?
                         List.of() :
                         postEntity.getComments().stream()
@@ -66,6 +65,10 @@ public class PostMapper {
                 .setCreatedAt(postEntity.getCreatedAt())
                 .setDeadline(postEntity.getDeadline())
                 .setMaxScore(postEntity.getMaxScore())
+                .setMinScore(postEntity.getMinScore())
+                .setMaxScore(postEntity.getMultiplier())
+                .setEvaluationFunction(postEntity.getEvaluationFunction())
+                .setTaskMarkEvaluationType(postEntity.getTaskMarkEvaluationType())
                 .setComments(postEntity.getComments() == null ?
                         List.of() :
                         postEntity.getComments().stream()

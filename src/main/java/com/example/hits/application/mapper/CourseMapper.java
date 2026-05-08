@@ -16,6 +16,7 @@ public class CourseMapper {
                 .setDescription(courseEntity.getDescription())
                 .setCreatedAt(courseEntity.getCreatedAt())
                 .setJoinCode(courseEntity.getJoinCode())
+                .setCourseMarkEvaluationType(courseEntity.getCourseMarkEvaluationType())
                 .setIsArchived(courseEntity.getIsArchived())
                 .setCurrentUserCourseRole(userCourseRole);
     }

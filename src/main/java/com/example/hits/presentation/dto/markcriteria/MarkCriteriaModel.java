@@ -1,10 +1,11 @@
-package com.example.hits.presentation.dto.post;
+package com.example.hits.presentation.dto.markcriteria;
 
-import com.example.hits.domain.entity.post.TaskMarkEvaluationType;
+import com.example.hits.domain.entity.markCriteria.EvaluationFunction;
+import com.example.hits.domain.entity.post.PostType;
 import com.example.hits.presentation.dto.comment.postcomment.PostCommentModel;
 import com.example.hits.presentation.dto.file.FileModel;
+import com.example.hits.presentation.dto.taskanswer.TaskAnswerModel;
 import com.example.hits.presentation.dto.user.UserModel;
-import com.example.hits.domain.entity.post.PostType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,25 +19,21 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Accessors(chain=true)
-public class PostShortModel {
+public class MarkCriteriaModel {
 
     private UUID id;
 
-    private String text;
+    private EvaluationFunction evaluationFunction;
 
-    private UserModel author;
+    private String name;
 
-    private List<FileModel> files;
+    private Float multiplier;
 
-    private PostType postType;
-
-    private TaskMarkEvaluationType taskMarkEvaluationType;
-
-    private LocalDateTime createdAt;
-
-    private LocalDateTime deadline;
+    private Float minScore;
 
     private Float maxScore;
 
-    private List<PostCommentModel> comments;
+    private Float passThreshold;
+
+    private UUID postId;
 }
