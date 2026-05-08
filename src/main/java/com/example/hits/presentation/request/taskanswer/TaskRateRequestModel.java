@@ -5,5 +5,5 @@ import lombok.Data;
 @Data
 public class TaskRateRequestModel {
 
-    private int rate;
+    private Float rate;
 }
