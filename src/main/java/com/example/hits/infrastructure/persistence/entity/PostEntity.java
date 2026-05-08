@@ -1,5 +1,6 @@
 package com.example.hits.infrastructure.persistence.entity;
 
+import com.example.hits.domain.entity.markCriteria.EvaluationFunction;
 import com.example.hits.domain.entity.post.PostType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -49,6 +50,13 @@ public class PostEntity {
 
     private LocalDateTime deadline;
 
-    private Integer maxScore;
+    private Float multiplier;
+
+    @Enumerated(EnumType.STRING)
+    private EvaluationFunction evaluationFunction;
+
+    private Float minScore;
+
+    private Float maxScore;
 
 }

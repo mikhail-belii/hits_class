@@ -20,7 +20,7 @@ public class TaskAnswerEntity {
     @Id
     private UUID id = UUID.randomUUID();
 
-    private Integer score = 0;
+    private Float score = 0f;
 
     private LocalDateTime submittedAt = null;
 

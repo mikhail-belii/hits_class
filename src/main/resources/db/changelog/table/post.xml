@@ -37,4 +37,20 @@
                                  referencedTableName="course"/>
     </changeSet>
 
+    <changeSet id="AddNewPostFieldsForMarkEvaluation" author="KBelovodchenko">
+        <dropColumn tableName="post" columnName="max_score"/>
+        <addColumn tableName="post">
+            <column name="max_score" type="real"/>
+        </addColumn>
+        <addColumn tableName="post">
+            <column name="min_score" type="real"/>
+        </addColumn>
+        <addColumn tableName="post">
+            <column name="multiplier" type="real"/>
+        </addColumn>
+        <addColumn tableName="post">
+            <column name="evaluation_function" type="VARCHAR(16)"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

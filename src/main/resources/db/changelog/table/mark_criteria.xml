@@ -1,0 +1,27 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="CreateMarkCriteriaTable" author="KBelovodchenko">
+        <createTable tableName="mark_criteria">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_mark_criteria"/>
+            </column>
+            <column name="evaluation_function" type="VARCHAR(16)"/>
+            <column name="name" type="VARCHAR(2048)"/>
+            <column name="multiplier" type="real"/>
+            <column name="min_score" type="real"/>
+            <column name="max_score" type="real"/>
+            <column name="pass_threshold" type="real"/>
+            <column name="post_id" type="UUID"/>
+        </createTable>
+
+        <addForeignKeyConstraint baseColumnNames="post_id"
+                                 baseTableName="mark_criteria"
+                                 constraintName="FK_MARK_CRITERIA_ON_POST"
+                                 referencedColumnNames="id"
+                                 referencedTableName="post"/>
+    </changeSet>
+
+</databaseChangeLog>
