@@ -39,3 +39,8 @@ jwt:
     refresh-days: 30
 
 file-storage-root: ${FILE_STORAGE_ROOT:files/uploads}
+
+springdoc:
+  swagger-ui:
+    config-url: ../v3/api-docs/swagger-config
+    url: ../v3/api-docs
