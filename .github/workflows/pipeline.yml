@@ -9,7 +9,6 @@ env:
 jobs:
   build-and-push:
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-    needs: test-and-coverage
     runs-on: ubuntu-latest
     permissions:
       contents: read
