@@ -1,9 +1,8 @@
 package com.example.hits.domain.entity.post;
 
-import com.example.hits.infrastructure.persistence.entity.CourseEntity;
-import com.example.hits.infrastructure.persistence.entity.FileEntity;
-import com.example.hits.infrastructure.persistence.entity.PostCommentEntity;
-import com.example.hits.infrastructure.persistence.entity.UserEntity;
+import com.example.hits.domain.entity.markCriteria.EvaluationFunction;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -35,6 +34,12 @@ public class Post {
 
     private LocalDateTime deadline;
 
-    private Integer maxScore;
+    private Float multiplier;
+
+    private EvaluationFunction evaluationFunction;
+
+    private Float minScore;
+
+    private Float maxScore;
 
 }

@@ -1,10 +1,14 @@
 package com.example.hits.presentation.dto.post;
 
+import com.example.hits.domain.entity.markCriteria.EvaluationFunction;
+import com.example.hits.domain.entity.post.TaskMarkEvaluationType;
 import com.example.hits.presentation.dto.comment.postcomment.PostCommentModel;
 import com.example.hits.presentation.dto.file.FileModel;
 import com.example.hits.presentation.dto.taskanswer.TaskAnswerModel;
 import com.example.hits.presentation.dto.user.UserModel;
 import com.example.hits.domain.entity.post.PostType;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -30,11 +34,19 @@ public class PostFullModel {
 
     private PostType postType;
 
+    private TaskMarkEvaluationType taskMarkEvaluationType;
+
     private LocalDateTime createdAt;
 
     private LocalDateTime deadline;
 
-    private Integer maxScore;
+    private Float multiplier;
+
+    private EvaluationFunction evaluationFunction;
+
+    private Float minScore;
+
+    private Float maxScore;
 
     private List<PostCommentModel> comments;
 

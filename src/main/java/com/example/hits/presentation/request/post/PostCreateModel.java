@@ -20,7 +20,7 @@ public class PostCreateModel {
 
     private PostType postType;
 
-    private Integer maxScore;
+    private Float maxScore;
 
     private LocalDateTime deadline;
 }

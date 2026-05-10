@@ -1,0 +1,29 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="CreateCriteriaScoreTable" author="KBelovodchenko">
+        <createTable tableName="criteria_score">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_mark_criteria"/>
+            </column>
+            <column name="score" type="real"/>
+            <column name="mark_criteria_id" type="UUID"/>
+            <column name="task_answer_id" type="UUID"/>
+        </createTable>
+
+        <addForeignKeyConstraint baseColumnNames="mark_criteria_id"
+                                 baseTableName="criteria_score"
+                                 constraintName="FK_CRITERIA_SCORE_ON_MARK_CRITERIA"
+                                 referencedColumnNames="id"
+                                 referencedTableName="mark_criteria"/>
+
+        <addForeignKeyConstraint baseColumnNames="task_answer_id"
+                                 baseTableName="criteria_score"
+                                 constraintName="FK_CRITERIA_SCORE_ON_TASK_ANSWER"
+                                 referencedColumnNames="id"
+                                 referencedTableName="task_answer"/>
+    </changeSet>
+
+</databaseChangeLog>

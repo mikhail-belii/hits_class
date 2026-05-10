@@ -35,4 +35,10 @@
                                  referencedTableName="user"/>
     </changeSet>
 
+    <changeSet id="AddScore" author="KBelovodchenko">
+        <addColumn tableName="user_course">
+            <column name="score" type="real"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

@@ -18,9 +18,9 @@ public class TaskAnswerFullModel {
 
     private UUID id = UUID.randomUUID();
 
-    private Integer score = null;
+    private Float score = null;
 
-    private Integer maxScore = 100;
+    private Float maxScore = 100f;
 
     private LocalDateTime submittedAt = null;
 

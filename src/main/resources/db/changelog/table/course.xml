@@ -26,4 +26,10 @@
         </createTable>
     </changeSet>
 
+    <changeSet id="AddMarkEvaluationType" author="KBelovodchenko">
+        <addColumn tableName="course">
+            <column name="course_mark_evaluation_type" type="VARCHAR(16)"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

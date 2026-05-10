@@ -19,5 +19,7 @@ public class UserCourse {
 
     private UserCourseRole userRole;
 
+    private Float score;
+
     private LocalDateTime createdAt;
 }

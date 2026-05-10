@@ -32,6 +32,8 @@ public class UserCourseEntity {
     @NotNull
     private UserCourseRole userRole;
 
+    private Float score;
+
     @NotNull
     private LocalDateTime createdAt;
 }

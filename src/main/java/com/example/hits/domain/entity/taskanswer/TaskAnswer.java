@@ -13,7 +13,7 @@ public class TaskAnswer {
 
     private UUID id;
 
-    private Integer score;
+    private Float score;
 
     private LocalDateTime submittedAt;
 

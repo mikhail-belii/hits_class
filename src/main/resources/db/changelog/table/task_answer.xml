@@ -30,4 +30,11 @@
                                  referencedTableName="post"/>
     </changeSet>
 
+    <changeSet id="ChangeScoreType" author="KBelovodchenko">
+        <dropColumn tableName="task_answer" columnName="score"/>
+        <addColumn tableName="task_answer">
+            <column name="score" type="real"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>
