@@ -32,6 +32,8 @@ public class CourseEntity {
     @Enumerated(EnumType.STRING)
     private CourseMarkEvaluationType courseMarkEvaluationType;
 
+    private Float passThreshold;
+
     @NotNull
     @Length(max = 512)
     private String description;

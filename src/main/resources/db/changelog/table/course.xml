@@ -30,6 +30,9 @@
         <addColumn tableName="course">
             <column name="course_mark_evaluation_type" type="VARCHAR(16)"/>
         </addColumn>
+        <addColumn tableName="course">
+            <column name="pass_threshold" type="real"/>
+        </addColumn>
     </changeSet>
 
 </databaseChangeLog>

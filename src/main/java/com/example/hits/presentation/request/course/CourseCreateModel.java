@@ -1,5 +1,7 @@
 package com.example.hits.presentation.request.course;
 
+import com.example.hits.domain.entity.course.CourseMarkEvaluationType;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -20,5 +22,11 @@ public class CourseCreateModel {
     @NotNull
     @Size(min=3, max=512)
     private String description;
+
+    @NotNull
+    private CourseMarkEvaluationType courseMarkEvaluationType;
+
+    @Min(0)
+    private Float passThreshold;
 
 }
