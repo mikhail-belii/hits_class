@@ -62,4 +62,6 @@ public class PostEntity {
 
     private Float maxScore;
 
+    private Float passThreshold;
+
 }

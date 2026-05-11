@@ -32,4 +32,10 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="AddPassThreshold" author="KBelovodchenko">
+        <addColumn tableName="course">
+            <column name="pass_threshold" type="real"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

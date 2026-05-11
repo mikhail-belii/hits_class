@@ -20,6 +20,8 @@ public class Course {
 
     private CourseMarkEvaluationType courseMarkEvaluationType;
 
+    private Float passThreshold;
+
     private String description;
 
     private List<UserCourseEntity> courseUsers;

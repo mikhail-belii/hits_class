@@ -1,18 +1,22 @@
 package com.example.hits.presentation.request.post;
 
+import com.example.hits.domain.entity.markCriteria.EvaluationFunction;
+import com.example.hits.domain.entity.post.TaskMarkEvaluationType;
 import com.example.hits.presentation.dto.file.FileModel;
 import com.example.hits.domain.entity.post.PostType;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
 @AllArgsConstructor
 @Accessors(chain=true)
-public class PostCreateModel {
+public class PostCreateModel implements TaskCreationFields {
 
     private String text;
 
@@ -20,7 +24,17 @@ public class PostCreateModel {
 
     private PostType postType;
 
+    private TaskMarkEvaluationType taskMarkEvaluationType;
+
     private Float maxScore;
+
+    private Float minScore;
+
+    private Float multiplier;
+
+    private Float passThreshold;
+
+    private EvaluationFunction evaluationFunction;
 
     private LocalDateTime deadline;
 }

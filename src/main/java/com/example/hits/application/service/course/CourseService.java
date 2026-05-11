@@ -23,6 +23,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import static com.example.hits.domain.entity.course.CourseMarkEvaluationType.PASS_FAIL;
+
 @Service
 @RequiredArgsConstructor
 public class CourseService {
@@ -37,6 +39,9 @@ public class CourseService {
     public CourseModel createCourse(UUID requestingUserId, CourseCreateModel courseCreateModel) {
         UserEntity requestingUserEntity = userRepository.findById(requestingUserId)
                 .orElseThrow(ExceptionUtility::userNotFoundException);
+
+        courseCreateModel.getCourseMarkEvaluationType().validateCourseCreatingByMarkEvaluationType(courseCreateModel);
+
         CourseEntity courseEntity = createCourseFromModel(courseCreateModel);
         UserCourseEntity userCourseEntity = createUserCourseOnCourseCreation(courseEntity, requestingUserEntity);
 
@@ -58,14 +63,18 @@ public class CourseService {
             throw ExceptionUtility.forbiddenRightsException();
         }
 
+        courseEditModel.getCourseMarkEvaluationType().validateCourseCreatingByMarkEvaluationType(courseEditModel);
+
         editingCourseEntity
             .setName(courseEditModel.getName())
-            .setDescription(courseEditModel.getDescription());
+            .setDescription(courseEditModel.getDescription())
+            .setCourseMarkEvaluationType(courseEditModel.getCourseMarkEvaluationType())
+            .setPassThreshold(courseEditModel.getPassThreshold());
 
         courseRepository.saveAndFlush(editingCourseEntity);
     }
 
-    public void archiveCourse(UUID requestingUserId, boolean isArchived, UUID courseId){
+    public void archiveCourse(UUID requestingUserId, boolean isArchived, UUID courseId) {
         UserEntity requestingUserEntity = userRepository.findById(requestingUserId)
                 .orElseThrow(ExceptionUtility::userNotFoundException);
         CourseEntity editingCourseEntity = courseRepository.findById(courseId)
@@ -206,7 +215,9 @@ public class CourseService {
                 .setDescription(courseCreateModel.getDescription())
                 .setIsArchived(false)
                 .setJoinCode(courseCodeGenerator.generateNewCode())
-                .setCreatedAt(LocalDateTime.now());
+                .setCreatedAt(LocalDateTime.now())
+                .setCourseMarkEvaluationType(courseCreateModel.getCourseMarkEvaluationType())
+                .setPassThreshold(courseCreateModel.getPassThreshold());
     }
 
     private UserCourseEntity createUserCourseOnCourseCreation(CourseEntity newCourseEntity, UserEntity creator) {
