@@ -74,6 +74,9 @@ public enum CourseMarkEvaluationType {
             if (courseCreationFields.getPassThreshold() == null) {
                 throw ExceptionUtility.badRequestException("Course passThreshold must be not null according to mark evaluation type");
             }
+            if (courseCreationFields.getPassThreshold() < 0 || courseCreationFields.getPassThreshold() > 1) {
+                throw ExceptionUtility.badRequestException("Pass threshold must be between 0 and 1 according to mark evaluation type");
+            }
         }
         @Override
         public boolean isTaskShouldContainMultiplierByCourseMarkEvaluationType() {

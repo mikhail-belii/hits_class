@@ -96,6 +96,9 @@ public enum TaskMarkEvaluationType {
             if (taskCreationFields.getPassThreshold() == null) {
                 throw ExceptionUtility.badRequestException("Pass threshold must be not null according to mark evaluation type");
             }
+            if (taskCreationFields.getPassThreshold() < 0 || taskCreationFields.getPassThreshold() > 1) {
+                throw ExceptionUtility.badRequestException("Pass threshold must be between 0 and 1 according to mark evaluation type");
+            }
             if (taskCreationFields.getMinScore() != null || taskCreationFields.getMaxScore() != null) {
                 throw ExceptionUtility.badRequestException("Task minScore and maxScore must be null according to mark evaluation type");
             }

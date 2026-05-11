@@ -28,7 +28,6 @@ public class CourseCreateModel implements CourseCreationFields {
     @NotNull
     private CourseMarkEvaluationType courseMarkEvaluationType;
 
-    @Min(0)
     private Float passThreshold;
 
 }
