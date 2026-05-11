@@ -9,11 +9,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
+import java.io.Serializable;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Accessors(chain=true)
-public class CourseCreateModel {
+public class CourseCreateModel implements CourseCreationFields {
 
     @NotNull
     @Size(min=3, max=128)

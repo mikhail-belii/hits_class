@@ -28,6 +28,8 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.example.hits.domain.entity.post.TaskMarkEvaluationType.PASS_FAIL;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -52,7 +54,7 @@ public class PostService {
             throw ExceptionUtility.forbiddenRightsException();
         }
 
-        validateDeadline(postCreateModel);
+        validatePostCreation(postCreateModel);
 
         PostEntity postEntity = createPostFromModel(postCreateModel, userEntity, courseEntity);
         postEntity = postRepository.save(postEntity);
@@ -66,13 +68,20 @@ public class PostService {
         postRepository.save(postEntity);
 
         if (postEntity.getPostType() == PostType.TASK) {
+            if (postEntity.getTaskMarkEvaluationType() == null) {
+                throw ExceptionUtility.badRequestException("Task mark evaluation type must be not null when post is task");
+            }
+            postCreateModel.getTaskMarkEvaluationType().validatePostCreationByMarkEvaluationType(
+                    postCreateModel,
+                    courseEntity.getCourseMarkEvaluationType());
+
             taskAnswerGeneralService.createTaskAnswerForEveryCourseMember(courseEntity, postEntity);
         }
 
         return new IdResponseModel(postEntity.getId());
     }
 
-    private void validateDeadline(PostCreateModel postCreateModel) {
+    private void validatePostCreation(PostCreateModel postCreateModel) {
         if (postCreateModel.getPostType() != PostType.TASK) {
             return;
         }
@@ -127,10 +136,21 @@ public class PostService {
         if (postEntity.getCourseEntity() == null || !postEntity.getCourseEntity().equals(courseEntity)) {
             throw ExceptionUtility.badRequestException("You can't edit this post");
         }
+        if (postEntity.getPostType() == PostType.TASK) {
+            postUpdateModel.getTaskMarkEvaluationType().validatePostCreationByMarkEvaluationType(
+                    postUpdateModel,
+                    courseEntity.getCourseMarkEvaluationType());
+        }
 
         postEntity.setText(postUpdateModel.getText());
         postEntity.setFileEntities(buildPostFiles(postUpdateModel.getFiles(), postEntity, userEntity, postEntity.getId()));
         postEntity.setUpdatedAt(LocalDateTime.now());
+        postEntity.setTaskMarkEvaluationType(postUpdateModel.getTaskMarkEvaluationType());
+        postEntity.setMaxScore(postUpdateModel.getMaxScore());
+        postEntity.setMinScore(postUpdateModel.getMinScore());
+        postEntity.setEvaluationFunction(postUpdateModel.getEvaluationFunction());
+        postEntity.setMultiplier(postUpdateModel.getMultiplier());
+        postEntity.setPassThreshold(postUpdateModel.getPassThreshold());
         postRepository.save(postEntity);
     }
 
@@ -215,7 +235,13 @@ public class PostService {
                 .setPostType(postCreateModel.getPostType())
                 .setDeadline(deadline)
                 .setMaxScore(postCreateModel.getMaxScore())
-                .setCreatedAt(LocalDateTime.now());
+                .setCreatedAt(LocalDateTime.now())
+                .setTaskMarkEvaluationType(postCreateModel.getTaskMarkEvaluationType())
+                .setMaxScore(postCreateModel.getMaxScore())
+                .setMinScore(postCreateModel.getMinScore())
+                .setEvaluationFunction(postCreateModel.getEvaluationFunction())
+                .setMultiplier(postCreateModel.getMultiplier())
+                .setPassThreshold(postCreateModel.getPassThreshold());
     }
 
     private List<FileEntity> buildPostFiles(List<FileModel> fileModels,

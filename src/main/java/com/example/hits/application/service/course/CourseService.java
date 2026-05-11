@@ -40,11 +40,7 @@ public class CourseService {
         UserEntity requestingUserEntity = userRepository.findById(requestingUserId)
                 .orElseThrow(ExceptionUtility::userNotFoundException);
 
-        if (PASS_FAIL.equals(courseCreateModel.getCourseMarkEvaluationType())
-            && courseCreateModel.getPassThreshold() == null
-        ) {
-            throw ExceptionUtility.badRequestException("Pass threshold must be set");
-        }
+        courseCreateModel.getCourseMarkEvaluationType().validateCourseCreatingByMarkEvaluationType(courseCreateModel);
 
         CourseEntity courseEntity = createCourseFromModel(courseCreateModel);
         UserCourseEntity userCourseEntity = createUserCourseOnCourseCreation(courseEntity, requestingUserEntity);
@@ -67,11 +63,7 @@ public class CourseService {
             throw ExceptionUtility.forbiddenRightsException();
         }
 
-        if (PASS_FAIL.equals(courseEditModel.getCourseMarkEvaluationType())
-                && courseEditModel.getPassThreshold() == null
-        ) {
-            throw ExceptionUtility.badRequestException("Pass threshold must be set");
-        }
+        courseEditModel.getCourseMarkEvaluationType().validateCourseCreatingByMarkEvaluationType(courseEditModel);
 
         editingCourseEntity
             .setName(courseEditModel.getName())

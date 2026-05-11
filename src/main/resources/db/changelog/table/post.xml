@@ -56,4 +56,10 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="AddPassThreshold" author="KBelovodchenko">
+        <addColumn tableName="post">
+            <column name="pass_threshold" type="real"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>
