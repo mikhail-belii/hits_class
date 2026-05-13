@@ -30,7 +30,11 @@ public class PostMapper {
                 .setPostType(postEntity.getPostType())
                 .setCreatedAt(postEntity.getCreatedAt())
                 .setDeadline(postEntity.getDeadline())
-                .setMaxScore(postEntity.getMaxScore());
+                .setMinScore(postEntity.getMinScore())
+                .setMaxScore(postEntity.getMaxScore())
+                .setMultiplier(postEntity.getMultiplier())
+                .setEvaluationFunction(postEntity.getEvaluationFunction())
+                .setTaskMarkEvaluationType(postEntity.getTaskMarkEvaluationType());
     }
 
     public PostShortModel toModel(PostEntity postEntity) {
@@ -66,7 +70,7 @@ public class PostMapper {
                 .setDeadline(postEntity.getDeadline())
                 .setMaxScore(postEntity.getMaxScore())
                 .setMinScore(postEntity.getMinScore())
-                .setMaxScore(postEntity.getMultiplier())
+                .setMultiplier(postEntity.getMultiplier())
                 .setEvaluationFunction(postEntity.getEvaluationFunction())
                 .setTaskMarkEvaluationType(postEntity.getTaskMarkEvaluationType())
                 .setComments(postEntity.getComments() == null ?

@@ -1,14 +1,13 @@
 package com.example.hits.application.service.taskanswer;
 
+import com.example.hits.application.mapper.UserCourseMapper;
 import com.example.hits.domain.aggregate.TaskEvaluationAggregate;
 import com.example.hits.infrastructure.persistence.entity.FileEntity;
+import com.example.hits.infrastructure.persistence.entity.UserCourseEntity;
 import com.example.hits.infrastructure.persistence.entity.UserEntity;
-import com.example.hits.infrastructure.persistence.repository.TaskAnswerRepository;
+import com.example.hits.infrastructure.persistence.repository.*;
 import com.example.hits.presentation.dto.file.FileModel;
 import com.example.hits.presentation.request.taskanswer.TaskRateRequestModel;
-import com.example.hits.infrastructure.persistence.repository.FileRepository;
-import com.example.hits.infrastructure.persistence.repository.JpaTaskAnswerRepository;
-import com.example.hits.infrastructure.persistence.repository.UserRepository;
 import com.example.hits.application.util.ExceptionUtility;
 import com.example.hits.infrastructure.persistence.entity.TaskAnswerEntity;
 import lombok.RequiredArgsConstructor;
@@ -28,12 +27,23 @@ public class TaskAnswerUploadService {
     private final JpaTaskAnswerRepository jpaTaskAnswerRepository;
     private final TaskAnswerRepository taskAnswerRepository;
     private final UserRepository userRepository;
+    private final UserCourseRepository userCourseRepository;
     private final FileRepository fileRepository;
 
-    public void evaluateTask(UUID taskAnswerId, TaskRateRequestModel taskScore, UUID userId) {
-        TaskEvaluationAggregate taskEvaluationAggregate = taskAnswerRepository.getTaskEvaluationAggregate(taskAnswerId, userId);
+    public void evaluateTaskManually(UUID taskAnswerId, TaskRateRequestModel taskScore, UUID userId) {
+        TaskEvaluationAggregate taskEvaluationAggregate = taskAnswerRepository.getTaskEvaluationAggregate(taskAnswerId);
+        UserCourseEntity requestingUserCourse = userCourseRepository.findByTaskAnswerIdAndUserId(taskAnswerId, userId)
+                        .orElseThrow(ExceptionUtility::forbiddenRightsException);
+        
+        taskEvaluationAggregate.evaluateTaskManually(taskScore.getRate(), UserCourseMapper.toDomain(requestingUserCourse));
 
-        taskEvaluationAggregate.evaluateTask(taskScore.getRate());
+        taskAnswerRepository.saveTaskEvaluationAggregate(taskEvaluationAggregate);
+    }
+
+    public void evaluateTaskByCriteriaList(UUID taskAnswerId) {
+        TaskEvaluationAggregate taskEvaluationAggregate = taskAnswerRepository.getTaskEvaluationAggregate(taskAnswerId);
+
+        taskEvaluationAggregate.evaluateTaskByCriteriaList();
 
         taskAnswerRepository.saveTaskEvaluationAggregate(taskEvaluationAggregate);
     }

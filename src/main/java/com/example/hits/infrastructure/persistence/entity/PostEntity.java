@@ -42,6 +42,9 @@ public class PostEntity {
     @OneToMany(mappedBy = "postEntity")
     private List<PostCommentEntity> comments;
 
+    @OneToMany(mappedBy = "postEntity")
+    private List<MarkCriteriaEntity> markCriteriaEntityList;
+
     @Enumerated(EnumType.STRING)
     @NotNull
     private PostType postType;

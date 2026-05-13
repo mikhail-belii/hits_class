@@ -16,6 +16,15 @@ public enum TaskMarkEvaluationType {
                 throw ExceptionUtility.badRequestException("Task minScore and maxScore must be not null according to mark evaluation type");
             }
         }
+
+        @Override
+        public boolean isAnswerScoreMustBeSetManually() { return true; };
+
+        @Override
+        public boolean isAnswerScoreIsPassFail() { return false; };
+
+        @Override
+        public boolean isAnswerScoreIsCriteriaBased() { return false; };
     },
     TEACHER_DECISION_PASS_FAIL {
         @Override
@@ -28,6 +37,15 @@ public enum TaskMarkEvaluationType {
                 throw ExceptionUtility.badRequestException("Task minScore and maxScore must be null according to mark evaluation type");
             }
         }
+
+        @Override
+        public boolean isAnswerScoreMustBeSetManually() { return true; };
+
+        @Override
+        public boolean isAnswerScoreIsPassFail() { return true; };
+
+        @Override
+        public boolean isAnswerScoreIsCriteriaBased() { return false; };
     },
     SUM {
         @Override
@@ -40,6 +58,15 @@ public enum TaskMarkEvaluationType {
                 throw ExceptionUtility.badRequestException("Task minScore and maxScore must be not null according to mark evaluation type");
             }
         }
+
+        @Override
+        public boolean isAnswerScoreMustBeSetManually() { return false; };
+
+        @Override
+        public boolean isAnswerScoreIsPassFail() { return false; };
+
+        @Override
+        public boolean isAnswerScoreIsCriteriaBased() { return true; };
     },
     MEAN_VALUE {
         @Override
@@ -52,6 +79,15 @@ public enum TaskMarkEvaluationType {
                 throw ExceptionUtility.badRequestException("Task minScore and maxScore must be not null according to mark evaluation type");
             }
         }
+
+        @Override
+        public boolean isAnswerScoreMustBeSetManually() { return false; };
+
+        @Override
+        public boolean isAnswerScoreIsPassFail() { return false; };
+
+        @Override
+        public boolean isAnswerScoreIsCriteriaBased() { return true; };
     },
     COEFFICIENTS_SUM {
         @Override
@@ -64,6 +100,15 @@ public enum TaskMarkEvaluationType {
                 throw ExceptionUtility.badRequestException("Task minScore and maxScore must be not null according to mark evaluation type");
             }
         }
+
+        @Override
+        public boolean isAnswerScoreMustBeSetManually() { return false; };
+
+        @Override
+        public boolean isAnswerScoreIsPassFail() { return false; };
+
+        @Override
+        public boolean isAnswerScoreIsCriteriaBased() { return true; };
     },
     COEFFICIENTS_MEAN_VALUE {
         @Override
@@ -76,6 +121,15 @@ public enum TaskMarkEvaluationType {
                 throw ExceptionUtility.badRequestException("Task minScore and maxScore must be not null according to mark evaluation type");
             }
         }
+
+        @Override
+        public boolean isAnswerScoreMustBeSetManually() { return false; };
+
+        @Override
+        public boolean isAnswerScoreIsPassFail() { return false; };
+
+        @Override
+        public boolean isAnswerScoreIsCriteriaBased() { return true; };
     },
     SELF_ASSESSMENT {
         @Override
@@ -88,6 +142,15 @@ public enum TaskMarkEvaluationType {
                 throw ExceptionUtility.badRequestException("Task minScore and maxScore must be not null according to mark evaluation type");
             }
         }
+
+        @Override
+        public boolean isAnswerScoreMustBeSetManually() { return false; };
+
+        @Override
+        public boolean isAnswerScoreIsPassFail() { return false; };
+
+        @Override
+        public boolean isAnswerScoreIsCriteriaBased() { return true; };
     },
     PASS_FAIL {
         @Override
@@ -103,11 +166,26 @@ public enum TaskMarkEvaluationType {
                 throw ExceptionUtility.badRequestException("Task minScore and maxScore must be null according to mark evaluation type");
             }
         }
+
+        @Override
+        public boolean isAnswerScoreMustBeSetManually() { return false; };
+
+        @Override
+        public boolean isAnswerScoreIsPassFail() { return true; };
+
+        @Override
+        public boolean isAnswerScoreIsCriteriaBased() { return true; };
     };
 
     public abstract void validatePostCreationByMarkEvaluationType(
             TaskCreationFields taskCreationFields,
             CourseMarkEvaluationType courseMarkEvaluationType);
+
+    public abstract boolean isAnswerScoreMustBeSetManually();
+
+    public abstract boolean isAnswerScoreIsPassFail();
+
+    public abstract boolean isAnswerScoreIsCriteriaBased();
 
     private static void validatePostCreationByCourse(TaskCreationFields taskCreationFields, CourseMarkEvaluationType courseMarkEvaluationType) {
         if (courseMarkEvaluationType.isTaskShouldContainEvaluationFunctionByCourseMarkEvaluationType()) {

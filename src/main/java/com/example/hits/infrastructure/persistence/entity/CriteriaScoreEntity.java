@@ -3,6 +3,8 @@ package com.example.hits.infrastructure.persistence.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.hibernate.validator.constraints.Length;
 
@@ -10,7 +12,8 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "criteria_score")
-@Data
+@Getter
+@Setter
 @Accessors(chain = true)
 public class CriteriaScoreEntity {
 

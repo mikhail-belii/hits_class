@@ -66,6 +66,6 @@ public class TaskAnswerController {
     public void evaluateTask(@PathVariable UUID taskAnswerId,
                              @RequestBody TaskRateRequestModel taskRate,
                              @RequestAttribute("userId") UUID userId) {
-        taskAnswerUploadService.evaluateTask(taskAnswerId, taskRate, userId);
+        taskAnswerUploadService.evaluateTaskManually(taskAnswerId, taskRate, userId);
     }
 }
