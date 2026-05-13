@@ -1,7 +1,7 @@
 package com.example.hits.presentation.dto.course;
 
-import com.example.hits.presentation.dto.user.UserModel;
 import com.example.hits.domain.entity.user.UserCourseRole;
+import com.example.hits.presentation.dto.user.UserModel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,4 +17,5 @@ public class UserCourseModel {
 
     private UserCourseRole userRole;
 
+    private Float score;
 }

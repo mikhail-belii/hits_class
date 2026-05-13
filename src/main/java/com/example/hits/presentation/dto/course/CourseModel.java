@@ -2,8 +2,6 @@ package com.example.hits.presentation.dto.course;
 
 import com.example.hits.domain.entity.course.CourseMarkEvaluationType;
 import com.example.hits.domain.entity.user.UserCourseRole;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -36,4 +34,5 @@ public class CourseModel {
 
     private UserCourseRole currentUserCourseRole;
 
+    private Float score;
 }
