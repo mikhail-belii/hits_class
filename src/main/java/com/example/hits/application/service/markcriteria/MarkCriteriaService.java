@@ -1,6 +1,6 @@
 package com.example.hits.application.service.markcriteria;
 
-import com.example.hits.application.mapper.MarkCriteriaModelMapper;
+import com.example.hits.application.mapper.CriteriaMapper;
 import com.example.hits.application.util.ExceptionUtility;
 import com.example.hits.application.util.PostUtility;
 import com.example.hits.domain.entity.markCriteria.MarkCriteria;
@@ -41,7 +41,7 @@ public class MarkCriteriaService {
             throw ExceptionUtility.badRequestException("You can't read this post");
         }
         return markCriteriaRepository.findAllByPostId(postId).stream()
-                .map(MarkCriteriaModelMapper::toModel)
+                .map(CriteriaMapper::toModel)
                 .toList();
     }
 

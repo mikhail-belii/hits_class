@@ -1,8 +1,6 @@
 package com.example.hits.domain.entity.post;
 
 import com.example.hits.domain.entity.markCriteria.EvaluationFunction;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -29,6 +27,8 @@ public class Post {
     private List<UUID> commentIds;
 
     private PostType postType;
+
+    private TaskMarkEvaluationType taskMarkEvaluationType;
 
     private LocalDateTime createdAt;
 

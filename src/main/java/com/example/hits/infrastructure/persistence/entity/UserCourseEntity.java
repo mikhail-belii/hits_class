@@ -4,6 +4,8 @@ import com.example.hits.domain.entity.user.UserCourseRole;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import java.time.LocalDateTime;
@@ -11,7 +13,8 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "user_course")
-@Data
+@Getter
+@Setter
 @Accessors(chain = true)
 public class UserCourseEntity {
 

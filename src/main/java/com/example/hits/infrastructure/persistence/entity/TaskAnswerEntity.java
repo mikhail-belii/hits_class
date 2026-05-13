@@ -4,6 +4,8 @@ import com.example.hits.domain.entity.taskanswer.TaskAnswerStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import java.time.LocalDateTime;
@@ -13,7 +15,8 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "task_answer")
-@Data
+@Getter
+@Setter
 @Accessors(chain = true)
 public class TaskAnswerEntity {
 
@@ -33,6 +36,9 @@ public class TaskAnswerEntity {
 
     @OneToMany(mappedBy = "taskAnswerEntity")
     private List<TaskAnswerCommentEntity> comments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "taskAnswerEntity")
+    private List<CriteriaScoreEntity> criteriaScoreEntities;
 
     @ManyToOne
     @JoinColumn(name = "user_id")

@@ -97,4 +97,15 @@ public class ExceptionUtility {
 
         return badRequestException;
     }
+
+    public ExceptionWrapper badRequestException(String message, String field) {
+        var badRequestException = new ExceptionWrapper(new BadRequestException(message));
+        badRequestException.addError(field, message);
+
+        return badRequestException;
+    }
+
+    public ExceptionWrapper internalServerError(String message) {
+        return new ExceptionWrapper(new Exception("Internal Server Error (" + message + ")"));
+    }
 }
