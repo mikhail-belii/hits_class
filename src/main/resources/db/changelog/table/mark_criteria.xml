@@ -13,7 +13,6 @@
             <column name="multiplier" type="real"/>
             <column name="min_score" type="real"/>
             <column name="max_score" type="real"/>
-            <column name="pass_threshold" type="real"/>
             <column name="post_id" type="UUID"/>
         </createTable>
 

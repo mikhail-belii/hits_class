@@ -1,5 +1,6 @@
 package com.example.hits.application.handler;
 
+import com.example.hits.domain.exception.DomainRuleViolationException;
 import com.example.hits.presentation.dto.common.Pair;
 import com.example.hits.presentation.dto.common.ResponseModel;
 import jakarta.persistence.EntityNotFoundException;
@@ -78,6 +79,15 @@ public class CustomExceptionHandler {
                         violation -> errors.put(violation.getField(), violation.getDefaultMessage())
                 );
         Pair<Integer, HttpStatus> statusCodeAndHttpStatus = getStatusCodeAndHttpStatusByExceptionClass(e.getClass());
+        ResponseModel response = new ResponseModel(statusCodeAndHttpStatus.first(), errors);
+        return new ResponseEntity<>(response, statusCodeAndHttpStatus.second());
+    }
+
+    @ExceptionHandler(DomainRuleViolationException.class)
+    public ResponseEntity<ResponseModel> handleDomainRuleViolationException(DomainRuleViolationException e) {
+        Pair<Integer, HttpStatus> statusCodeAndHttpStatus = new Pair<>(400, HttpStatus.BAD_REQUEST);
+        Dictionary<String, String> errors = new Hashtable<>();
+        errors.put("domain", e.getMessage());
         ResponseModel response = new ResponseModel(statusCodeAndHttpStatus.first(), errors);
         return new ResponseEntity<>(response, statusCodeAndHttpStatus.second());
     }

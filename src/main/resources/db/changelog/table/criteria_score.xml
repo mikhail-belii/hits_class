@@ -6,7 +6,7 @@
     <changeSet id="CreateCriteriaScoreTable" author="KBelovodchenko">
         <createTable tableName="criteria_score">
             <column name="id" type="UUID">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_mark_criteria"/>
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_criteria_score"/>
             </column>
             <column name="score" type="real"/>
             <column name="mark_criteria_id" type="UUID"/>

@@ -28,7 +28,5 @@ public class ScoredMarkCriteriaModel {
 
     private Float maxScore;
 
-    private Float passThreshold;
-
     private UUID postId;
 }
