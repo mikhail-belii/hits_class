@@ -50,7 +50,7 @@ public class CourseService {
 
         courseRepository.flush();
 
-        return CourseMapper.toModel(courseEntity, userCourseEntity.getUserRole());
+        return CourseMapper.toModel(courseEntity, userCourseEntity);
     }
 
     public void editCourse(UUID requestingUserId, UUID courseId, CourseEditModel courseEditModel) {
@@ -115,7 +115,7 @@ public class CourseService {
                 .orElseThrow(ExceptionUtility::forbiddenRightsException);
 
 
-        return CourseMapper.toModel(courseEntity, userCourseEntity.getUserRole());
+        return CourseMapper.toModel(courseEntity, userCourseEntity);
     }
 
     public List<CourseShortModel> getUserCourses(UUID requestingUserId, boolean isArchived) {

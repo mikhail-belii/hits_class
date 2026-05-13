@@ -22,4 +22,19 @@ public class UserCourse {
     private Float score;
 
     private LocalDateTime createdAt;
+
+    public static UserCourse restore(UUID id,
+                                     UUID courseId,
+                                     UUID userId,
+                                     UserCourseRole userRole,
+                                     LocalDateTime createdAt,
+                                     Float score) {
+        return new UserCourse()
+                .setId(id)
+                .setCourseId(courseId)
+                .setUserId(userId)
+                .setUserRole(userRole)
+                .setCreatedAt(createdAt)
+                .setScore(score);
+    }
 }
