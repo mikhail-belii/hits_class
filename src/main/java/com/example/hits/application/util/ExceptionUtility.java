@@ -84,6 +84,13 @@ public class ExceptionUtility {
         return notFoundException;
     }
 
+    public ExceptionWrapper markCriteriaNotFoundException() {
+        var notFoundException = new ExceptionWrapper(new EntityNotFoundException("Mark criteria not found"));
+        notFoundException.addError("markCriteriaId", "Mark criteria not found");
+
+        return notFoundException;
+    }
+
     public ExceptionWrapper badRequestException(String message) {
         var badRequestException = new ExceptionWrapper(new BadRequestException(message));
         badRequestException.addError("Bad request", message);

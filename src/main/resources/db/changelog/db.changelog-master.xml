@@ -4,11 +4,12 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
-    <!--    Tables     -->
     <include file="db/changelog/table/user.xml"/>
     <include file="db/changelog/table/course.xml"/>
     <include file="db/changelog/table/post.xml"/>
     <include file="db/changelog/table/task_answer.xml"/>
+    <include file="db/changelog/table/mark_criteria.xml"/>
+    <include file="db/changelog/table/criteria_score.xml"/>
     <include file="db/changelog/table/file.xml"/>
     <include file="db/changelog/table/attachment.xml"/>
     <include file="db/changelog/table/file2.xml"/>

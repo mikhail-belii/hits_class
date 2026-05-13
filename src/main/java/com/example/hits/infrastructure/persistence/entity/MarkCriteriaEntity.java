@@ -10,7 +10,7 @@ import org.hibernate.validator.constraints.Length;
 import java.util.UUID;
 
 @Entity
-@Table(name = "post")
+@Table(name = "mark_criteria")
 @Data
 @Accessors(chain = true)
 public class MarkCriteriaEntity {
@@ -19,7 +19,6 @@ public class MarkCriteriaEntity {
     private UUID id;
 
     @Enumerated(EnumType.STRING)
-    @NotNull
     private EvaluationFunction evaluationFunction;
 
     @NotNull
@@ -31,8 +30,6 @@ public class MarkCriteriaEntity {
     private Float minScore;
 
     private Float maxScore;
-
-    private Float passThreshold;
 
     @ManyToOne
     @JoinColumn(name = "post_id")

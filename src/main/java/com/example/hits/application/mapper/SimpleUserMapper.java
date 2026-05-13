@@ -4,9 +4,6 @@ import com.example.hits.infrastructure.persistence.entity.UserEntity;
 import com.example.hits.presentation.dto.user.UserModel;
 import lombok.experimental.UtilityClass;
 
-/*
-Выполняет ту же функцию, что и UserMapper, но без нахождения в DI
- */
 @UtilityClass
 public class SimpleUserMapper {
 

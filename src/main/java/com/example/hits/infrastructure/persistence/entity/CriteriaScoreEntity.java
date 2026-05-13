@@ -9,7 +9,7 @@ import org.hibernate.validator.constraints.Length;
 import java.util.UUID;
 
 @Entity
-@Table(name = "post")
+@Table(name = "criteria_score")
 @Data
 @Accessors(chain = true)
 public class CriteriaScoreEntity {
