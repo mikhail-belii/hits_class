@@ -1,21 +1,29 @@
 package com.example.hits.application.service.taskanswer;
 
 import com.example.hits.application.mapper.UserCourseMapper;
+import com.example.hits.application.util.ExceptionUtility;
 import com.example.hits.domain.aggregate.TaskEvaluationAggregate;
+import com.example.hits.domain.entity.post.PostType;
+import com.example.hits.domain.entity.post.TaskMarkEvaluationType;
+import com.example.hits.infrastructure.persistence.entity.CriteriaScoreEntity;
 import com.example.hits.infrastructure.persistence.entity.FileEntity;
+import com.example.hits.infrastructure.persistence.entity.MarkCriteriaEntity;
+import com.example.hits.infrastructure.persistence.entity.PostEntity;
+import com.example.hits.infrastructure.persistence.entity.TaskAnswerEntity;
 import com.example.hits.infrastructure.persistence.entity.UserCourseEntity;
 import com.example.hits.infrastructure.persistence.entity.UserEntity;
 import com.example.hits.infrastructure.persistence.repository.*;
 import com.example.hits.presentation.dto.file.FileModel;
+import com.example.hits.presentation.request.taskanswer.CriteriaScoreRequest;
 import com.example.hits.presentation.request.taskanswer.TaskRateRequestModel;
-import com.example.hits.application.util.ExceptionUtility;
-import com.example.hits.infrastructure.persistence.entity.TaskAnswerEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -29,23 +37,151 @@ public class TaskAnswerUploadService {
     private final UserRepository userRepository;
     private final UserCourseRepository userCourseRepository;
     private final FileRepository fileRepository;
+    private final JpaCriteriaScoreRepository jpaCriteriaScoreRepository;
 
     public void evaluateTaskManually(UUID taskAnswerId, TaskRateRequestModel taskScore, UUID userId) {
         TaskEvaluationAggregate taskEvaluationAggregate = taskAnswerRepository.getTaskEvaluationAggregate(taskAnswerId);
         UserCourseEntity requestingUserCourse = userCourseRepository.findByTaskAnswerIdAndUserId(taskAnswerId, userId)
-                        .orElseThrow(ExceptionUtility::forbiddenRightsException);
-        
+                .orElseThrow(ExceptionUtility::forbiddenRightsException);
+
         taskEvaluationAggregate.evaluateTaskManually(taskScore.getRate(), UserCourseMapper.toDomain(requestingUserCourse));
 
         taskAnswerRepository.saveTaskEvaluationAggregate(taskEvaluationAggregate);
     }
 
+    @Transactional
     public void evaluateTaskByCriteriaList(UUID taskAnswerId) {
-        TaskEvaluationAggregate taskEvaluationAggregate = taskAnswerRepository.getTaskEvaluationAggregate(taskAnswerId);
+        recalculateTaskAnswerScoreFromStoredCriteria(taskAnswerId);
+    }
 
-        taskEvaluationAggregate.evaluateTaskByCriteriaList();
+    private void recalculateTaskAnswerScoreFromStoredCriteria(UUID taskAnswerId) {
+        TaskEvaluationAggregate aggregate = taskAnswerRepository.getTaskEvaluationAggregate(taskAnswerId);
+        aggregate.evaluateTaskByCriteriaList();
+        taskAnswerRepository.saveTaskEvaluationAggregate(aggregate);
+    }
 
-        taskAnswerRepository.saveTaskEvaluationAggregate(taskEvaluationAggregate);
+    @Transactional
+    public void putCriteriaScore(UUID taskAnswerId, CriteriaScoreRequest request, UUID userId) {
+        UUID markCriteriaId = requireMarkCriteriaId(request);
+
+        TaskAnswerEntity taskAnswerEntity = jpaTaskAnswerRepository.findById(taskAnswerId)
+                .orElseThrow(ExceptionUtility::taskAnswerNotFoundException);
+        PostEntity post = taskAnswerEntity.getPostEntity();
+
+        assertTaskPostWithCriteriaBasedMarkEvaluation(post);
+
+        MarkCriteriaEntity markCriteria = requireMarkCriteriaBelongingToPost(post, markCriteriaId);
+
+        UserCourseEntity requestingUserCourse = userCourseRepository.findByTaskAnswerIdAndUserId(taskAnswerId, userId)
+                .orElseThrow(ExceptionUtility::forbiddenRightsException);
+        TaskEvaluationAggregate aggregate = taskAnswerRepository.getTaskEvaluationAggregate(taskAnswerId);
+        aggregate.validateEvaluator(UserCourseMapper.toDomain(requestingUserCourse));
+
+        persistSingleCriteriaScore(taskAnswerId, taskAnswerEntity, markCriteria, request.getScore(),
+                post.getTaskMarkEvaluationType());
+    }
+
+    @Transactional
+    public void putSelfAssessmentCriteriaScore(UUID taskAnswerId, CriteriaScoreRequest request, UUID userId) {
+        UUID markCriteriaId = requireMarkCriteriaId(request);
+
+        TaskAnswerEntity taskAnswerEntity = jpaTaskAnswerRepository.findById(taskAnswerId)
+                .orElseThrow(ExceptionUtility::taskAnswerNotFoundException);
+        PostEntity post = taskAnswerEntity.getPostEntity();
+
+        if (post.getPostType() != PostType.TASK) {
+            throw ExceptionUtility.badRequestException("Criteria scores are only allowed for task posts", "postType");
+        }
+        if (post.getTaskMarkEvaluationType() != TaskMarkEvaluationType.SELF_ASSESSMENT) {
+            throw ExceptionUtility.badRequestException(
+                    "Self-assessment criteria scores are only allowed when task mark evaluation type is SELF_ASSESSMENT",
+                    "taskMarkEvaluationType");
+        }
+
+        MarkCriteriaEntity markCriteria = requireMarkCriteriaBelongingToPost(post, markCriteriaId);
+
+        UserEntity owner = taskAnswerEntity.getUserEntity();
+        if (owner == null || !owner.getId().equals(userId)) {
+            throw ExceptionUtility.forbiddenRightsException();
+        }
+
+        persistSingleCriteriaScore(taskAnswerId, taskAnswerEntity, markCriteria, request.getScore(),
+                post.getTaskMarkEvaluationType());
+    }
+
+    private static UUID requireMarkCriteriaId(CriteriaScoreRequest request) {
+        UUID markCriteriaId = request != null ? request.getMarkCriteriaId() : null;
+        if (markCriteriaId == null) {
+            throw ExceptionUtility.badRequestException("Mark criteria id must not be null", "markCriteriaId");
+        }
+        return markCriteriaId;
+    }
+
+    private static void assertTaskPostWithCriteriaBasedMarkEvaluation(PostEntity post) {
+        if (post.getPostType() != PostType.TASK) {
+            throw ExceptionUtility.badRequestException("Criteria scores are only allowed for task posts", "postType");
+        }
+        TaskMarkEvaluationType taskMarkEvaluationType = post.getTaskMarkEvaluationType();
+        if (taskMarkEvaluationType == null || !taskMarkEvaluationType.isAnswerScoreIsCriteriaBased()) {
+            throw ExceptionUtility.badRequestException(
+                    "Criteria scores are only allowed for criteria-based task mark evaluation types", "postType");
+        }
+    }
+
+    private static MarkCriteriaEntity requireMarkCriteriaBelongingToPost(PostEntity post, UUID markCriteriaId) {
+        List<MarkCriteriaEntity> criteriaList = post.getMarkCriteriaEntityList();
+        if (criteriaList == null || criteriaList.isEmpty()) {
+            throw ExceptionUtility.badRequestException("Task has no mark criteria");
+        }
+
+        Map<UUID, MarkCriteriaEntity> criteriaById = criteriaList.stream()
+                .collect(Collectors.toMap(MarkCriteriaEntity::getId, Function.identity()));
+        MarkCriteriaEntity markCriteria = criteriaById.get(markCriteriaId);
+        if (markCriteria == null) {
+            throw ExceptionUtility.badRequestException("Mark criteria does not belong to this task", "markCriteriaId");
+        }
+        return markCriteria;
+    }
+
+    private void persistSingleCriteriaScore(UUID taskAnswerId, TaskAnswerEntity taskAnswerEntity,
+                                            MarkCriteriaEntity markCriteria, Float score,
+                                            TaskMarkEvaluationType taskMarkEvaluationType) {
+        validateCriteriaScore(markCriteria, score, taskMarkEvaluationType);
+
+        UUID markCriteriaId = markCriteria.getId();
+        CriteriaScoreEntity entity = jpaCriteriaScoreRepository
+                .findByTaskAnswerEntity_IdAndMarkCriteriaEntity_Id(taskAnswerId, markCriteriaId)
+                .orElseGet(() -> new CriteriaScoreEntity()
+                        .setId(UUID.randomUUID())
+                        .setMarkCriteriaEntity(markCriteria)
+                        .setTaskAnswerEntity(taskAnswerEntity));
+        entity.setScore(score);
+        jpaCriteriaScoreRepository.save(entity);
+        jpaTaskAnswerRepository.flush();
+
+        recalculateTaskAnswerScoreFromStoredCriteria(taskAnswerId);
+    }
+
+    private static void validateCriteriaScore(MarkCriteriaEntity markCriteria, Float score,
+                                              TaskMarkEvaluationType taskMarkEvaluationType) {
+        if (score == null) {
+            throw ExceptionUtility.badRequestException("Criteria score must not be null", "score");
+        }
+        if (taskMarkEvaluationType == TaskMarkEvaluationType.PASS_FAIL
+                && markCriteria.getMinScore() == null
+                && markCriteria.getMaxScore() == null) {
+            float s = score;
+            if (s != 0f && s != 1f) {
+                throw ExceptionUtility.badRequestException("Criteria score must be 0 or 1 for pass/fail mark criteria", "score");
+            }
+            return;
+        }
+        if (markCriteria.getMinScore() == null || markCriteria.getMaxScore() == null) {
+            throw ExceptionUtility.badRequestException("Mark criteria is missing min or max score", "markCriteriaId");
+        }
+        if (score < markCriteria.getMinScore() || score > markCriteria.getMaxScore()) {
+            throw ExceptionUtility.badRequestException("Criteria score is outside allowed range", "score");
+        }
     }
 
     public void appendFiles(UUID taskAnswerId, List<FileModel> fileModels, UUID userId) {
@@ -61,8 +197,8 @@ public class TaskAnswerUploadService {
         }
 
         taskAnswerEntity.setFileEntities(formFiles(taskAnswerEntity, fileModels.stream()
-                        .map(FileModel::getId)
-                        .toList()));
+                .map(FileModel::getId)
+                .toList()));
 
         jpaTaskAnswerRepository.save(taskAnswerEntity);
     }

@@ -27,6 +27,10 @@ public class TaskEvaluationAggregate {
 
     private final List<ScoredMarkCriteria> scoredMarkCriteriaList;
 
+    public void validateEvaluator(UserCourse requestingUserCourse) {
+        validateUsers(requestingUserCourse);
+    }
+
     public void evaluateTaskManually(Float score, UserCourse requestingUserCourse) {
         validatePost();
         validateUsers(requestingUserCourse);
@@ -98,7 +102,7 @@ public class TaskEvaluationAggregate {
     private void coefficientsMeanValueScoreEvaluation() {
         Float currentScore = 0F;
         for (ScoredMarkCriteria scoredMarkCriteria : scoredMarkCriteriaList) {
-            currentScore = scoredMarkCriteria.getScoreByMarkEvaluationType(TaskMarkEvaluationType.COEFFICIENTS_MEAN_VALUE);
+            currentScore += scoredMarkCriteria.getScoreByMarkEvaluationType(TaskMarkEvaluationType.COEFFICIENTS_MEAN_VALUE);
         }
         Float finalScore = MathUtility.getValueByDiapasons(post.getMinScore(), currentScore / scoredMarkCriteriaList.size(), post.getMaxScore());
         taskAnswer.setScore(finalScore);
@@ -107,7 +111,7 @@ public class TaskEvaluationAggregate {
     private void selfAssessmentScoreEvaluation() {
         Float currentScore = 0F;
         for (ScoredMarkCriteria scoredMarkCriteria : scoredMarkCriteriaList) {
-            currentScore = scoredMarkCriteria.getScoreByMarkEvaluationType(TaskMarkEvaluationType.SELF_ASSESSMENT);
+            currentScore += scoredMarkCriteria.getScoreByMarkEvaluationType(TaskMarkEvaluationType.SELF_ASSESSMENT);
         }
         Float finalScore = MathUtility.getValueByDiapasons(post.getMinScore(), currentScore, post.getMaxScore());
         taskAnswer.setScore(finalScore);
@@ -116,7 +120,7 @@ public class TaskEvaluationAggregate {
     private void passFailScoreEvaluation() {
         Float currentScore = 0F;
         for (ScoredMarkCriteria scoredMarkCriteria : scoredMarkCriteriaList) {
-            currentScore = scoredMarkCriteria.getScoreByMarkEvaluationType(TaskMarkEvaluationType.PASS_FAIL);
+            currentScore += scoredMarkCriteria.getScoreByMarkEvaluationType(TaskMarkEvaluationType.PASS_FAIL);
         }
         Float finalScore = currentScore / scoredMarkCriteriaList.size();
         taskAnswer.setScore(finalScore);
