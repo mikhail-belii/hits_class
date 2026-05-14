@@ -42,4 +42,6 @@ public class Post {
 
     private Float maxScore;
 
+    private Float passThreshold;
+
 }

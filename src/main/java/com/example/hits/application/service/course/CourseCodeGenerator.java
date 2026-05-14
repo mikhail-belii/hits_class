@@ -1,6 +1,6 @@
 package com.example.hits.application.service.course;
 
-import com.example.hits.infrastructure.persistence.repository.CourseRepository;
+import com.example.hits.domain.repository.JpaCourseRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -11,7 +11,7 @@ import java.util.Random;
 @RequiredArgsConstructor
 public class CourseCodeGenerator {
 
-    private final CourseRepository courseRepository;
+    private final JpaCourseRepository jpaCourseRepository;
 
     private final Random random = new SecureRandom();
 
@@ -22,7 +22,7 @@ public class CourseCodeGenerator {
     public String generateNewCode() {
         for (int attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
             String code = generateCode();
-            if (!courseRepository.existsByJoinCode(code)) {
+            if (!jpaCourseRepository.existsByJoinCode(code)) {
                 return code;
             }
         }

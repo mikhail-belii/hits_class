@@ -1,5 +1,6 @@
 package com.example.hits.application.service.post;
 
+import com.example.hits.domain.repository.JpaCourseRepository;
 import com.example.hits.infrastructure.persistence.entity.FileEntity;
 import com.example.hits.infrastructure.persistence.entity.PostEntity;
 import com.example.hits.infrastructure.persistence.entity.UserEntity;
@@ -28,8 +29,6 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.example.hits.domain.entity.post.TaskMarkEvaluationType.PASS_FAIL;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -37,7 +36,7 @@ import static com.example.hits.domain.entity.post.TaskMarkEvaluationType.PASS_FA
 public class PostService {
 
     private final TaskAnswerGeneralService taskAnswerGeneralService;
-    private final CourseRepository courseRepository;
+    private final JpaCourseRepository jpaCourseRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final FileRepository fileRepository;
@@ -311,7 +310,7 @@ public class PostService {
     }
 
     private CourseEntity getCourseById(UUID courseId) {
-        return courseRepository.findById(courseId)
+        return jpaCourseRepository.findById(courseId)
                 .orElseThrow(ExceptionUtility::courseNotFoundException);
     }
 

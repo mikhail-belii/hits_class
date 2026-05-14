@@ -24,9 +24,7 @@ public class Course {
 
     private String description;
 
-    private List<UserCourseEntity> courseUsers;
-
-    private Boolean isArchived;
+    private List<UUID> courseUsers;
 
     private LocalDateTime createdAt;
 }

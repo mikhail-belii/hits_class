@@ -1,7 +1,10 @@
 package com.example.hits.application.service.course;
 
+import com.example.hits.domain.aggregate.CourseEvaluationAggregate;
+import com.example.hits.domain.aggregate.TaskEvaluationAggregate;
 import com.example.hits.infrastructure.persistence.entity.CourseEntity;
 import com.example.hits.infrastructure.persistence.entity.UserEntity;
+import com.example.hits.domain.repository.JpaCourseRepository;
 import com.example.hits.infrastructure.persistence.repository.CourseRepository;
 import com.example.hits.infrastructure.persistence.repository.UserCourseRepository;
 import com.example.hits.infrastructure.persistence.repository.UserRepository;
@@ -23,17 +26,16 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-import static com.example.hits.domain.entity.course.CourseMarkEvaluationType.PASS_FAIL;
-
 @Service
 @RequiredArgsConstructor
 public class CourseService {
 
     private final UserRepository userRepository;
-    private final CourseRepository courseRepository;
+    private final JpaCourseRepository jpaCourseRepository;
     private final UserCourseRepository userCourseRepository;
     private final CourseCodeGenerator courseCodeGenerator;
     private final TaskAnswerGeneralService taskAnswerGeneralService;
+    private final CourseRepository courseRepository;
 
     @Transactional
     public CourseModel createCourse(UUID requestingUserId, CourseCreateModel courseCreateModel) {
@@ -45,10 +47,10 @@ public class CourseService {
         CourseEntity courseEntity = createCourseFromModel(courseCreateModel);
         UserCourseEntity userCourseEntity = createUserCourseOnCourseCreation(courseEntity, requestingUserEntity);
 
-        courseRepository.save(courseEntity);
+        jpaCourseRepository.save(courseEntity);
         userCourseRepository.save(userCourseEntity);
 
-        courseRepository.flush();
+        jpaCourseRepository.flush();
 
         return CourseMapper.toModel(courseEntity, userCourseEntity);
     }
@@ -56,7 +58,7 @@ public class CourseService {
     public void editCourse(UUID requestingUserId, UUID courseId, CourseEditModel courseEditModel) {
         UserEntity requestingUserEntity = userRepository.findById(requestingUserId)
                 .orElseThrow(ExceptionUtility::userNotFoundException);
-        CourseEntity editingCourseEntity = courseRepository.findById(courseId)
+        CourseEntity editingCourseEntity = jpaCourseRepository.findById(courseId)
                 .orElseThrow(ExceptionUtility::courseNotFoundException);
 
         if (!CourseUtility.isCourseAvailableForEditing(editingCourseEntity, requestingUserEntity)) {
@@ -71,13 +73,21 @@ public class CourseService {
             .setCourseMarkEvaluationType(courseEditModel.getCourseMarkEvaluationType())
             .setPassThreshold(courseEditModel.getPassThreshold());
 
-        courseRepository.saveAndFlush(editingCourseEntity);
+        jpaCourseRepository.saveAndFlush(editingCourseEntity);
+    }
+
+    public void evaluateUserCourseScore(UUID userCourseId) {
+        CourseEvaluationAggregate courseEvaluationAggregate = courseRepository.getCourseEvaluationAggregate(userCourseId);
+
+        courseEvaluationAggregate.evaluateCourseByTasks();
+
+        courseRepository.saveCourseEvaluationAggregate(courseEvaluationAggregate);
     }
 
     public void archiveCourse(UUID requestingUserId, boolean isArchived, UUID courseId) {
         UserEntity requestingUserEntity = userRepository.findById(requestingUserId)
                 .orElseThrow(ExceptionUtility::userNotFoundException);
-        CourseEntity editingCourseEntity = courseRepository.findById(courseId)
+        CourseEntity editingCourseEntity = jpaCourseRepository.findById(courseId)
                 .orElseThrow(ExceptionUtility::courseNotFoundException);
 
         if (!CourseUtility.isCourseAvailableForEditing(editingCourseEntity, requestingUserEntity)) {
@@ -86,13 +96,13 @@ public class CourseService {
 
         editingCourseEntity.setIsArchived(isArchived);
 
-        courseRepository.saveAndFlush(editingCourseEntity);
+        jpaCourseRepository.saveAndFlush(editingCourseEntity);
     }
 
     public List<UserCourseModel> getCourseUsers(UUID requestingUserId, UUID courseId) {
         UserEntity requestingUserEntity = userRepository.findById(requestingUserId)
                 .orElseThrow(ExceptionUtility::userNotFoundException);
-        CourseEntity courseEntity = courseRepository.findById(courseId)
+        CourseEntity courseEntity = jpaCourseRepository.findById(courseId)
                 .orElseThrow(ExceptionUtility::courseNotFoundException);
 
         if (CourseUtility.getUserCourse(courseEntity, requestingUserEntity).isEmpty()) {
@@ -108,7 +118,7 @@ public class CourseService {
     public CourseModel getConcreteCourse(UUID requestingUserId, UUID courseId) {
         UserEntity requestingUserEntity = userRepository.findById(requestingUserId)
                 .orElseThrow(ExceptionUtility::userNotFoundException);
-        CourseEntity courseEntity = courseRepository.findById(courseId)
+        CourseEntity courseEntity = jpaCourseRepository.findById(courseId)
                 .orElseThrow(ExceptionUtility::courseNotFoundException);
 
         UserCourseEntity userCourseEntity = CourseUtility.getUserCourse(courseEntity, requestingUserEntity)
@@ -132,7 +142,7 @@ public class CourseService {
     public void joinCourseByCode(UUID requestingUserId, String code) {
         UserEntity requestingUserEntity = userRepository.findById(requestingUserId)
                 .orElseThrow(ExceptionUtility::userNotFoundException);
-        CourseEntity courseEntity = courseRepository.findByJoinCode(code)
+        CourseEntity courseEntity = jpaCourseRepository.findByJoinCode(code)
                 .orElseThrow(ExceptionUtility::courseNotFoundByCodeException);
 
         if (CourseUtility.getUserCourse(courseEntity, requestingUserEntity).isPresent()) {
@@ -156,7 +166,7 @@ public class CourseService {
                 .orElseThrow(ExceptionUtility::userNotFoundException);
         UserEntity userEntityToChange = userRepository.findById(userId)
                 .orElseThrow(ExceptionUtility::userNotFoundException);
-        CourseEntity courseEntity = courseRepository.findById(courseId)
+        CourseEntity courseEntity = jpaCourseRepository.findById(courseId)
                 .orElseThrow(ExceptionUtility::courseNotFoundException);
 
         if (!CourseUtility.isUserAvailableToChangeOtherUserRoleOnCourse(courseEntity, userEntityToChange, newUserRole, requestingUserEntity)) {
@@ -179,7 +189,7 @@ public class CourseService {
                 .orElseThrow(ExceptionUtility::userNotFoundException);
         UserEntity userEntityToChange = userRepository.findById(userId)
                 .orElseThrow(ExceptionUtility::userNotFoundException);
-        CourseEntity courseEntity = courseRepository.findById(courseId)
+        CourseEntity courseEntity = jpaCourseRepository.findById(courseId)
                 .orElseThrow(ExceptionUtility::courseNotFoundException);
 
         if (!CourseUtility.isUserAvailableToRemoveOtherUserFromCourse(courseEntity, userEntityToChange, requestingUserEntity)) {
@@ -195,7 +205,7 @@ public class CourseService {
     public void leaveCourse(UUID requestingUserId, UUID courseId) {
         UserEntity requestingUserEntity = userRepository.findById(requestingUserId)
                 .orElseThrow(ExceptionUtility::userNotFoundException);
-        CourseEntity courseEntity = courseRepository.findById(courseId)
+        CourseEntity courseEntity = jpaCourseRepository.findById(courseId)
                 .orElseThrow(ExceptionUtility::courseNotFoundException);
 
         if (!CourseUtility.isUserAbleToLeaveCourse(courseEntity, requestingUserEntity)) {

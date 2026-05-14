@@ -1,13 +1,13 @@
 package com.example.hits.application.mapper;
 
+import com.example.hits.domain.aggregate.ScoredMarkCriteria;
+import com.example.hits.domain.aggregate.ScoredPost;
 import com.example.hits.domain.entity.post.Post;
-import com.example.hits.infrastructure.persistence.entity.FileEntity;
-import com.example.hits.infrastructure.persistence.entity.PostCommentEntity;
-import com.example.hits.infrastructure.persistence.entity.PostEntity;
+import com.example.hits.infrastructure.persistence.entity.*;
 import com.example.hits.presentation.dto.file.FileModel;
 import com.example.hits.presentation.dto.post.PostFullModel;
 import com.example.hits.presentation.dto.post.PostShortModel;
-import com.example.hits.infrastructure.persistence.entity.TaskAnswerEntity;
+import jakarta.validation.constraints.NotNull;
 import lombok.experimental.ExtensionMethod;
 import lombok.experimental.UtilityClass;
 
@@ -30,11 +30,12 @@ public class PostMapper {
                 .setPostType(postEntity.getPostType())
                 .setCreatedAt(postEntity.getCreatedAt())
                 .setDeadline(postEntity.getDeadline())
-                .setMinScore(postEntity.getMinScore())
-                .setMaxScore(postEntity.getMaxScore())
+                .setMinScore(postEntity.getTaskMarkEvaluationType().isAnswerScoreIsPassFail() ? 0 : postEntity.getMinScore())
+                .setMaxScore(postEntity.getTaskMarkEvaluationType().isAnswerScoreIsPassFail() ? 1 : postEntity.getMaxScore())
                 .setMultiplier(postEntity.getMultiplier())
                 .setEvaluationFunction(postEntity.getEvaluationFunction())
-                .setTaskMarkEvaluationType(postEntity.getTaskMarkEvaluationType());
+                .setTaskMarkEvaluationType(postEntity.getTaskMarkEvaluationType())
+                .setPassThreshold(postEntity.getPassThreshold());
     }
 
     public PostShortModel toModel(PostEntity postEntity) {
@@ -79,5 +80,17 @@ public class PostMapper {
                                 .map(c -> c.toModel())
                                 .toList())
                 .setTaskAnswer(taskAnswerEntity != null ? taskAnswerEntity.toModel() : null);
+    }
+
+    public ScoredPost toDomain(@NotNull PostEntity postEntity, TaskAnswerEntity taskAnswerEntity) {
+        Float minScore = postEntity.getTaskMarkEvaluationType().isAnswerScoreIsPassFail() ? 0 : postEntity.getMinScore();
+        return new ScoredPost(
+                postEntity.getPostType(),
+                postEntity.getTaskMarkEvaluationType(),
+                postEntity.getMultiplier(),
+                postEntity.getEvaluationFunction(),
+                taskAnswerEntity != null ? taskAnswerEntity.getScore() : minScore,
+                minScore,
+                postEntity.getTaskMarkEvaluationType().isAnswerScoreIsPassFail() ? 1 : postEntity.getMaxScore());
     }
 }
