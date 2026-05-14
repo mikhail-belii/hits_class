@@ -6,9 +6,12 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public interface JpaCriteriaScoreRepository extends JpaRepository<CriteriaScoreEntity, UUID> {
+
+    Optional<CriteriaScoreEntity> findByTaskAnswerEntity_IdAndMarkCriteriaEntity_Id(UUID taskAnswerId, UUID markCriteriaId);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM CriteriaScoreEntity c WHERE c.markCriteriaEntity.id = :markCriteriaId")

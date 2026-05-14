@@ -1,8 +1,10 @@
 package com.example.hits.presentation.controller;
 
 import com.example.hits.presentation.dto.file.FileModel;
+import com.example.hits.presentation.dto.taskanswer.TaskAnswerCriteriaScoreModel;
 import com.example.hits.presentation.dto.taskanswer.TaskAnswerFullModel;
 import com.example.hits.presentation.dto.taskanswer.TaskAnswerModel;
+import com.example.hits.presentation.request.taskanswer.CriteriaScoreRequest;
 import com.example.hits.presentation.request.taskanswer.TaskRateRequestModel;
 import com.example.hits.application.service.taskanswer.TaskAnswerGeneralService;
 import com.example.hits.application.service.taskanswer.TaskAnswerUploadService;
@@ -60,6 +62,29 @@ public class TaskAnswerController {
     @DeleteMapping("/submit/{taskAnswerId}")
     public void unsubmitTask(@PathVariable UUID taskAnswerId, @RequestAttribute("userId") UUID userId) {
         taskAnswerUploadService.unsubmitTask(taskAnswerId, userId);
+    }
+
+    @GetMapping("/task-answer/{taskAnswerId}/criteria-scores")
+    @Operation(summary = "Mark criteria scores for a task answer [FOR STUDENT owner or TEACHER+]")
+    public List<TaskAnswerCriteriaScoreModel> getTaskAnswerCriteriaScores(@PathVariable UUID taskAnswerId,
+                                                                          @RequestAttribute("userId") UUID userId) {
+        return taskAnswerGeneralService.getCriteriaScoresForTaskAnswer(taskAnswerId, userId);
+    }
+
+    @PutMapping("/task-answer/{taskAnswerId}/self-assessment/criteria-scores")
+    @Operation(summary = "Set self-assessment score for one mark criterion [FOR STUDENT owner, SELF_ASSESSMENT tasks only]")
+    public void putSelfAssessmentCriteriaScore(@PathVariable UUID taskAnswerId,
+                                               @RequestBody CriteriaScoreRequest request,
+                                               @RequestAttribute("userId") UUID userId) {
+        taskAnswerUploadService.putSelfAssessmentCriteriaScore(taskAnswerId, request, userId);
+    }
+
+    @PutMapping("/task-answer/{taskAnswerId}/criteria-scores")
+    @Operation(summary = "Set score for one mark criterion on a task answer [FOR TEACHER+]")
+    public void putCriteriaScore(@PathVariable UUID taskAnswerId,
+                                 @RequestBody CriteriaScoreRequest request,
+                                 @RequestAttribute("userId") UUID userId) {
+        taskAnswerUploadService.putCriteriaScore(taskAnswerId, request, userId);
     }
 
     @PutMapping("/task-answer/{taskAnswerId}/evaluate")
