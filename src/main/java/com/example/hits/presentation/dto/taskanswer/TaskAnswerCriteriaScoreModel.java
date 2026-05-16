@@ -14,4 +14,10 @@ public class TaskAnswerCriteriaScoreModel {
     private String name;
 
     private Float score;
+
+    private Float minScore;
+
+    private Float maxScore;
+
+    private Float multiplier;
 }
