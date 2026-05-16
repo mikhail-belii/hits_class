@@ -18,6 +18,7 @@ import com.example.hits.domain.entity.post.PostType;
 import com.example.hits.infrastructure.persistence.entity.TaskAnswerCommentEntity;
 import com.example.hits.application.mapper.PostMapper;
 import com.example.hits.application.service.taskanswer.TaskAnswerGeneralService;
+import com.example.hits.application.service.taskanswer.TaskAnswerUploadService;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.ExtensionMethod;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +37,7 @@ import java.util.stream.Collectors;
 public class PostService {
 
     private final TaskAnswerGeneralService taskAnswerGeneralService;
+    private final TaskAnswerUploadService taskAnswerUploadService;
     private final JpaCourseRepository jpaCourseRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
@@ -151,6 +153,10 @@ public class PostService {
         postEntity.setMultiplier(postUpdateModel.getMultiplier());
         postEntity.setPassThreshold(postUpdateModel.getPassThreshold());
         postRepository.save(postEntity);
+
+        if (postEntity.getPostType() == PostType.TASK) {
+            taskAnswerUploadService.recalculateScoresForAllPostTaskAnswers(postId);
+        }
     }
 
     @Transactional

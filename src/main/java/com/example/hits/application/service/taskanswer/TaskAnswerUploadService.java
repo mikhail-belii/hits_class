@@ -15,6 +15,7 @@ import com.example.hits.infrastructure.persistence.entity.UserCourseEntity;
 import com.example.hits.infrastructure.persistence.entity.UserEntity;
 import com.example.hits.infrastructure.persistence.repository.*;
 import com.example.hits.presentation.dto.file.FileModel;
+import com.example.hits.domain.entity.user.UserCourseRole;
 import com.example.hits.presentation.request.taskanswer.CriteriaScoreRequest;
 import com.example.hits.presentation.request.taskanswer.TaskRateRequestModel;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +42,7 @@ public class TaskAnswerUploadService {
     private final UserCourseRepository userCourseRepository;
     private final FileRepository fileRepository;
     private final JpaCriteriaScoreRepository jpaCriteriaScoreRepository;
+    private final CourseRepository courseRepository;
 
     public void evaluateTaskManually(UUID taskAnswerId, TaskRateRequestModel taskScore, UUID userId) {
         TaskEvaluationAggregate taskEvaluationAggregate = taskAnswerRepository.getTaskEvaluationAggregate(taskAnswerId);
@@ -50,12 +52,41 @@ public class TaskAnswerUploadService {
         taskEvaluationAggregate.evaluateTaskManually(taskScore.getRate(), UserCourseMapper.toDomain(requestingUserCourse));
 
         taskAnswerRepository.saveTaskEvaluationAggregate(taskEvaluationAggregate);
+
+        TaskAnswerEntity taskAnswerEntity = jpaTaskAnswerRepository.findById(taskAnswerId)
+                .orElseThrow(ExceptionUtility::taskAnswerNotFoundException);
+        recalculateCourseScoreForTaskAnswer(taskAnswerEntity);
     }
 
-    private void recalculateTaskAnswerScoreFromStoredCriteria(UUID taskAnswerId) {
+    public void recalculateTaskAnswerScoreFromStoredCriteria(UUID taskAnswerId) {
         TaskEvaluationAggregate aggregate = taskAnswerRepository.getTaskEvaluationAggregate(taskAnswerId);
         aggregate.evaluateTaskByCriteriaList();
         taskAnswerRepository.saveTaskEvaluationAggregate(aggregate);
+    }
+
+    public void recalculateScoresForAllPostTaskAnswers(UUID postId) {
+        List<TaskAnswerEntity> taskAnswers = jpaTaskAnswerRepository.findAllByPostEntityId(postId);
+        for (TaskAnswerEntity taskAnswer : taskAnswers) {
+            recalculateTaskAnswerScoreFromStoredCriteria(taskAnswer.getId());
+            recalculateCourseScoreForTaskAnswer(taskAnswer);
+        }
+    }
+
+    private void recalculateCourseScoreForTaskAnswer(TaskAnswerEntity taskAnswer) {
+        if (taskAnswer.getUserEntity() == null) {
+            return;
+        }
+        UUID userId = taskAnswer.getUserEntity().getId();
+        UUID courseId = taskAnswer.getPostEntity().getCourseEntity().getId();
+        userCourseRepository.findAllByCourseEntityId(courseId).stream()
+                .filter(uc -> uc.getUserEntity() != null && uc.getUserEntity().getId().equals(userId))
+                .filter(uc -> UserCourseRole.STUDENT.equals(uc.getUserRole()))
+                .findFirst()
+                .ifPresent(uc -> {
+                    var aggregate = courseRepository.getCourseEvaluationAggregate(uc.getId());
+                    aggregate.evaluateCourseByTasks();
+                    courseRepository.saveCourseEvaluationAggregate(aggregate);
+                });
     }
 
     @Transactional
@@ -159,6 +190,7 @@ public class TaskAnswerUploadService {
         jpaTaskAnswerRepository.flush();
 
         recalculateTaskAnswerScoreFromStoredCriteria(taskAnswerId);
+        recalculateCourseScoreForTaskAnswer(taskAnswerEntity);
     }
 
     private static void validateCriteriaScore(MarkCriteriaEntity markCriteria, Float score,
