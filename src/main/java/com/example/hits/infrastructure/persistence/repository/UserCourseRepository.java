@@ -4,6 +4,7 @@ import com.example.hits.infrastructure.persistence.entity.UserCourseEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -29,5 +30,7 @@ public interface UserCourseRepository extends JpaRepository<UserCourseEntity, UU
     Optional<UserCourseEntity> findByTaskAnswerIdAndUserId(UUID taskAnswerId, UUID userId);
 
     Optional<UserCourseEntity> findByUserEntityId(UUID userId);
+
+    List<UserCourseEntity> findAllByCourseEntityId(UUID courseId);
 
 }

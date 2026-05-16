@@ -3,6 +3,7 @@ package com.example.hits.application.service.markcriteria;
 import com.example.hits.application.mapper.CriteriaMapper;
 import com.example.hits.application.util.ExceptionUtility;
 import com.example.hits.application.util.PostUtility;
+import com.example.hits.application.service.taskanswer.TaskAnswerUploadService;
 import com.example.hits.domain.entity.markCriteria.MarkCriteria;
 import com.example.hits.domain.entity.markCriteria.MarkCriteriaDefinition;
 import com.example.hits.domain.entity.post.PostType;
@@ -31,6 +32,7 @@ public class MarkCriteriaService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final MarkCriteriaRepository markCriteriaRepository;
+    private final TaskAnswerUploadService taskAnswerUploadService;
 
     @Transactional(readOnly = true)
     public List<MarkCriteriaModel> getMarkCriteria(UUID courseId, UUID postId, UUID userId) {
@@ -58,6 +60,7 @@ public class MarkCriteriaService {
         MarkCriteriaDefinition definition = toDefinition(request);
         MarkCriteria criteria = MarkCriteria.issue(UUID.randomUUID(), postId, definition, post.getTaskMarkEvaluationType());
         markCriteriaRepository.save(criteria);
+        taskAnswerUploadService.recalculateScoresForAllPostTaskAnswers(postId);
         return new IdResponseModel(criteria.getId());
     }
 
@@ -76,6 +79,7 @@ public class MarkCriteriaService {
                 .orElseThrow(ExceptionUtility::markCriteriaNotFoundException);
         criteria.redefine(toDefinition(request), post.getTaskMarkEvaluationType());
         markCriteriaRepository.save(criteria);
+        taskAnswerUploadService.recalculateScoresForAllPostTaskAnswers(postId);
     }
 
     @Transactional
@@ -89,6 +93,7 @@ public class MarkCriteriaService {
         if (!markCriteriaRepository.deleteWithScores(markCriteriaId, postId)) {
             throw ExceptionUtility.markCriteriaNotFoundException();
         }
+        taskAnswerUploadService.recalculateScoresForAllPostTaskAnswers(postId);
     }
 
     private static MarkCriteriaDefinition toDefinition(MarkCriteriaWriteRequest request) {

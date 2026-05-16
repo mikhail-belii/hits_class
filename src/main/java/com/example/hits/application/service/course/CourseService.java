@@ -74,6 +74,15 @@ public class CourseService {
             .setPassThreshold(courseEditModel.getPassThreshold());
 
         jpaCourseRepository.saveAndFlush(editingCourseEntity);
+        recalculateCourseScoresForAllStudents(courseId);
+    }
+
+    public void recalculateCourseScoresForAllStudents(UUID courseId) {
+        CourseEntity courseEntity = jpaCourseRepository.findById(courseId)
+                .orElseThrow(ExceptionUtility::courseNotFoundException);
+        courseEntity.getCourseUsers().stream()
+                .filter(uc -> UserCourseRole.STUDENT.equals(uc.getUserRole()))
+                .forEach(uc -> evaluateUserCourseScore(uc.getId()));
     }
 
     public void evaluateUserCourseScore(UUID userCourseId) {
