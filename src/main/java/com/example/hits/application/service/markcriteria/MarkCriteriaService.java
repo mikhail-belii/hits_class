@@ -10,7 +10,7 @@ import com.example.hits.domain.repository.MarkCriteriaRepository;
 import com.example.hits.infrastructure.persistence.entity.CourseEntity;
 import com.example.hits.infrastructure.persistence.entity.PostEntity;
 import com.example.hits.infrastructure.persistence.entity.UserEntity;
-import com.example.hits.infrastructure.persistence.repository.CourseRepository;
+import com.example.hits.domain.repository.JpaCourseRepository;
 import com.example.hits.infrastructure.persistence.repository.PostRepository;
 import com.example.hits.infrastructure.persistence.repository.UserRepository;
 import com.example.hits.presentation.dto.common.IdResponseModel;
@@ -27,7 +27,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class MarkCriteriaService {
 
-    private final CourseRepository courseRepository;
+    private final JpaCourseRepository jpaCourseRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final MarkCriteriaRepository markCriteriaRepository;
@@ -119,7 +119,7 @@ public class MarkCriteriaService {
     }
 
     private CourseEntity getCourse(UUID courseId) {
-        return courseRepository.findById(courseId)
+        return jpaCourseRepository.findById(courseId)
                 .orElseThrow(ExceptionUtility::courseNotFoundException);
     }
 

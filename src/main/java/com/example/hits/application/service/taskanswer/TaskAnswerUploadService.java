@@ -5,6 +5,7 @@ import com.example.hits.application.util.ExceptionUtility;
 import com.example.hits.domain.aggregate.TaskEvaluationAggregate;
 import com.example.hits.domain.entity.post.PostType;
 import com.example.hits.domain.entity.post.TaskMarkEvaluationType;
+import com.example.hits.domain.entity.usercourse.UserCourse;
 import com.example.hits.infrastructure.persistence.entity.CriteriaScoreEntity;
 import com.example.hits.infrastructure.persistence.entity.FileEntity;
 import com.example.hits.infrastructure.persistence.entity.MarkCriteriaEntity;
@@ -28,6 +29,8 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.example.hits.domain.entity.user.UserCourseRole.STUDENT;
+
 @Service
 @RequiredArgsConstructor
 public class TaskAnswerUploadService {
@@ -49,11 +52,6 @@ public class TaskAnswerUploadService {
         taskAnswerRepository.saveTaskEvaluationAggregate(taskEvaluationAggregate);
     }
 
-    @Transactional
-    public void evaluateTaskByCriteriaList(UUID taskAnswerId) {
-        recalculateTaskAnswerScoreFromStoredCriteria(taskAnswerId);
-    }
-
     private void recalculateTaskAnswerScoreFromStoredCriteria(UUID taskAnswerId) {
         TaskEvaluationAggregate aggregate = taskAnswerRepository.getTaskEvaluationAggregate(taskAnswerId);
         aggregate.evaluateTaskByCriteriaList();
@@ -72,10 +70,11 @@ public class TaskAnswerUploadService {
 
         MarkCriteriaEntity markCriteria = requireMarkCriteriaBelongingToPost(post, markCriteriaId);
 
-        UserCourseEntity requestingUserCourse = userCourseRepository.findByTaskAnswerIdAndUserId(taskAnswerId, userId)
-                .orElseThrow(ExceptionUtility::forbiddenRightsException);
-        TaskEvaluationAggregate aggregate = taskAnswerRepository.getTaskEvaluationAggregate(taskAnswerId);
-        aggregate.validateEvaluator(UserCourseMapper.toDomain(requestingUserCourse));
+        UserCourseEntity requestingUserCourse = userCourseRepository.findByUserEntityId(userId)
+            .orElseThrow(ExceptionUtility::forbiddenRightsException);
+        if (STUDENT.equals(requestingUserCourse.getUserRole())) {
+            throw ExceptionUtility.forbiddenRightsException();
+        }
 
         persistSingleCriteriaScore(taskAnswerId, taskAnswerEntity, markCriteria, request.getScore(),
                 post.getTaskMarkEvaluationType());

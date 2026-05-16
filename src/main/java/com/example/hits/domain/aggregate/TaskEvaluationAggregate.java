@@ -27,10 +27,6 @@ public class TaskEvaluationAggregate {
 
     private final List<ScoredMarkCriteria> scoredMarkCriteriaList;
 
-    public void validateEvaluator(UserCourse requestingUserCourse) {
-        validateUsers(requestingUserCourse);
-    }
-
     public void evaluateTaskManually(Float score, UserCourse requestingUserCourse) {
         validatePost();
         validateUsers(requestingUserCourse);
@@ -123,7 +119,11 @@ public class TaskEvaluationAggregate {
             currentScore += scoredMarkCriteria.getScoreByMarkEvaluationType(TaskMarkEvaluationType.PASS_FAIL);
         }
         Float finalScore = currentScore / scoredMarkCriteriaList.size();
-        taskAnswer.setScore(finalScore);
+        if (post.getPassThreshold() < finalScore) {
+            taskAnswer.setScore(1F);
+        } else {
+            taskAnswer.setScore(0F);
+        }
     }
 
     private void validateUsers(UserCourse requestingUserCourse) {

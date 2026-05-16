@@ -28,4 +28,6 @@ public interface UserCourseRepository extends JpaRepository<UserCourseEntity, UU
     """, nativeQuery = true)
     Optional<UserCourseEntity> findByTaskAnswerIdAndUserId(UUID taskAnswerId, UUID userId);
 
+    Optional<UserCourseEntity> findByUserEntityId(UUID userId);
+
 }

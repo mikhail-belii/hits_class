@@ -4,6 +4,8 @@ import com.example.hits.domain.entity.course.CourseMarkEvaluationType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.hibernate.validator.constraints.Length;
 
@@ -13,7 +15,8 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "course")
-@Data
+@Getter
+@Setter
 @Accessors(chain = true)
 public class CourseEntity {
 
@@ -40,6 +43,9 @@ public class CourseEntity {
 
     @OneToMany(mappedBy = "courseEntity")
     private List<UserCourseEntity> courseUsers;
+
+    @OneToMany(mappedBy = "courseEntity")
+    private List<PostEntity> postEntities;
 
     @NotNull
     private Boolean isArchived;
