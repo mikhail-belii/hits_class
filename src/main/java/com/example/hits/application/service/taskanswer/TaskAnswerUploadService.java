@@ -101,7 +101,7 @@ public class TaskAnswerUploadService {
 
         MarkCriteriaEntity markCriteria = requireMarkCriteriaBelongingToPost(post, markCriteriaId);
 
-        UserCourseEntity requestingUserCourse = userCourseRepository.findByUserEntityId(userId)
+        UserCourseEntity requestingUserCourse = userCourseRepository.findByTaskAnswerIdAndUserId(taskAnswerId, userId)
             .orElseThrow(ExceptionUtility::forbiddenRightsException);
         if (STUDENT.equals(requestingUserCourse.getUserRole())) {
             throw ExceptionUtility.forbiddenRightsException();
