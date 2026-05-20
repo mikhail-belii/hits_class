@@ -5,6 +5,7 @@ import com.example.hits.application.util.ExceptionUtility;
 import com.example.hits.domain.aggregate.TaskEvaluationAggregate;
 import com.example.hits.domain.entity.post.PostType;
 import com.example.hits.domain.entity.post.TaskMarkEvaluationType;
+import com.example.hits.domain.entity.taskanswer.TaskAnswerEvaluationStatus;
 import com.example.hits.domain.entity.usercourse.UserCourse;
 import com.example.hits.infrastructure.persistence.entity.CriteriaScoreEntity;
 import com.example.hits.infrastructure.persistence.entity.FileEntity;
@@ -55,6 +56,7 @@ public class TaskAnswerUploadService {
 
         TaskAnswerEntity taskAnswerEntity = jpaTaskAnswerRepository.findById(taskAnswerId)
                 .orElseThrow(ExceptionUtility::taskAnswerNotFoundException);
+        taskAnswerEntity.setEvaluationStatus(TaskAnswerEvaluationStatus.EVALUATED);
         recalculateCourseScoreForTaskAnswer(taskAnswerEntity);
     }
 
@@ -107,6 +109,7 @@ public class TaskAnswerUploadService {
             throw ExceptionUtility.forbiddenRightsException();
         }
 
+        taskAnswerEntity.setEvaluationStatus(TaskAnswerEvaluationStatus.EVALUATED);
         persistSingleCriteriaScore(taskAnswerId, taskAnswerEntity, markCriteria, request.getScore(),
                 post.getTaskMarkEvaluationType());
     }
@@ -135,6 +138,7 @@ public class TaskAnswerUploadService {
             throw ExceptionUtility.forbiddenRightsException();
         }
 
+        taskAnswerEntity.setEvaluationStatus(TaskAnswerEvaluationStatus.EVALUATED);
         persistSingleCriteriaScore(taskAnswerId, taskAnswerEntity, markCriteria, request.getScore(),
                 post.getTaskMarkEvaluationType());
     }

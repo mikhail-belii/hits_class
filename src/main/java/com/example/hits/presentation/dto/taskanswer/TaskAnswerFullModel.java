@@ -1,5 +1,6 @@
 package com.example.hits.presentation.dto.taskanswer;
 
+import com.example.hits.domain.entity.taskanswer.TaskAnswerEvaluationStatus;
 import com.example.hits.presentation.dto.comment.taskanswercomment.TaskAnswerCommentModel;
 import com.example.hits.presentation.dto.file.FileModel;
 import com.example.hits.presentation.dto.user.UserModel;
@@ -25,6 +26,9 @@ public class TaskAnswerFullModel {
     private LocalDateTime submittedAt = null;
 
     private TaskAnswerStatus status = TaskAnswerStatus.NOT_COMPLETED;
+
+    private TaskAnswerEvaluationStatus evaluationStatus
+            = TaskAnswerEvaluationStatus.NOT_EVALUATED;
 
     private List<FileModel> files = new ArrayList<>();
 
