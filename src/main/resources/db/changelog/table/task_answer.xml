@@ -37,4 +37,10 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="AddEvaluationStatus" author="mikhail-belii">
+        <addColumn tableName="task_answer">
+            <column name="evaluation_status" type="VARCHAR(255)"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

@@ -1,9 +1,9 @@
 package com.example.hits.infrastructure.persistence.entity;
 
 import com.example.hits.domain.entity.taskanswer.TaskAnswerStatus;
+import com.example.hits.domain.entity.taskanswer.TaskAnswerEvaluationStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -30,6 +30,9 @@ public class TaskAnswerEntity {
     @Enumerated(EnumType.STRING)
     @NotNull
     private TaskAnswerStatus status = TaskAnswerStatus.NOT_COMPLETED;
+
+    @Enumerated(EnumType.STRING)
+    private TaskAnswerEvaluationStatus evaluationStatus = TaskAnswerEvaluationStatus.NOT_EVALUATED;
 
     @OneToMany(mappedBy = "taskAnswerEntity")
     private List<FileEntity> fileEntities = new ArrayList<>();
