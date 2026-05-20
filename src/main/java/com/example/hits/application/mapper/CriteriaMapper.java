@@ -30,6 +30,7 @@ public class CriteriaMapper {
                 .setId(domain.getId())
                 .setEvaluationFunction(domain.getEvaluationFunction())
                 .setName(domain.getName())
+                .setDescription(domain.getDescription())
                 .setMultiplier(domain.getMultiplier())
                 .setMinScore(domain.getMinScore())
                 .setMaxScore(domain.getMaxScore())

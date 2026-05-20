@@ -99,9 +99,11 @@ public class MarkCriteriaService {
     private static MarkCriteriaDefinition toDefinition(MarkCriteriaWriteRequest request) {
         return new MarkCriteriaDefinition(
                 request.getName(),
+                request.getDescription(),
                 request.getMinScore(),
                 request.getMaxScore(),
-                request.getMultiplier()
+                request.getMultiplier(),
+                request.getEvaluationFunction()
         );
     }
 

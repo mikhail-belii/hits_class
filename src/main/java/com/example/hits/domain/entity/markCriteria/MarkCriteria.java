@@ -12,6 +12,7 @@ public class MarkCriteria {
     private UUID id;
     private UUID postId;
     private String name;
+    private String description;
     private Float multiplier;
     private Float minScore;
     private Float maxScore;
@@ -29,13 +30,13 @@ public class MarkCriteria {
         m.id = id;
         m.postId = postId;
         applyDefinition(m, definition);
-        m.evaluationFunction = EvaluationFunction.SUM;
         return m;
     }
 
     public static MarkCriteria restore(UUID id,
                                        UUID postId,
                                        String name,
+                                       String description,
                                        Float minScore,
                                        Float maxScore,
                                        Float multiplier,
@@ -44,6 +45,7 @@ public class MarkCriteria {
         m.id = id;
         m.postId = postId;
         m.name = name;
+        m.description = description;
         m.minScore = minScore;
         m.maxScore = maxScore;
         m.multiplier = multiplier;
@@ -54,15 +56,16 @@ public class MarkCriteria {
     public void redefine(MarkCriteriaDefinition definition, TaskMarkEvaluationType taskEvaluationType) {
         validateAgainstTaskType(definition, taskEvaluationType);
         applyDefinition(this, definition);
-        this.evaluationFunction = EvaluationFunction.SUM;
     }
 
     private static void applyDefinition(MarkCriteria target, MarkCriteriaDefinition definition) {
         String rawName = definition.name();
         target.name = rawName == null ? null : rawName.trim();
+        target.description = definition.description();
         target.minScore = definition.minScore();
         target.maxScore = definition.maxScore();
         target.multiplier = definition.multiplier();
+        target.evaluationFunction = definition.evaluationFunction();
     }
 
     private static void validateAgainstTaskType(MarkCriteriaDefinition definition,

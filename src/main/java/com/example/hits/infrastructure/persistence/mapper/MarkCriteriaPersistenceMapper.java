@@ -16,6 +16,7 @@ public class MarkCriteriaPersistenceMapper {
                 entity.getId(),
                 entity.getPostEntity() != null ? entity.getPostEntity().getId() : null,
                 entity.getName(),
+                entity.getDescription(),
                 entity.getMinScore(),
                 entity.getMaxScore(),
                 entity.getMultiplier(),
@@ -27,6 +28,7 @@ public class MarkCriteriaPersistenceMapper {
         entity.setId(domain.getId());
         entity.setPostEntity(post);
         entity.setName(domain.getName());
+        entity.setDescription(domain.getDescription());
         entity.setMinScore(domain.getMinScore());
         entity.setMaxScore(domain.getMaxScore());
         entity.setMultiplier(domain.getMultiplier());

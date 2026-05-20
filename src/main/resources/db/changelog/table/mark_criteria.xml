@@ -23,4 +23,10 @@
                                  referencedTableName="post"/>
     </changeSet>
 
+    <changeSet id="AddDescription" author="KBelovodchenko">
+        <addColumn tableName="mark_criteria">
+            <column name="description" type="VARCHAR(2048)"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>
