@@ -38,4 +38,11 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="AlterMarkEvaluationTypeSize" author="KBelovodchenko">
+        <modifyDataType
+                tableName="course"
+                columnName="course_mark_evaluation_type"
+                newDataType="VARCHAR(64)"/>
+    </changeSet>
+
 </databaseChangeLog>
