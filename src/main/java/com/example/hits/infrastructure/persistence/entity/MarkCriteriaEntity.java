@@ -25,6 +25,8 @@ public class MarkCriteriaEntity {
     @Length(max = 2048)
     private String name;
 
+    private String description;
+
     private Float multiplier;
 
     private Float minScore;

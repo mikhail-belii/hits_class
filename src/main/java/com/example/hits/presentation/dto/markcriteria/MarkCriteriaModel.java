@@ -20,6 +20,8 @@ public class MarkCriteriaModel {
 
     private String name;
 
+    private String description;
+
     private Float multiplier;
 
     private Float minScore;

@@ -147,10 +147,12 @@ public class TaskAnswerGeneralService {
                     return new TaskAnswerCriteriaScoreModel()
                             .setMarkCriteriaId(mc.getId())
                             .setName(mc.getName())
+                            .setDescription(mc.getDescription())
                             .setScore(score)
                             .setMinScore(mc.getMinScore())
                             .setMaxScore(mc.getMaxScore())
-                            .setMultiplier(mc.getMultiplier());
+                            .setMultiplier(mc.getMultiplier())
+                            .setEvaluationFunction(mc.getEvaluationFunction());
                 })
                 .toList();
     }

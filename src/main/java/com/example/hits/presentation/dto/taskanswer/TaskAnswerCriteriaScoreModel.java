@@ -1,5 +1,6 @@
 package com.example.hits.presentation.dto.taskanswer;
 
+import com.example.hits.domain.entity.markCriteria.EvaluationFunction;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -13,6 +14,8 @@ public class TaskAnswerCriteriaScoreModel {
 
     private String name;
 
+    private String description;
+
     private Float score;
 
     private Float minScore;
@@ -20,4 +23,6 @@ public class TaskAnswerCriteriaScoreModel {
     private Float maxScore;
 
     private Float multiplier;
+
+    private EvaluationFunction evaluationFunction;
 }
