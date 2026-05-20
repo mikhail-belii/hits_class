@@ -19,6 +19,8 @@ public class TaskAnswer {
 
     private TaskAnswerStatus status;
 
+    private TaskAnswerEvaluationStatus evaluationStatus;
+
     private List<UUID> fileEntityIds;
 
     private List<UUID> commentIds;
