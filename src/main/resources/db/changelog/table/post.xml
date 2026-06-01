@@ -69,4 +69,16 @@
                 newDataType="VARCHAR(64)"/>
     </changeSet>
 
+    <changeSet id="AddAppraisingFields" author="KBelovodchenko">
+        <addColumn tableName="post">
+            <column name="appraiser_deadline" type="DATETIME"/>
+        </addColumn>
+        <addColumn tableName="post">
+            <column name="student_appraising_number" type="INT"/>
+        </addColumn>
+        <addColumn tableName="post">
+            <column name="task_answer_appraising_type" type="VARCHAR(16)"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

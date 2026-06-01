@@ -17,5 +17,6 @@
     <include file="db/changelog/table/post_comment.xml"/>
     <include file="db/changelog/table/task_answer_comment.xml"/>
     <include file="db/changelog/table/user_course.xml"/>
+    <include file="db/changelog/table/task_answer_student_appraiser.xml"/>
 
 </databaseChangeLog>

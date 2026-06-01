@@ -43,6 +43,9 @@ public class TaskAnswerEntity {
     @OneToMany(mappedBy = "taskAnswerEntity")
     private List<CriteriaScoreEntity> criteriaScoreEntities;
 
+    @OneToMany(mappedBy = "taskAnswerEntity")
+    private List<TaskAnswerStudentAppraiserEntity> studentAppraiserEntities;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private UserEntity userEntity;
