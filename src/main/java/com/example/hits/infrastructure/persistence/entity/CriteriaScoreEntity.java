@@ -1,12 +1,9 @@
 package com.example.hits.infrastructure.persistence.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import org.hibernate.validator.constraints.Length;
 
 import java.util.UUID;
 
@@ -26,6 +23,12 @@ public class CriteriaScoreEntity {
     @JoinColumn(name = "mark_criteria_id")
     private MarkCriteriaEntity markCriteriaEntity;
 
+    // Оценка по критерию либо для оценки студента
+    @ManyToOne
+    @JoinColumn(name = "task_answer_student_appraiser_id")
+    private TaskAnswerStudentAppraiserEntity taskAnswerStudentAppraiserEntity;
+
+    // Либо для оценки преподавателя
     @ManyToOne
     @JoinColumn(name = "task_answer_id")
     private TaskAnswerEntity taskAnswerEntity;

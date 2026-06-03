@@ -12,7 +12,6 @@
             <column name="submitted_at" type="DATETIME"/>
             <column name="student_id" type="UUID"/>
             <column name="task_answer_id" type="UUID"/>
-            <column name="criteria_score_id" type="UUID"/>
         </createTable>
 
         <addForeignKeyConstraint baseColumnNames="student_id"
@@ -26,12 +25,6 @@
                                  constraintName="FK_TASK_ANSWER_STUDENT_APPRAISER_ON_TASK_ANSWER"
                                  referencedColumnNames="id"
                                  referencedTableName="post"/>
-
-        <addForeignKeyConstraint baseColumnNames="criteria_score_id"
-                                 baseTableName="task_answer_student_appraiser"
-                                 constraintName="FK_TASK_ANSWER_STUDENT_APPRAISER_ON_CRITERIA_SCORE"
-                                 referencedColumnNames="id"
-                                 referencedTableName="criteria_score"/>
     </changeSet>
 
 </databaseChangeLog>

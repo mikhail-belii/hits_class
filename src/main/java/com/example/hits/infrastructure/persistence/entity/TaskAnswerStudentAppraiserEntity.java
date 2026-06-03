@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -26,9 +27,8 @@ public class TaskAnswerStudentAppraiserEntity {
     @JoinColumn(name = "task_answer_id")
     private TaskAnswerEntity taskAnswerEntity;
 
-    @ManyToOne
-    @JoinColumn(name = "criteria_score_id")
-    private TaskAnswerEntity criteriaScore;
+    @OneToMany(mappedBy = "taskAnswerStudentAppraiserEntity")
+    private List<CriteriaScoreEntity> criteriaScores;
 
     private LocalDateTime submittedAt;
 

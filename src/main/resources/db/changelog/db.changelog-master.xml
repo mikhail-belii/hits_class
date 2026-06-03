@@ -9,6 +9,7 @@
     <include file="db/changelog/table/post.xml"/>
     <include file="db/changelog/table/task_answer.xml"/>
     <include file="db/changelog/table/mark_criteria.xml"/>
+    <include file="db/changelog/table/task_answer_student_appraiser.xml"/>
     <include file="db/changelog/table/criteria_score.xml"/>
     <include file="db/changelog/table/file.xml"/>
     <include file="db/changelog/table/attachment.xml"/>
@@ -17,6 +18,6 @@
     <include file="db/changelog/table/post_comment.xml"/>
     <include file="db/changelog/table/task_answer_comment.xml"/>
     <include file="db/changelog/table/user_course.xml"/>
-    <include file="db/changelog/table/task_answer_student_appraiser.xml"/>
+
 
 </databaseChangeLog>
