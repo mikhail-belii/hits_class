@@ -26,4 +26,16 @@
                                  referencedTableName="task_answer"/>
     </changeSet>
 
+    <changeSet id="AddTaskAnswerStudentAppraiserFK" author="KBelovodchenko">
+        <addColumn tableName="criteria_score">
+            <column name="task_answer_student_appraiser_id" type="UUID"/>
+        </addColumn>
+
+        <addForeignKeyConstraint baseColumnNames="task_answer_student_appraiser_id"
+                                 baseTableName="criteria_score"
+                                 constraintName="FK_CRITERIA_SCORE_ON_TASK_ANSWER_STUDENT_APPRAISER"
+                                 referencedColumnNames="id"
+                                 referencedTableName="task_answer_student_appraiser"/>
+    </changeSet>
+
 </databaseChangeLog>

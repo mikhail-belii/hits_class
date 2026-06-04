@@ -1,0 +1,30 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="CreateTaskAnswerStudentAppraiserTable" author="KBelovodchenko">
+        <createTable tableName="task_answer_student_appraiser">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_task_answer_student_appraiser"/>
+            </column>
+            <column name="score" type="REAL"/>
+            <column name="submitted_at" type="DATETIME"/>
+            <column name="student_id" type="UUID"/>
+            <column name="task_answer_id" type="UUID"/>
+        </createTable>
+
+        <addForeignKeyConstraint baseColumnNames="student_id"
+                                 baseTableName="task_answer_student_appraiser"
+                                 constraintName="FK_TASK_ANSWER_STUDENT_APPRAISER_ON_USER"
+                                 referencedColumnNames="id"
+                                 referencedTableName="user"/>
+
+        <addForeignKeyConstraint baseColumnNames="task_answer_id"
+                                 baseTableName="task_answer_student_appraiser"
+                                 constraintName="FK_TASK_ANSWER_STUDENT_APPRAISER_ON_TASK_ANSWER"
+                                 referencedColumnNames="id"
+                                 referencedTableName="post"/>
+    </changeSet>
+
+</databaseChangeLog>
