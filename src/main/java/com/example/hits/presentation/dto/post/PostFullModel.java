@@ -7,8 +7,7 @@ import com.example.hits.presentation.dto.file.FileModel;
 import com.example.hits.presentation.dto.taskanswer.TaskAnswerModel;
 import com.example.hits.presentation.dto.user.UserModel;
 import com.example.hits.domain.entity.post.PostType;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import com.example.hits.domain.entity.post.TaskAnswerAppraisingType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -51,4 +50,12 @@ public class PostFullModel {
     private List<PostCommentModel> comments;
 
     private TaskAnswerModel taskAnswer;
+
+    private LocalDateTime appraiserDeadline;
+
+    private TaskAnswerAppraisingType taskAnswerAppraisingType;
+
+    private Boolean canSeeAppraiser;
+
+    private Boolean canSeeAppraised;
 }

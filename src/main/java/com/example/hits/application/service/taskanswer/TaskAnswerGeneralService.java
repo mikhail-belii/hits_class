@@ -10,6 +10,7 @@ import com.example.hits.presentation.dto.taskanswer.TaskAnswerFullModel;
 import com.example.hits.presentation.dto.taskanswer.TaskAnswerModel;
 import com.example.hits.infrastructure.persistence.repository.PostRepository;
 import com.example.hits.infrastructure.persistence.repository.JpaTaskAnswerRepository;
+import com.example.hits.infrastructure.persistence.repository.JpaTaskAnswerStudentAppraiserRepository;
 import com.example.hits.infrastructure.persistence.repository.UserRepository;
 import com.example.hits.application.util.ExceptionUtility;
 import com.example.hits.application.util.PostUtility;
@@ -20,6 +21,11 @@ import com.example.hits.domain.entity.taskanswer.TaskAnswerStatus;
 import com.example.hits.domain.entity.user.UserCourseRole;
 import com.example.hits.infrastructure.persistence.entity.UserCourseEntity;
 import com.example.hits.application.mapper.TaskAnswerMapper;
+import com.example.hits.application.mapper.SimpleUserMapper;
+import com.example.hits.infrastructure.persistence.entity.TaskAnswerStudentAppraiserEntity;
+import com.example.hits.presentation.dto.markcriteria.ScoredMarkCriteriaModel;
+import com.example.hits.presentation.dto.file.FileModel;
+import com.example.hits.presentation.dto.taskanswer.PeerEvaluationModel;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -41,6 +47,7 @@ public class TaskAnswerGeneralService {
     private final JpaTaskAnswerRepository jpaTaskAnswerRepository;
     private final UserRepository userRepository;
     private final PostRepository postRepository;
+    private final JpaTaskAnswerStudentAppraiserRepository jpaAppraiserRepository;
 
     Map<TaskAnswerStatus, Integer> priority = Map.of(
             TaskAnswerStatus.NEW, 1,
@@ -57,6 +64,9 @@ public class TaskAnswerGeneralService {
 
         var taskAnswers = new ArrayList<TaskAnswerEntity>(courseEntity.getCourseUsers().size());
         for (UserCourseEntity userCourseEntity : courseEntity.getCourseUsers()) {
+            if (userCourseEntity.getUserRole() != UserCourseRole.STUDENT) {
+                continue;
+            }
             UserEntity userEntity = userCourseEntity.getUserEntity();
 
             taskAnswers.add(createTaskAnswerForDefiniteUser(postEntity, userEntity));
@@ -166,6 +176,120 @@ public class TaskAnswerGeneralService {
             return false;
         }
         return PostUtility.isAvailableForEditing(post.getCourseEntity(), user);
+    }
+
+    public List<PeerEvaluationModel> getTasksToAppraise(UUID userId, UUID postId) {
+        List<TaskAnswerStudentAppraiserEntity> appraiserEntities;
+        if (postId != null) {
+            appraiserEntities = jpaAppraiserRepository.findAllByStudentIdAndTaskAnswerEntity_PostEntityId(userId, postId);
+        } else {
+            appraiserEntities = jpaAppraiserRepository.findAllByStudentId(userId);
+        }
+        return appraiserEntities.stream()
+                .map(this::toAppraiserModel)
+                .toList();
+    }
+
+    private PeerEvaluationModel toAppraiserModel(TaskAnswerStudentAppraiserEntity entity) {
+        var post = entity.getTaskAnswerEntity().getPostEntity();
+        var evaluatedStudent = entity.getTaskAnswerEntity().getUserEntity();
+        var appraiserStudent = entity.getStudent();
+
+        Map<UUID, Float> scoreByCriteriaId = entity.getCriteriaScores() != null
+                ? entity.getCriteriaScores().stream()
+                    .filter(cs -> cs.getMarkCriteriaEntity() != null)
+                    .collect(Collectors.toMap(cs -> cs.getMarkCriteriaEntity().getId(),
+                                              cs -> cs.getScore(), (a, b) -> a))
+                : Map.of();
+
+        List<ScoredMarkCriteriaModel> criteriaScoresList;
+        if (post.getMarkCriteriaEntityList() != null && !post.getMarkCriteriaEntityList().isEmpty()) {
+            criteriaScoresList = post.getMarkCriteriaEntityList().stream()
+                    .map(mc -> new ScoredMarkCriteriaModel()
+                            .setId(mc.getId())
+                            .setScore(scoreByCriteriaId.get(mc.getId()))
+                            .setName(mc.getName())
+                            .setMinScore(mc.getMinScore())
+                            .setMaxScore(mc.getMaxScore())
+                            .setMultiplier(mc.getMultiplier())
+                            .setEvaluationFunction(mc.getEvaluationFunction()))
+                    .toList();
+        } else {
+            criteriaScoresList = List.of();
+        }
+
+        return new PeerEvaluationModel()
+                .setId(entity.getId())
+                .setStudent(evaluatedStudent != null ? SimpleUserMapper.toModel(evaluatedStudent) : null)
+                .setAppraiser(appraiserStudent != null ? SimpleUserMapper.toModel(appraiserStudent) : null)
+                .setScore(entity.getScore())
+                .setSubmittedAt(entity.getSubmittedAt())
+                .setTaskAnswerId(entity.getTaskAnswerEntity().getId())
+                .setCriteriaScores(criteriaScoresList)
+                .setFiles(entity.getTaskAnswerEntity().getFileEntities() != null
+                        ? entity.getTaskAnswerEntity().getFileEntities().stream()
+                            .map(f -> new FileModel(f.getId(), f.getOriginalName()))
+                            .toList()
+                        : List.of());
+    }
+
+    public List<PeerEvaluationModel> getAppraisersForTaskAnswer(UUID taskAnswerId, UUID userId) {
+        var taskAnswer = jpaTaskAnswerRepository.findById(taskAnswerId)
+                .orElseThrow(ExceptionUtility::taskAnswerNotFoundException);
+        var userEntity = userRepository.findById(userId)
+                .orElseThrow(ExceptionUtility::userNotFoundException);
+
+        if (taskAnswer.getUserEntity() == null || !taskAnswer.getUserEntity().getId().equals(userId)) {
+            throw ExceptionUtility.forbiddenRightsException();
+        }
+
+        var appraisers = jpaAppraiserRepository.findAllByTaskAnswerEntityId(taskAnswerId);
+        var post = taskAnswer.getPostEntity();
+        var hideAppraiser = post.getCanSeeAppraiser() != null && !post.getCanSeeAppraiser();
+
+        return appraisers.stream()
+                .map(a -> {
+                    var model = toAppraiserModel(a);
+                    if (hideAppraiser) {
+                        model.setAppraiser(null);
+                    }
+                    return model;
+                })
+                .toList();
+    }
+
+    public List<PeerEvaluationModel> getAllAppraisersForTaskAnswer(UUID taskAnswerId, UUID userId) {
+        var taskAnswer = jpaTaskAnswerRepository.findById(taskAnswerId)
+                .orElseThrow(ExceptionUtility::taskAnswerNotFoundException);
+        var userEntity = userRepository.findById(userId)
+                .orElseThrow(ExceptionUtility::userNotFoundException);
+
+        var post = taskAnswer.getPostEntity();
+        if (post.getCourseEntity() == null || !PostUtility.isAvailableForEditing(post.getCourseEntity(), userEntity)) {
+            throw ExceptionUtility.forbiddenRightsException();
+        }
+
+        var appraisers = jpaAppraiserRepository.findAllByTaskAnswerEntityId(taskAnswerId);
+        return appraisers.stream()
+                .map(this::toAppraiserModel)
+                .toList();
+    }
+
+    public PeerEvaluationModel getPeerEvaluationDetail(UUID evaluationId, UUID userId) {
+        var appraiser = jpaAppraiserRepository.findById(evaluationId)
+                .orElseThrow(ExceptionUtility::appraiserNotFoundException);
+
+        if (!appraiser.getStudent().getId().equals(userId)) {
+            throw ExceptionUtility.forbiddenRightsException();
+        }
+
+        var model = toAppraiserModel(appraiser);
+        var post = appraiser.getTaskAnswerEntity().getPostEntity();
+        var hideStudent = post.getCanSeeAppraised() != null && !post.getCanSeeAppraised();
+        if (hideStudent) {
+            model.setStudent(null);
+        }
+        return model;
     }
 
     public void createTaskAnswersForNewCourseUser(UserEntity userEntity, CourseEntity courseEntity) {

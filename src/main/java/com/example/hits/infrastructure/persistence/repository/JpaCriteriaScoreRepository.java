@@ -13,6 +13,8 @@ public interface JpaCriteriaScoreRepository extends JpaRepository<CriteriaScoreE
 
     Optional<CriteriaScoreEntity> findByTaskAnswerEntity_IdAndMarkCriteriaEntity_Id(UUID taskAnswerId, UUID markCriteriaId);
 
+    Optional<CriteriaScoreEntity> findByTaskAnswerStudentAppraiserEntity_IdAndMarkCriteriaEntity_Id(UUID appraiserId, UUID markCriteriaId);
+
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM CriteriaScoreEntity c WHERE c.markCriteriaEntity.id = :markCriteriaId")
     void deleteAllByMarkCriteriaId(@Param("markCriteriaId") UUID markCriteriaId);

@@ -35,7 +35,11 @@ public class PostMapper {
                 .setMultiplier(postEntity.getMultiplier())
                 .setEvaluationFunction(postEntity.getEvaluationFunction())
                 .setTaskMarkEvaluationType(postEntity.getTaskMarkEvaluationType())
-                .setPassThreshold(postEntity.getPassThreshold());
+                .setPassThreshold(postEntity.getPassThreshold())
+                .setAppraiserDeadline(postEntity.getAppraiserDeadline())
+                .setTaskAnswerAppraisingType(postEntity.getTaskAnswerAppraisingType())
+                .setCanSeeAppraiser(postEntity.getCanSeeAppraiser())
+                .setCanSeeAppraised(postEntity.getCanSeeAppraised());
     }
 
     public PostShortModel toModel(PostEntity postEntity) {
@@ -55,7 +59,11 @@ public class PostMapper {
                         List.of() :
                         postEntity.getComments().stream()
                                 .map(c -> c.toModel())
-                                .toList());
+                                .toList())
+                .setAppraiserDeadline(postEntity.getAppraiserDeadline())
+                .setTaskAnswerAppraisingType(postEntity.getTaskAnswerAppraisingType())
+                .setCanSeeAppraiser(postEntity.getCanSeeAppraiser())
+                .setCanSeeAppraised(postEntity.getCanSeeAppraised());
     }
 
     public PostFullModel toModel(PostEntity postEntity, TaskAnswerEntity taskAnswerEntity) {
@@ -79,7 +87,11 @@ public class PostMapper {
                         postEntity.getComments().stream()
                                 .map(c -> c.toModel())
                                 .toList())
-                .setTaskAnswer(taskAnswerEntity != null ? taskAnswerEntity.toModel() : null);
+                .setTaskAnswer(taskAnswerEntity != null ? taskAnswerEntity.toModel() : null)
+                .setAppraiserDeadline(postEntity.getAppraiserDeadline())
+                .setTaskAnswerAppraisingType(postEntity.getTaskAnswerAppraisingType())
+                .setCanSeeAppraiser(postEntity.getCanSeeAppraiser())
+                .setCanSeeAppraised(postEntity.getCanSeeAppraised());
     }
 
     public ScoredPost toDomain(@NotNull PostEntity postEntity, TaskAnswerEntity taskAnswerEntity) {

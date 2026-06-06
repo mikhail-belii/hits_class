@@ -15,6 +15,7 @@ import com.example.hits.infrastructure.persistence.entity.UserCourseEntity;
 import com.example.hits.application.mapper.CourseMapper;
 import com.example.hits.application.mapper.UserCourseMapper;
 import com.example.hits.application.service.taskanswer.TaskAnswerGeneralService;
+import com.example.hits.application.service.peer.PeerEvaluationService;
 import com.example.hits.presentation.dto.course.*;
 import com.example.hits.presentation.request.course.CourseCreateModel;
 import com.example.hits.presentation.request.course.CourseEditModel;
@@ -35,6 +36,7 @@ public class CourseService {
     private final UserCourseRepository userCourseRepository;
     private final CourseCodeGenerator courseCodeGenerator;
     private final TaskAnswerGeneralService taskAnswerGeneralService;
+    private final PeerEvaluationService peerEvaluationService;
     private final CourseRepository courseRepository;
 
     @Transactional
@@ -163,6 +165,8 @@ public class CourseService {
         userCourseRepository.saveAndFlush(userCourseEntity);
 
         taskAnswerGeneralService.createTaskAnswersForNewCourseUser(requestingUserEntity, courseEntity);
+
+        peerEvaluationService.regenerateChainsForCourse(courseEntity);
     }
 
     public void changeUserRoleOnCourse(
@@ -209,6 +213,9 @@ public class CourseService {
                 .orElseThrow(ExceptionUtility::userCourseNotFoundException);
 
         userCourseRepository.delete(userCourseEntity);
+
+        var refreshedCourse = jpaCourseRepository.findById(courseId).orElseThrow(ExceptionUtility::courseNotFoundException);
+        peerEvaluationService.regenerateChainsForCourse(refreshedCourse);
     }
 
     public void leaveCourse(UUID requestingUserId, UUID courseId) {
@@ -225,6 +232,9 @@ public class CourseService {
                 .orElseThrow(ExceptionUtility::forbiddenRightsException);
 
         userCourseRepository.delete(userCourseEntity);
+
+        var refreshedCourse = jpaCourseRepository.findById(courseId).orElseThrow(ExceptionUtility::courseNotFoundException);
+        peerEvaluationService.regenerateChainsForCourse(refreshedCourse);
     }
 
     private CourseEntity createCourseFromModel(CourseCreateModel courseCreateModel) {

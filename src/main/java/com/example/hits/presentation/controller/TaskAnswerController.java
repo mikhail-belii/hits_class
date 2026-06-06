@@ -3,11 +3,13 @@ package com.example.hits.presentation.controller;
 import com.example.hits.presentation.dto.file.FileModel;
 import com.example.hits.presentation.dto.taskanswer.TaskAnswerCriteriaScoreModel;
 import com.example.hits.presentation.dto.taskanswer.TaskAnswerFullModel;
+import com.example.hits.presentation.dto.taskanswer.PeerEvaluationModel;
 import com.example.hits.presentation.dto.taskanswer.TaskAnswerModel;
 import com.example.hits.presentation.request.taskanswer.CriteriaScoreRequest;
 import com.example.hits.presentation.request.taskanswer.TaskRateRequestModel;
 import com.example.hits.application.service.taskanswer.TaskAnswerGeneralService;
 import com.example.hits.application.service.taskanswer.TaskAnswerUploadService;
+import com.example.hits.application.service.peer.PeerEvaluationService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +24,7 @@ public class TaskAnswerController {
 
     private final TaskAnswerGeneralService taskAnswerGeneralService;
     private final TaskAnswerUploadService taskAnswerUploadService;
+    private final PeerEvaluationService peerEvaluationService;
 
     @GetMapping("/all")
     public List<TaskAnswerModel> getAllUserTaskAnswers(@RequestAttribute("userId") UUID userId) {
@@ -92,5 +95,64 @@ public class TaskAnswerController {
                              @RequestBody TaskRateRequestModel taskRate,
                              @RequestAttribute("userId") UUID userId) {
         taskAnswerUploadService.evaluateTaskManually(taskAnswerId, taskRate, userId);
+    }
+
+    @GetMapping("/to-appraise")
+    @Operation(summary = "Get task answers to appraise [FOR STUDENT]")
+    public List<PeerEvaluationModel> getTasksToAppraise(@RequestAttribute("userId") UUID userId,
+                                                           @RequestParam(required = false) UUID postId) {
+        return taskAnswerGeneralService.getTasksToAppraise(userId, postId);
+    }
+
+    @GetMapping("/peer-evaluation/{evaluationId}")
+    @Operation(summary = "Get peer evaluation detail [FOR STUDENT appraiser]")
+    public PeerEvaluationModel getPeerEvaluationDetail(@PathVariable UUID evaluationId,
+                                                        @RequestAttribute("userId") UUID userId) {
+        return taskAnswerGeneralService.getPeerEvaluationDetail(evaluationId, userId);
+    }
+
+    @PutMapping("/appraiser/{appraiserId}/criteria-scores")
+    @Operation(summary = "Set criteria scores as appraiser [FOR STUDENT appraiser]")
+    public void putAppraiserCriteriaScores(@PathVariable UUID appraiserId,
+                                            @RequestBody List<CriteriaScoreRequest> requests,
+                                            @RequestAttribute("userId") UUID userId) {
+        peerEvaluationService.submitAppraiserScore(appraiserId, requests, userId);
+    }
+
+    @PostMapping("/appraiser/{appraiserId}/submit")
+    @Operation(summary = "Submit appraiser evaluation [FOR STUDENT appraiser]")
+    public void submitAppraiserEvaluation(@PathVariable UUID appraiserId,
+                                           @RequestAttribute("userId") UUID userId) {
+        peerEvaluationService.finalizeAppraiserEvaluation(appraiserId, userId);
+    }
+
+    @GetMapping("/task-answer/{taskAnswerId}/appraisers")
+    @Operation(summary = "Who evaluated my answer [FOR STUDENT owner, respects canSeeAppraiser]")
+    public List<PeerEvaluationModel> getTaskAnswerAppraisers(@PathVariable UUID taskAnswerId,
+                                                                @RequestAttribute("userId") UUID userId) {
+        return taskAnswerGeneralService.getAppraisersForTaskAnswer(taskAnswerId, userId);
+    }
+
+    @GetMapping("/task-answer/{taskAnswerId}/appraisers/all")
+    @Operation(summary = "All appraiser evaluations [FOR TEACHER+]")
+    public List<PeerEvaluationModel> getAllTaskAnswerAppraisers(@PathVariable UUID taskAnswerId,
+                                                                   @RequestAttribute("userId") UUID userId) {
+        return taskAnswerGeneralService.getAllAppraisersForTaskAnswer(taskAnswerId, userId);
+    }
+
+    @PutMapping("/appraiser/{appraiserId}/criteria-scores/override")
+    @Operation(summary = "Override appraiser criteria scores [FOR TEACHER+]")
+    public void overrideAppraiserCriteria(@PathVariable UUID appraiserId,
+                                           @RequestBody List<CriteriaScoreRequest> requests,
+                                           @RequestAttribute("userId") UUID userId) {
+        peerEvaluationService.overrideAppraiserCriteria(appraiserId, requests, userId);
+    }
+
+    @PutMapping("/appraiser/{appraiserId}/evaluate")
+    @Operation(summary = "Override appraiser final score [FOR TEACHER+]")
+    public void overrideAppraiserScore(@PathVariable UUID appraiserId,
+                                        @RequestBody TaskRateRequestModel taskRate,
+                                        @RequestAttribute("userId") UUID userId) {
+        peerEvaluationService.overrideAppraiserScore(appraiserId, taskRate.getRate(), userId);
     }
 }

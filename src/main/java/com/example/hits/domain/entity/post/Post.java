@@ -44,4 +44,12 @@ public class Post {
 
     private Float passThreshold;
 
+    private LocalDateTime appraiserDeadline;
+
+    private TaskAnswerAppraisingType taskAnswerAppraisingType;
+
+    private Boolean canSeeAppraiser;
+
+    private Boolean canSeeAppraised;
+
 }

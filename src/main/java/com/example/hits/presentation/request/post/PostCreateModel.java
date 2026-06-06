@@ -4,6 +4,7 @@ import com.example.hits.domain.entity.markCriteria.EvaluationFunction;
 import com.example.hits.domain.entity.post.TaskMarkEvaluationType;
 import com.example.hits.presentation.dto.file.FileModel;
 import com.example.hits.domain.entity.post.PostType;
+import com.example.hits.domain.entity.post.TaskAnswerAppraisingType;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -37,4 +38,12 @@ public class PostCreateModel implements TaskCreationFields {
     private EvaluationFunction evaluationFunction;
 
     private LocalDateTime deadline;
+
+    private LocalDateTime appraiserDeadline;
+
+    private TaskAnswerAppraisingType taskAnswerAppraisingType;
+
+    private Boolean canSeeAppraiser;
+
+    private Boolean canSeeAppraised;
 }
