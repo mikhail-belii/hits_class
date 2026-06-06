@@ -81,4 +81,13 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="AddPeerEvaluationPrivacyColumns" author="mikhail-belii">
+        <addColumn tableName="post">
+            <column name="can_see_appraiser" type="BOOLEAN" defaultValueBoolean="true"/>
+        </addColumn>
+        <addColumn tableName="post">
+            <column name="can_see_appraised" type="BOOLEAN" defaultValueBoolean="true"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

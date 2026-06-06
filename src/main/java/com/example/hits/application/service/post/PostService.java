@@ -15,10 +15,15 @@ import com.example.hits.application.util.ExceptionUtility;
 import com.example.hits.application.util.PostUtility;
 import com.example.hits.infrastructure.persistence.entity.CourseEntity;
 import com.example.hits.domain.entity.post.PostType;
+import com.example.hits.domain.entity.post.TaskAnswerAppraisingType;
+import com.example.hits.domain.entity.post.TaskMarkEvaluationType;
 import com.example.hits.infrastructure.persistence.entity.TaskAnswerCommentEntity;
 import com.example.hits.application.mapper.PostMapper;
+import com.example.hits.application.service.peer.PeerEvaluationService;
 import com.example.hits.application.service.taskanswer.TaskAnswerGeneralService;
 import com.example.hits.application.service.taskanswer.TaskAnswerUploadService;
+import com.example.hits.infrastructure.persistence.repository.JpaTaskAnswerStudentAppraiserRepository;
+import com.example.hits.infrastructure.persistence.repository.JpaCriteriaScoreRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.ExtensionMethod;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +43,7 @@ public class PostService {
 
     private final TaskAnswerGeneralService taskAnswerGeneralService;
     private final TaskAnswerUploadService taskAnswerUploadService;
+    private final PeerEvaluationService peerEvaluationService;
     private final JpaCourseRepository jpaCourseRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
@@ -45,6 +51,8 @@ public class PostService {
     private final PostCommentRepository postCommentRepository;
     private final JpaTaskAnswerRepository jpaTaskAnswerRepository;
     private final TaskAnswerCommentRepository taskAnswerCommentRepository;
+    private final JpaTaskAnswerStudentAppraiserRepository jpaAppraiserRepository;
+    private final JpaCriteriaScoreRepository jpaCriteriaScoreRepository;
 
     @Transactional
     public IdResponseModel createPost(UUID courseId, UUID userId, PostCreateModel postCreateModel) {
@@ -56,6 +64,7 @@ public class PostService {
         }
 
         validatePostCreation(postCreateModel);
+        validateAppraisingConstraints(postCreateModel);
 
         PostEntity postEntity = createPostFromModel(postCreateModel, userEntity, courseEntity);
         postEntity = postRepository.save(postEntity);
@@ -77,6 +86,10 @@ public class PostService {
                     courseEntity.getCourseMarkEvaluationType());
 
             taskAnswerGeneralService.createTaskAnswerForEveryCourseMember(courseEntity, postEntity);
+
+            if (postEntity.getTaskAnswerAppraisingType() == TaskAnswerAppraisingType.CHAIN) {
+                peerEvaluationService.generateChain(postEntity, courseEntity);
+            }
         }
 
         return new IdResponseModel(postEntity.getId());
@@ -90,6 +103,66 @@ public class PostService {
         var deadline = postCreateModel.getDeadline();
         if (deadline != null && deadline.isBefore(LocalDateTime.now())) {
             throw ExceptionUtility.badRequestException("Deadline cannot be earlier than current moment");
+        }
+    }
+
+    private void validateAppraisingConstraints(PostCreateModel model) {
+        if (model.getTaskAnswerAppraisingType() == null) {
+            return;
+        }
+
+        if (model.getPostType() != PostType.TASK) {
+            throw ExceptionUtility.badRequestException("Peer evaluation is only available for task posts", "postType");
+        }
+
+        if (model.getTaskMarkEvaluationType() == TaskMarkEvaluationType.TEACHER_DECISION
+                || model.getTaskMarkEvaluationType() == TaskMarkEvaluationType.TEACHER_DECISION_PASS_FAIL) {
+            throw ExceptionUtility.badRequestException(
+                    "Peer evaluation cannot be used with TEACHER_DECISION mark evaluation type",
+                    "taskAnswerAppraisingType");
+        }
+
+        if (model.getAppraiserDeadline() == null) {
+            throw ExceptionUtility.badRequestException("Appraiser deadline is required when peer evaluation is enabled",
+                    "appraiserDeadline");
+        }
+
+        if (model.getDeadline() != null && !model.getAppraiserDeadline().isAfter(model.getDeadline())) {
+            throw ExceptionUtility.badRequestException("Appraiser deadline must be after the task deadline",
+                    "appraiserDeadline");
+        }
+
+        if (model.getAppraiserDeadline().isBefore(LocalDateTime.now())) {
+            throw ExceptionUtility.badRequestException("Appraiser deadline cannot be in the past",
+                    "appraiserDeadline");
+        }
+    }
+
+    private void validateAppraisingUpdateConstraints(PostUpdateModel model, PostEntity postEntity) {
+        if (model.getTaskAnswerAppraisingType() == null) {
+            return;
+        }
+
+        if (model.getTaskMarkEvaluationType() == TaskMarkEvaluationType.TEACHER_DECISION
+                || model.getTaskMarkEvaluationType() == TaskMarkEvaluationType.TEACHER_DECISION_PASS_FAIL) {
+            throw ExceptionUtility.badRequestException(
+                    "Peer evaluation cannot be used with TEACHER_DECISION mark evaluation type",
+                    "taskAnswerAppraisingType");
+        }
+
+        if (model.getAppraiserDeadline() == null) {
+            throw ExceptionUtility.badRequestException("Appraiser deadline is required when peer evaluation is enabled",
+                    "appraiserDeadline");
+        }
+
+        if (postEntity.getDeadline() != null && !model.getAppraiserDeadline().isAfter(postEntity.getDeadline())) {
+            throw ExceptionUtility.badRequestException("Appraiser deadline must be after the task deadline",
+                    "appraiserDeadline");
+        }
+
+        if (model.getAppraiserDeadline().isBefore(LocalDateTime.now())) {
+            throw ExceptionUtility.badRequestException("Appraiser deadline cannot be in the past",
+                    "appraiserDeadline");
         }
     }
 
@@ -143,6 +216,8 @@ public class PostService {
                     courseEntity.getCourseMarkEvaluationType());
         }
 
+        validateAppraisingUpdateConstraints(postUpdateModel, postEntity);
+
         postEntity.setText(postUpdateModel.getText());
         postEntity.setFileEntities(buildPostFiles(postUpdateModel.getFiles(), postEntity, userEntity, postEntity.getId()));
         postEntity.setUpdatedAt(LocalDateTime.now());
@@ -152,6 +227,18 @@ public class PostService {
         postEntity.setEvaluationFunction(postUpdateModel.getEvaluationFunction());
         postEntity.setMultiplier(postUpdateModel.getMultiplier());
         postEntity.setPassThreshold(postUpdateModel.getPassThreshold());
+        postEntity.setAppraiserDeadline(postUpdateModel.getAppraiserDeadline());
+        postEntity.setTaskAnswerAppraisingType(postUpdateModel.getTaskAnswerAppraisingType());
+        postEntity.setCanSeeAppraiser(postUpdateModel.getCanSeeAppraiser());
+        postEntity.setCanSeeAppraised(postUpdateModel.getCanSeeAppraised());
+
+        if (postEntity.getTaskAnswerAppraisingType() == TaskAnswerAppraisingType.CHAIN) {
+            clearExistingAppraiserRecordsForPost(postEntity);
+            peerEvaluationService.generateChain(postEntity, courseEntity);
+        } else {
+            clearExistingAppraiserRecordsForPost(postEntity);
+        }
+
         postRepository.save(postEntity);
 
         if (postEntity.getPostType() == PostType.TASK) {
@@ -224,6 +311,18 @@ public class PostService {
             taskAnswerCommentRepository.deleteAll(comments);
         }
 
+        for (var taskAnswer : taskAnswers) {
+            if (taskAnswer.getStudentAppraiserEntities() != null
+                    && !taskAnswer.getStudentAppraiserEntities().isEmpty()) {
+                for (var appraiser : taskAnswer.getStudentAppraiserEntities()) {
+                    if (appraiser.getCriteriaScores() != null && !appraiser.getCriteriaScores().isEmpty()) {
+                        jpaCriteriaScoreRepository.deleteAll(appraiser.getCriteriaScores());
+                    }
+                }
+                jpaAppraiserRepository.deleteAll(taskAnswer.getStudentAppraiserEntities());
+            }
+        }
+
         jpaTaskAnswerRepository.deleteAll(taskAnswers);
     }
 
@@ -246,7 +345,11 @@ public class PostService {
                 .setMinScore(postCreateModel.getMinScore())
                 .setEvaluationFunction(postCreateModel.getEvaluationFunction())
                 .setMultiplier(postCreateModel.getMultiplier())
-                .setPassThreshold(postCreateModel.getPassThreshold());
+                .setPassThreshold(postCreateModel.getPassThreshold())
+                .setAppraiserDeadline(postCreateModel.getAppraiserDeadline())
+                .setTaskAnswerAppraisingType(postCreateModel.getTaskAnswerAppraisingType())
+                .setCanSeeAppraiser(postCreateModel.getCanSeeAppraiser())
+                .setCanSeeAppraised(postCreateModel.getCanSeeAppraised());
     }
 
     private List<FileEntity> buildPostFiles(List<FileModel> fileModels,
@@ -328,6 +431,20 @@ public class PostService {
     private PostEntity findPostById(UUID userId) {
         return postRepository.findById(userId)
                 .orElseThrow(ExceptionUtility::postNotFoundException);
+    }
+
+    private void clearExistingAppraiserRecordsForPost(PostEntity postEntity) {
+        var taskAnswers = jpaTaskAnswerRepository.findAllByPostEntityId(postEntity.getId());
+        for (var ta : taskAnswers) {
+            if (ta.getStudentAppraiserEntities() != null && !ta.getStudentAppraiserEntities().isEmpty()) {
+                for (var appraiser : ta.getStudentAppraiserEntities()) {
+                    if (appraiser.getCriteriaScores() != null && !appraiser.getCriteriaScores().isEmpty()) {
+                        jpaCriteriaScoreRepository.deleteAll(appraiser.getCriteriaScores());
+                    }
+                }
+                jpaAppraiserRepository.deleteAll(ta.getStudentAppraiserEntities());
+            }
+        }
     }
 }
 

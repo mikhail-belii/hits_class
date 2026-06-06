@@ -5,6 +5,7 @@ import com.example.hits.presentation.dto.comment.postcomment.PostCommentModel;
 import com.example.hits.presentation.dto.file.FileModel;
 import com.example.hits.presentation.dto.user.UserModel;
 import com.example.hits.domain.entity.post.PostType;
+import com.example.hits.domain.entity.post.TaskAnswerAppraisingType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -39,4 +40,12 @@ public class PostShortModel {
     private Float maxScore;
 
     private List<PostCommentModel> comments;
+
+    private LocalDateTime appraiserDeadline;
+
+    private TaskAnswerAppraisingType taskAnswerAppraisingType;
+
+    private Boolean canSeeAppraiser;
+
+    private Boolean canSeeAppraised;
 }

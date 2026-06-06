@@ -27,4 +27,14 @@
                                  referencedTableName="post"/>
     </changeSet>
 
+    <changeSet id="FixTaskAnswerStudentAppraiserFK" author="mikhail-belii">
+        <dropForeignKeyConstraint baseTableName="task_answer_student_appraiser"
+                                  constraintName="FK_TASK_ANSWER_STUDENT_APPRAISER_ON_TASK_ANSWER"/>
+        <addForeignKeyConstraint baseColumnNames="task_answer_id"
+                                 baseTableName="task_answer_student_appraiser"
+                                 constraintName="FK_TASK_ANSWER_STUDENT_APPRAISER_ON_TASK_ANSWER"
+                                 referencedColumnNames="id"
+                                 referencedTableName="task_answer"/>
+    </changeSet>
+
 </databaseChangeLog>

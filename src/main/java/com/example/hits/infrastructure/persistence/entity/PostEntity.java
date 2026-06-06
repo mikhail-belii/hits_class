@@ -78,4 +78,8 @@ public class PostEntity {
 
     private Float passThreshold;
 
+    private Boolean canSeeAppraiser;
+
+    private Boolean canSeeAppraised;
+
 }

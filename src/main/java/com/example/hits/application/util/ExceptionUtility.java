@@ -91,6 +91,12 @@ public class ExceptionUtility {
         return notFoundException;
     }
 
+    public ExceptionWrapper appraiserNotFoundException() {
+        var notFoundException = new ExceptionWrapper(new EntityNotFoundException("Student appraiser not found"));
+        notFoundException.addError("appraiserId", "Cannot find student appraiser with requested id");
+        return notFoundException;
+    }
+
     public ExceptionWrapper badRequestException(String message) {
         var badRequestException = new ExceptionWrapper(new BadRequestException(message));
         badRequestException.addError("Bad request", message);
