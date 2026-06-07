@@ -25,6 +25,7 @@ import com.example.hits.infrastructure.persistence.repository.JpaTaskAnswerStude
 import com.example.hits.infrastructure.persistence.repository.UserCourseRepository;
 import com.example.hits.infrastructure.persistence.repository.UserRepository;
 import com.example.hits.presentation.request.taskanswer.CriteriaScoreRequest;
+import com.example.hits.presentation.request.taskanswer.TaskRateRequestModel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -160,7 +161,7 @@ public class PeerEvaluationService {
     }
 
     @Transactional
-    public void finalizeAppraiserEvaluation(UUID appraiserId, UUID userId) {
+    public void evaluateAppraiser(UUID appraiserId, TaskRateRequestModel taskRate, UUID userId) {
         var appraiser = jpaAppraiserRepository.findById(appraiserId)
                 .orElseThrow(ExceptionUtility::appraiserNotFoundException);
 
@@ -177,41 +178,15 @@ public class PeerEvaluationService {
             throw ExceptionUtility.badRequestException("Appraiser deadline has passed");
         }
 
-        recalculateAppraiserScore(appraiser);
+        if (taskRate.getRate() > post.getMaxScore()) {
+            throw ExceptionUtility.badRequestException("Appraiser score is bigger than max score");
+        }
+        if (taskRate.getRate() < post.getMinScore()) {
+            throw ExceptionUtility.badRequestException("Appraiser score is lower than min score");
+        }
+
+        appraiser.setScore(taskRate.getRate());
         appraiser.setSubmittedAt(LocalDateTime.now());
-        jpaAppraiserRepository.save(appraiser);
-
-        recalculateTaskAnswerScoreFromAppraisers(appraiser.getTaskAnswerEntity());
-        recalculateCourseScoreForTaskAnswer(appraiser.getTaskAnswerEntity());
-    }
-
-    @Transactional
-    public void overrideAppraiserCriteria(UUID appraiserId, List<CriteriaScoreRequest> criteriaScores, UUID userId) {
-        var appraiser = jpaAppraiserRepository.findById(appraiserId)
-                .orElseThrow(ExceptionUtility::appraiserNotFoundException);
-        var requestingUser = getUser(userId);
-
-        var post = appraiser.getTaskAnswerEntity().getPostEntity();
-        assertCanEditCourse(post.getCourseEntity(), requestingUser);
-
-        for (var request : criteriaScores) {
-            var markCriteria = requireMarkCriteriaBelongingToPost(post, request.getMarkCriteriaId());
-            validateCriteriaScore(markCriteria, request.getScore(), post.getTaskMarkEvaluationType());
-
-            var entity = jpaCriteriaScoreRepository
-                    .findByTaskAnswerStudentAppraiserEntity_IdAndMarkCriteriaEntity_Id(appraiserId, request.getMarkCriteriaId())
-                    .orElseGet(() -> new CriteriaScoreEntity()
-                            .setId(UUID.randomUUID())
-                            .setMarkCriteriaEntity(markCriteria)
-                            .setTaskAnswerStudentAppraiserEntity(appraiser));
-            entity.setScore(request.getScore());
-            jpaCriteriaScoreRepository.save(entity);
-        }
-
-        recalculateAppraiserScore(appraiser);
-        if (appraiser.getSubmittedAt() == null) {
-            appraiser.setSubmittedAt(LocalDateTime.now());
-        }
         jpaAppraiserRepository.save(appraiser);
 
         recalculateTaskAnswerScoreFromAppraisers(appraiser.getTaskAnswerEntity());
@@ -270,6 +245,9 @@ public class PeerEvaluationService {
 
         aggregate.evaluateTaskByCriteriaList();
         appraiser.setScore(domainTaskAnswer.getScore());
+
+        recalculateTaskAnswerScoreFromAppraisers(appraiser.getTaskAnswerEntity());
+        recalculateCourseScoreForTaskAnswer(appraiser.getTaskAnswerEntity());
     }
 
     private void recalculateTaskAnswerScoreFromAppraisers(TaskAnswerEntity taskAnswer) {
@@ -278,15 +256,15 @@ public class PeerEvaluationService {
             return;
         }
 
-        var submittedAppraisers = appraisers.stream()
-                .filter(a -> a.getSubmittedAt() != null)
-                .toList();
+        //var submittedAppraisers = appraisers.stream()
+        //        .filter(a -> a.getSubmittedAt() != null)
+        //        .toList();
+//
+        //if (submittedAppraisers.isEmpty()) {
+        //    return;
+        //}
 
-        if (submittedAppraisers.isEmpty()) {
-            return;
-        }
-
-        float avgScore = (float) submittedAppraisers.stream()
+        float avgScore = (float) appraisers.stream()
                 .mapToDouble(a -> a.getScore() != null ? a.getScore() : 0f)
                 .average()
                 .orElse(0f);

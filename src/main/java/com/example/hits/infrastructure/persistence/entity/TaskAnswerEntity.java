@@ -25,6 +25,8 @@ public class TaskAnswerEntity {
 
     private Float score = 0f;
 
+    private Float teacherScore = null;
+
     private LocalDateTime submittedAt = null;
 
     @Enumerated(EnumType.STRING)

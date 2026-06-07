@@ -119,11 +119,12 @@ public class TaskAnswerController {
         peerEvaluationService.submitAppraiserScore(appraiserId, requests, userId);
     }
 
-    @PostMapping("/appraiser/{appraiserId}/submit")
-    @Operation(summary = "Submit appraiser evaluation [FOR STUDENT appraiser]")
+    @PostMapping("/appraiser/{appraiserId}/evaluate")
+    @Operation(summary = "Evaluate task answer by student [FOR STUDENT appraiser]")
     public void submitAppraiserEvaluation(@PathVariable UUID appraiserId,
+                                          @RequestBody TaskRateRequestModel taskRate,
                                            @RequestAttribute("userId") UUID userId) {
-        peerEvaluationService.finalizeAppraiserEvaluation(appraiserId, userId);
+        peerEvaluationService.evaluateAppraiser(appraiserId, taskRate, userId);
     }
 
     @GetMapping("/task-answer/{taskAnswerId}/appraisers")
@@ -138,21 +139,5 @@ public class TaskAnswerController {
     public List<PeerEvaluationModel> getAllTaskAnswerAppraisers(@PathVariable UUID taskAnswerId,
                                                                    @RequestAttribute("userId") UUID userId) {
         return taskAnswerGeneralService.getAllAppraisersForTaskAnswer(taskAnswerId, userId);
-    }
-
-    @PutMapping("/appraiser/{appraiserId}/criteria-scores/override")
-    @Operation(summary = "Override appraiser criteria scores [FOR TEACHER+]")
-    public void overrideAppraiserCriteria(@PathVariable UUID appraiserId,
-                                           @RequestBody List<CriteriaScoreRequest> requests,
-                                           @RequestAttribute("userId") UUID userId) {
-        peerEvaluationService.overrideAppraiserCriteria(appraiserId, requests, userId);
-    }
-
-    @PutMapping("/appraiser/{appraiserId}/evaluate")
-    @Operation(summary = "Override appraiser final score [FOR TEACHER+]")
-    public void overrideAppraiserScore(@PathVariable UUID appraiserId,
-                                        @RequestBody TaskRateRequestModel taskRate,
-                                        @RequestAttribute("userId") UUID userId) {
-        peerEvaluationService.overrideAppraiserScore(appraiserId, taskRate.getRate(), userId);
     }
 }

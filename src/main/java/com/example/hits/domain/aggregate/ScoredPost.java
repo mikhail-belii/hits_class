@@ -8,7 +8,6 @@ import com.example.hits.domain.utility.MathUtility;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import java.util.UUID;
 
 @RequiredArgsConstructor
 @Getter
@@ -24,11 +23,20 @@ public class ScoredPost {
 
     private final Float score;
 
+    private final Float teacherScore;
+
     private final Float minScore;
 
     private final Float maxScore;
 
     public Float getScoreByMarkEvaluationType(CourseMarkEvaluationType markEvaluationType) {
+        Float score = this.score;
+        if (teacherScore != null) {
+            score = teacherScore;
+        }
+        if (score == null) {
+            return null;
+        }
         return switch (markEvaluationType) {
             case SUM -> MathUtility.getValueByDiapasons(minScore, score, maxScore);
             case MEAN_VALUE -> MathUtility.getValueByDiapasons(minScore, score, maxScore);

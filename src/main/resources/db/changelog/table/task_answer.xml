@@ -43,4 +43,10 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="AddTeacherScore" author="KBelovodchenko">
+        <addColumn tableName="task_answer">
+            <column name="teacher_score" type="real"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

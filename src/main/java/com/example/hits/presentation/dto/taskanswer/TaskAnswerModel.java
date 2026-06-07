@@ -20,6 +20,8 @@ public class TaskAnswerModel {
 
     private Float score = null;
 
+    private Boolean isScoredByTeacher;
+
     private Float maxScore = 100f;
 
     private LocalDateTime submittedAt = null;
