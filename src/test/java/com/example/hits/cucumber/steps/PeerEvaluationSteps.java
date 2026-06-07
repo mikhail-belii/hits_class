@@ -11,6 +11,7 @@ import com.example.hits.infrastructure.persistence.repository.JpaTaskAnswerRepos
 import com.example.hits.infrastructure.persistence.repository.JpaTaskAnswerStudentAppraiserRepository;
 import com.example.hits.infrastructure.persistence.repository.UserRepository;
 import com.example.hits.presentation.request.taskanswer.CriteriaScoreRequest;
+import com.example.hits.presentation.request.taskanswer.TaskRateRequestModel;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -265,16 +266,19 @@ public class PeerEvaluationSteps {
                 .findFirst().orElseThrow().getUserEntity());
     }
 
-    @When("the appraiser finalizes the evaluation")
+    @When("the appraiser evaluate task answer")
     public void appraiserFinalizesEvaluation() {
-        peerEvaluationService.finalizeAppraiserEvaluation(
-                appraiser.getId(), appraiser.getStudent().getId());
-    }
+        peerEvaluationService.evaluateAppraiser(
+                appraiser.getId(), new TaskRateRequestModel().setRate(3F), appraiser.getStudent().getId());
+}
 
-    @Then("the appraiser submittedAt is set")
+    @Then("the appraiser submittedAt and score is set")
     public void appraiserSubmittedAtIsSet() {
         var captor = ArgumentCaptor.forClass(TaskAnswerStudentAppraiserEntity.class);
         verify(jpaAppraiserRepository).save(captor.capture());
+        var result = captor.getValue();
+        assertEquals(3F, result.getScore());
+        assertNotNull(result.getSubmittedAt());
     }
 
     @Then("the appraiser submittedAt is not set")
