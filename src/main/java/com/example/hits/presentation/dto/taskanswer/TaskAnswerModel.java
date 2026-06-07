@@ -22,6 +22,8 @@ public class TaskAnswerModel {
 
     private Boolean isScoredByTeacher;
 
+    private Float minScore;
+
     private Float maxScore = 100f;
 
     private LocalDateTime submittedAt = null;

@@ -153,7 +153,7 @@ public class PeerEvaluationService {
                             .setMarkCriteriaEntity(markCriteria)
                             .setTaskAnswerStudentAppraiserEntity(appraiser));
             entity.setScore(request.getScore());
-            jpaCriteriaScoreRepository.save(entity);
+            jpaCriteriaScoreRepository.saveAndFlush(entity);
         }
 
         recalculateAppraiserScore(appraiser);
@@ -186,7 +186,6 @@ public class PeerEvaluationService {
         }
 
         appraiser.setScore(taskRate.getRate());
-        appraiser.setSubmittedAt(LocalDateTime.now());
         jpaAppraiserRepository.save(appraiser);
 
         recalculateTaskAnswerScoreFromAppraisers(appraiser.getTaskAnswerEntity());

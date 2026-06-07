@@ -52,6 +52,7 @@ public class TaskAnswerMapper {
                 .setId(taskAnswerEntity.getId())
                 .setScore(score)
                 .setIsScoredByTeacher(isScoredByTeacher)
+                .setMinScore(taskAnswerEntity.getPostEntity() != null ? taskAnswerEntity.getPostEntity().getMinScore() : null)
                 .setMaxScore(taskAnswerEntity.getPostEntity() != null ? taskAnswerEntity.getPostEntity().getMaxScore() : null)
                 .setSubmittedAt(taskAnswerEntity.getSubmittedAt())
                 .setStatus(parseStatus(taskAnswerEntity))

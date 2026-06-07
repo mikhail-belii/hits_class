@@ -115,13 +115,6 @@ public class PostService {
             throw ExceptionUtility.badRequestException("Peer evaluation is only available for task posts", "postType");
         }
 
-        if (model.getTaskMarkEvaluationType() == TaskMarkEvaluationType.TEACHER_DECISION
-                || model.getTaskMarkEvaluationType() == TaskMarkEvaluationType.TEACHER_DECISION_PASS_FAIL) {
-            throw ExceptionUtility.badRequestException(
-                    "Peer evaluation cannot be used with TEACHER_DECISION mark evaluation type",
-                    "taskAnswerAppraisingType");
-        }
-
         if (model.getAppraiserDeadline() == null) {
             throw ExceptionUtility.badRequestException("Appraiser deadline is required when peer evaluation is enabled",
                     "appraiserDeadline");
