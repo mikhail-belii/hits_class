@@ -33,6 +33,8 @@ public class PostUpdateModel implements TaskCreationFields {
 
     private LocalDateTime appraiserDeadline;
 
+    private Integer studentAppraisingNumber;
+
     private TaskAnswerAppraisingType taskAnswerAppraisingType;
 
     private Boolean canSeeAppraiser;

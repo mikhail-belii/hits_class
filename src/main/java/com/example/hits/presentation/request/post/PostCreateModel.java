@@ -1,16 +1,14 @@
 package com.example.hits.presentation.request.post;
 
 import com.example.hits.domain.entity.markCriteria.EvaluationFunction;
-import com.example.hits.domain.entity.post.TaskMarkEvaluationType;
-import com.example.hits.presentation.dto.file.FileModel;
 import com.example.hits.domain.entity.post.PostType;
 import com.example.hits.domain.entity.post.TaskAnswerAppraisingType;
-import jakarta.validation.constraints.NotNull;
+import com.example.hits.domain.entity.post.TaskMarkEvaluationType;
+import com.example.hits.presentation.dto.file.FileModel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -40,6 +38,8 @@ public class PostCreateModel implements TaskCreationFields {
     private LocalDateTime deadline;
 
     private LocalDateTime appraiserDeadline;
+
+    private Integer studentAppraisingNumber;
 
     private TaskAnswerAppraisingType taskAnswerAppraisingType;
 
