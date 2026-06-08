@@ -102,6 +102,7 @@ public class PostMapper {
                 postEntity.getMultiplier(),
                 postEntity.getEvaluationFunction(),
                 taskAnswerEntity != null ? taskAnswerEntity.getScore() : minScore,
+                taskAnswerEntity != null ? taskAnswerEntity.getTeacherScore() : null,
                 minScore,
                 postEntity.getTaskMarkEvaluationType().isAnswerScoreIsPassFail() ? 1 : postEntity.getMaxScore());
     }

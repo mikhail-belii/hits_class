@@ -18,8 +18,8 @@ Feature: Peer evaluation chain
     Given a course with 3 students
     And a task with CHAIN appraising and criteria "Accuracy" range 0.0-5.0 and "Clarity" range 0.0-5.0
     And an appraiser assigned to student "No1" task answer with submitted scores 4 and 3
-    When the appraiser finalizes the evaluation
-    Then the appraiser submittedAt is set
+    When the appraiser evaluate task answer
+    Then the appraiser score is set
     And the task answer score is recalculated
 
   Scenario: Submitting criteria does not finalize the evaluation

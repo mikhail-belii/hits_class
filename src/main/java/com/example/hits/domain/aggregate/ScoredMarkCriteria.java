@@ -4,10 +4,12 @@ import com.example.hits.domain.entity.markCriteria.EvaluationFunction;
 import com.example.hits.domain.entity.post.TaskMarkEvaluationType;
 import com.example.hits.domain.utility.MathUtility;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.Accessors;
 
 import java.util.UUID;
 
 @RequiredArgsConstructor
+@Accessors(chain = true)
 public class ScoredMarkCriteria {
 
     private final EvaluationFunction evaluationFunction;
@@ -25,6 +27,9 @@ public class ScoredMarkCriteria {
     private final UUID postId;
 
     public Float getScoreByMarkEvaluationType(TaskMarkEvaluationType markEvaluationType) {
+        if (score == null) {
+            return 0F;
+        }
         return switch (markEvaluationType) {
             case SUM -> MathUtility.getValueByDiapasons(minScore, score, maxScore);
             case MEAN_VALUE -> MathUtility.getValueByDiapasons(minScore, score, maxScore);

@@ -41,9 +41,18 @@ public class TaskAnswerMapper {
         String postText = extractPostText(taskAnswerEntity);
         postText = postText.length() > MAX_POST_NAME_LENGTH ? postText.substring(0, MAX_POST_NAME_LENGTH) + "..." : postText;
 
+        Boolean isScoredByTeacher = false;
+        Float score = taskAnswerEntity.getScore();
+        if (taskAnswerEntity.getTeacherScore() != null) {
+            isScoredByTeacher = true;
+            score = taskAnswerEntity.getTeacherScore();
+        }
+
         return new TaskAnswerModel()
                 .setId(taskAnswerEntity.getId())
-                .setScore(taskAnswerEntity.getScore())
+                .setScore(score)
+                .setIsScoredByTeacher(isScoredByTeacher)
+                .setMinScore(taskAnswerEntity.getPostEntity() != null ? taskAnswerEntity.getPostEntity().getMinScore() : null)
                 .setMaxScore(taskAnswerEntity.getPostEntity() != null ? taskAnswerEntity.getPostEntity().getMaxScore() : null)
                 .setSubmittedAt(taskAnswerEntity.getSubmittedAt())
                 .setStatus(parseStatus(taskAnswerEntity))
@@ -63,9 +72,17 @@ public class TaskAnswerMapper {
     public TaskAnswerFullModel toFullModel(TaskAnswerEntity taskAnswerEntity) {
         String postText = extractPostText(taskAnswerEntity);
 
+        Boolean isScoredByTeacher = false;
+        Float score = taskAnswerEntity.getScore();
+        if (taskAnswerEntity.getTeacherScore() != null) {
+            isScoredByTeacher = true;
+            score = taskAnswerEntity.getTeacherScore();
+        }
+
         return new TaskAnswerFullModel()
                 .setId(taskAnswerEntity.getId())
-                .setScore(taskAnswerEntity.getScore())
+                .setScore(score)
+                .setIsScoredByTeacher(isScoredByTeacher)
                 .setMaxScore(taskAnswerEntity.getPostEntity() != null ? taskAnswerEntity.getPostEntity().getMaxScore() : null)
                 .setSubmittedAt(taskAnswerEntity.getSubmittedAt())
                 .setStatus(parseStatus(taskAnswerEntity))

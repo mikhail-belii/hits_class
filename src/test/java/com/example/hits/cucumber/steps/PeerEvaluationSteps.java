@@ -11,6 +11,7 @@ import com.example.hits.infrastructure.persistence.repository.JpaTaskAnswerRepos
 import com.example.hits.infrastructure.persistence.repository.JpaTaskAnswerStudentAppraiserRepository;
 import com.example.hits.infrastructure.persistence.repository.UserRepository;
 import com.example.hits.presentation.request.taskanswer.CriteriaScoreRequest;
+import com.example.hits.presentation.request.taskanswer.TaskRateRequestModel;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -227,7 +228,7 @@ public class PeerEvaluationSteps {
     @Then("{int} criteria score records are saved with values {double} and {double}")
     public void criteriaRecordsSaved(int count, double val1, double val2) {
         var captor = ArgumentCaptor.forClass(CriteriaScoreEntity.class);
-        verify(jpaCriteriaScoreRepository, Mockito.times(count)).save(captor.capture());
+        verify(jpaCriteriaScoreRepository, Mockito.times(count)).saveAndFlush(captor.capture());
         var scores = captor.getAllValues().stream().map(CriteriaScoreEntity::getScore).toList();
         assertEquals(count, scores.size());
     }
@@ -265,16 +266,18 @@ public class PeerEvaluationSteps {
                 .findFirst().orElseThrow().getUserEntity());
     }
 
-    @When("the appraiser finalizes the evaluation")
+    @When("the appraiser evaluate task answer")
     public void appraiserFinalizesEvaluation() {
-        peerEvaluationService.finalizeAppraiserEvaluation(
-                appraiser.getId(), appraiser.getStudent().getId());
-    }
+        peerEvaluationService.evaluateAppraiser(
+                appraiser.getId(), new TaskRateRequestModel().setRate(3F), appraiser.getStudent().getId());
+}
 
-    @Then("the appraiser submittedAt is set")
+    @Then("the appraiser score is set")
     public void appraiserSubmittedAtIsSet() {
         var captor = ArgumentCaptor.forClass(TaskAnswerStudentAppraiserEntity.class);
         verify(jpaAppraiserRepository).save(captor.capture());
+        var result = captor.getValue();
+        assertEquals(3F, result.getScore());
     }
 
     @Then("the appraiser submittedAt is not set")

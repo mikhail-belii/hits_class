@@ -66,8 +66,17 @@ public class TaskEvaluationAggregate {
 
     private void sumScoreEvaluation() {
         Float currentScore = 0F;
+        boolean thereAreAnyNotNullScores = false;
         for (ScoredMarkCriteria scoredMarkCriteria : scoredMarkCriteriaList) {
-            currentScore += scoredMarkCriteria.getScoreByMarkEvaluationType(TaskMarkEvaluationType.SUM);
+            var score = scoredMarkCriteria.getScoreByMarkEvaluationType(TaskMarkEvaluationType.SUM);
+            if (score != null) {
+                thereAreAnyNotNullScores = true;
+            }
+            currentScore += score;
+        }
+        if (!thereAreAnyNotNullScores) {
+            taskAnswer.setScore(null);
+            return;
         }
         Float finalScore = MathUtility.getValueByDiapasons(post.getMinScore(), currentScore, post.getMaxScore());
         taskAnswer.setScore(finalScore);
@@ -75,8 +84,17 @@ public class TaskEvaluationAggregate {
 
     private void meanValueScoreEvaluation() {
         Float currentScore = 0F;
+        boolean thereAreAnyNotNullScores = false;
         for (ScoredMarkCriteria scoredMarkCriteria : scoredMarkCriteriaList) {
-            currentScore += scoredMarkCriteria.getScoreByMarkEvaluationType(TaskMarkEvaluationType.MEAN_VALUE);
+            var score = scoredMarkCriteria.getScoreByMarkEvaluationType(TaskMarkEvaluationType.MEAN_VALUE);
+            if (score != null) {
+                thereAreAnyNotNullScores = true;
+            }
+            currentScore += score;
+        }
+        if (!thereAreAnyNotNullScores) {
+            taskAnswer.setScore(null);
+            return;
         }
         Float finalScore = MathUtility.getValueByDiapasons(post.getMinScore(), currentScore / scoredMarkCriteriaList.size(), post.getMaxScore());
         taskAnswer.setScore(finalScore);
@@ -84,12 +102,21 @@ public class TaskEvaluationAggregate {
 
     private void coefficientsSumScoreEvaluation() {
         Float currentScore = 0F;
+        boolean thereAreAnyNotNullScores = false;
         for (ScoredMarkCriteria scoredMarkCriteria : scoredMarkCriteriaList) {
+            var score = scoredMarkCriteria.getScoreByMarkEvaluationType(TaskMarkEvaluationType.COEFFICIENTS_SUM);
+            if (score != null) {
+                thereAreAnyNotNullScores = true;
+            }
             currentScore = scoredMarkCriteria
                     .getEvaluationFunction()
                     .performEvaluation(
-                            scoredMarkCriteria.getScoreByMarkEvaluationType(TaskMarkEvaluationType.COEFFICIENTS_SUM),
+                            score,
                             currentScore);
+        }
+        if (!thereAreAnyNotNullScores) {
+            taskAnswer.setScore(null);
+            return;
         }
         Float finalScore = MathUtility.getValueByDiapasons(post.getMinScore(), currentScore, post.getMaxScore());
         taskAnswer.setScore(finalScore);
@@ -97,8 +124,17 @@ public class TaskEvaluationAggregate {
 
     private void coefficientsMeanValueScoreEvaluation() {
         Float currentScore = 0F;
+        boolean thereAreAnyNotNullScores = false;
         for (ScoredMarkCriteria scoredMarkCriteria : scoredMarkCriteriaList) {
-            currentScore += scoredMarkCriteria.getScoreByMarkEvaluationType(TaskMarkEvaluationType.COEFFICIENTS_MEAN_VALUE);
+            var score = scoredMarkCriteria.getScoreByMarkEvaluationType(TaskMarkEvaluationType.COEFFICIENTS_MEAN_VALUE);
+            if (score != null) {
+                thereAreAnyNotNullScores = true;
+            }
+            currentScore += score;
+        }
+        if (!thereAreAnyNotNullScores) {
+            taskAnswer.setScore(null);
+            return;
         }
         Float finalScore = MathUtility.getValueByDiapasons(post.getMinScore(), currentScore / scoredMarkCriteriaList.size(), post.getMaxScore());
         taskAnswer.setScore(finalScore);
@@ -106,8 +142,17 @@ public class TaskEvaluationAggregate {
 
     private void selfAssessmentScoreEvaluation() {
         Float currentScore = 0F;
+        boolean thereAreAnyNotNullScores = false;
         for (ScoredMarkCriteria scoredMarkCriteria : scoredMarkCriteriaList) {
-            currentScore += scoredMarkCriteria.getScoreByMarkEvaluationType(TaskMarkEvaluationType.SELF_ASSESSMENT);
+            var score = scoredMarkCriteria.getScoreByMarkEvaluationType(TaskMarkEvaluationType.SELF_ASSESSMENT);
+            if (score != null) {
+                thereAreAnyNotNullScores = true;
+            }
+            currentScore += score;
+        }
+        if (!thereAreAnyNotNullScores) {
+            taskAnswer.setScore(null);
+            return;
         }
         Float finalScore = MathUtility.getValueByDiapasons(post.getMinScore(), currentScore, post.getMaxScore());
         taskAnswer.setScore(finalScore);
@@ -115,8 +160,17 @@ public class TaskEvaluationAggregate {
 
     private void passFailScoreEvaluation() {
         Float currentScore = 0F;
+        boolean thereAreAnyNotNullScores = false;
         for (ScoredMarkCriteria scoredMarkCriteria : scoredMarkCriteriaList) {
-            currentScore += scoredMarkCriteria.getScoreByMarkEvaluationType(TaskMarkEvaluationType.PASS_FAIL);
+            var score = scoredMarkCriteria.getScoreByMarkEvaluationType(TaskMarkEvaluationType.PASS_FAIL);
+            if (score != null) {
+                thereAreAnyNotNullScores = true;
+            }
+            currentScore += score;
+        }
+        if (!thereAreAnyNotNullScores) {
+            taskAnswer.setScore(null);
+            return;
         }
         Float finalScore = currentScore / scoredMarkCriteriaList.size();
         if (post.getPassThreshold() < finalScore) {

@@ -50,7 +50,7 @@ public class TaskAnswerRepository {
     public void saveTaskEvaluationAggregate(TaskEvaluationAggregate taskEvaluationAggregate) {
         TaskAnswerEntity taskAnswerEntity = getTaskAnswer(taskEvaluationAggregate.getTaskAnswer().getId());
 
-        taskAnswerEntity.setScore(taskEvaluationAggregate.getTaskAnswer().getScore());
+        taskAnswerEntity.setTeacherScore(taskEvaluationAggregate.getTaskAnswer().getScore());
         repository.saveAndFlush(taskAnswerEntity);
     }
 
