@@ -20,6 +20,7 @@ Feature: Peer evaluation chain
     And an appraiser assigned to student "No1" task answer with submitted scores 4 and 3
     When the appraiser evaluate task answer
     Then the appraiser score is set
+    And the appraiser submittedAt is set
     And the task answer score is recalculated
 
   Scenario: Submitting criteria does not finalize the evaluation

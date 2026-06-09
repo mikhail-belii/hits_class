@@ -270,10 +270,10 @@ public class PeerEvaluationSteps {
     public void appraiserFinalizesEvaluation() {
         peerEvaluationService.evaluateAppraiser(
                 appraiser.getId(), new TaskRateRequestModel().setRate(3F), appraiser.getStudent().getId());
-}
+    }
 
     @Then("the appraiser score is set")
-    public void appraiserSubmittedAtIsSet() {
+    public void appraiserScoreIsSet() {
         var captor = ArgumentCaptor.forClass(TaskAnswerStudentAppraiserEntity.class);
         verify(jpaAppraiserRepository).save(captor.capture());
         var result = captor.getValue();
@@ -286,6 +286,14 @@ public class PeerEvaluationSteps {
         verify(jpaAppraiserRepository).save(captor.capture());
         var saved = captor.getValue();
         assertNull(saved.getSubmittedAt(), "submittedAt should remain null after only submitting criteria");
+    }
+
+    @Then("the appraiser submittedAt is set")
+    public void appraiserSubmittedAtIsSet() {
+        var captor = ArgumentCaptor.forClass(TaskAnswerStudentAppraiserEntity.class);
+        verify(jpaAppraiserRepository).save(captor.capture());
+        var saved = captor.getValue();
+        assertNotNull(saved.getSubmittedAt(), "submittedAt should be set after finalizing evaluation");
     }
 
     @Then("the task answer score is recalculated")

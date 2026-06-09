@@ -186,6 +186,7 @@ public class PeerEvaluationService {
         }
 
         appraiser.setScore(taskRate.getRate());
+        appraiser.setSubmittedAt(LocalDateTime.now());
         jpaAppraiserRepository.save(appraiser);
 
         recalculateTaskAnswerScoreFromAppraisers(appraiser.getTaskAnswerEntity());
@@ -255,15 +256,15 @@ public class PeerEvaluationService {
             return;
         }
 
-        //var submittedAppraisers = appraisers.stream()
-        //        .filter(a -> a.getSubmittedAt() != null)
-        //        .toList();
-//
-        //if (submittedAppraisers.isEmpty()) {
-        //    return;
-        //}
+        var submittedAppraisers = appraisers.stream()
+                .filter(a -> a.getSubmittedAt() != null)
+                .toList();
 
-        float avgScore = (float) appraisers.stream()
+        if (submittedAppraisers.isEmpty()) {
+            return;
+        }
+
+        float avgScore = (float) submittedAppraisers.stream()
                 .mapToDouble(a -> a.getScore() != null ? a.getScore() : 0f)
                 .average()
                 .orElse(0f);
