@@ -35,3 +35,17 @@ Feature: Peer evaluation available works
     And all students submitted their answers
     When student "First" selects student "First" answer to appraise
     Then peer evaluation selection is rejected
+
+  Scenario: Student cannot select already selected work to appraise
+    Given an ANY appraising task after submission deadline with students "First", "Second" and "Third"
+    And all students submitted their answers
+    And student "First" already selected student "Second" answer
+    When student "First" selects student "Second" answer to appraise
+    Then peer evaluation selection is rejected
+
+  Scenario: Student can select reciprocal evaluation when no other works are available
+    Given an ANY appraising task after submission deadline with students "First" and "Second"
+    And all students submitted their answers
+    And student "Second" already selected student "First" answer
+    When student "First" requests available peer evaluation works
+    Then student "Second" answer is available to appraise

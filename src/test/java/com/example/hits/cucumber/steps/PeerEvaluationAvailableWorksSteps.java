@@ -93,6 +93,12 @@ public class PeerEvaluationAvailableWorksSteps {
                 List.of(student1, student2, student3));
     }
 
+    @Given("an ANY appraising task after submission deadline with students {string} and {string}")
+    public void anyAppraisingTaskAfterSubmissionDeadlineWithStudents(String student1, String student2) {
+        createAnyAppraisingTask(LocalDateTime.now().minusDays(1), LocalDateTime.now().plusDays(1), 2,
+                List.of(student1, student2));
+    }
+
     @Given("an ANY appraising task after submission deadline with appraising limit {int} and students {string}, {string} and {string}")
     public void anyAppraisingTaskAfterSubmissionDeadlineWithLimitAndStudents(int limit,
                                                                              String student1,
