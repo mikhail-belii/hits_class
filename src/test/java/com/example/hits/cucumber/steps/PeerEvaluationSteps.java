@@ -1,6 +1,7 @@
 package com.example.hits.cucumber.steps;
 
 import com.example.hits.application.service.peer.PeerEvaluationService;
+import com.example.hits.application.service.taskanswer.TaskAnswerGeneralService;
 import com.example.hits.domain.entity.post.PostType;
 import com.example.hits.domain.entity.post.TaskAnswerAppraisingType;
 import com.example.hits.domain.entity.post.TaskMarkEvaluationType;
@@ -12,6 +13,7 @@ import com.example.hits.infrastructure.persistence.repository.JpaTaskAnswerStude
 import com.example.hits.infrastructure.persistence.repository.UserRepository;
 import com.example.hits.presentation.request.taskanswer.CriteriaScoreRequest;
 import com.example.hits.presentation.request.taskanswer.TaskRateRequestModel;
+import com.example.hits.presentation.dto.taskanswer.PeerEvaluationModel;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -39,6 +41,9 @@ public class PeerEvaluationSteps {
     private PeerEvaluationService peerEvaluationService;
 
     @Autowired
+    private TaskAnswerGeneralService taskAnswerGeneralService;
+
+    @Autowired
     private JpaTaskAnswerRepository jpaTaskAnswerRepository;
 
     @Autowired
@@ -53,6 +58,7 @@ public class PeerEvaluationSteps {
     private CourseEntity course;
     private PostEntity post;
     private TaskAnswerStudentAppraiserEntity appraiser;
+    private List<PeerEvaluationModel> tasksToAppraise;
 
     @Before
     public void setupMocks() {
@@ -192,6 +198,14 @@ public class PeerEvaluationSteps {
                 .setScore(0f);
 
         when(jpaAppraiserRepository.findById(appraiser.getId())).thenReturn(Optional.of(appraiser));
+        when(jpaAppraiserRepository.findAllByStudentIdAndTaskAnswerEntity_PostEntityId(
+                appraiser.getStudent().getId(), post.getId()))
+                .thenReturn(List.of(appraiser));
+    }
+
+    @Given("task hides appraised student")
+    public void taskHidesAppraisedStudent() {
+        post.setCanSeeAppraised(false);
     }
 
     @When("appraiser submits scores: {string}={int}, {string}={int}")
@@ -334,5 +348,16 @@ public class PeerEvaluationSteps {
     @Then("appraiser score is {double}")
     public void appraiserScoreIs(double expectedScore) {
         assertEquals((float) expectedScore, appraiser.getScore(), 0.01f);
+    }
+
+    @When("appraiser requests tasks to appraise")
+    public void appraiserRequestsTasksToAppraise() {
+        tasksToAppraise = taskAnswerGeneralService.getTasksToAppraise(appraiser.getStudent().getId(), post.getId());
+    }
+
+    @Then("appraised student is hidden in tasks to appraise")
+    public void appraisedStudentIsHiddenInTasksToAppraise() {
+        assertEquals(1, tasksToAppraise.size());
+        assertNull(tasksToAppraise.getFirst().getStudent());
     }
 }

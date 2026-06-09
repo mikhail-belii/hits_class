@@ -189,7 +189,7 @@ public class TaskAnswerGeneralService {
             appraiserEntities = jpaAppraiserRepository.findAllByStudentId(userId);
         }
         return appraiserEntities.stream()
-                .map(this::toAppraiserModel)
+                .map(entity -> applyAppraisedPrivacy(toAppraiserModel(entity), entity))
                 .toList();
     }
 
@@ -295,6 +295,11 @@ public class TaskAnswerGeneralService {
         }
 
         var model = toAppraiserModel(appraiser);
+        return applyAppraisedPrivacy(model, appraiser);
+    }
+
+    private PeerEvaluationModel applyAppraisedPrivacy(PeerEvaluationModel model,
+                                                      TaskAnswerStudentAppraiserEntity appraiser) {
         var post = appraiser.getTaskAnswerEntity().getPostEntity();
         var hideStudent = post.getCanSeeAppraised() != null && !post.getCanSeeAppraised();
         if (hideStudent) {

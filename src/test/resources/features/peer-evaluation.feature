@@ -38,3 +38,11 @@ Feature: Peer evaluation chain
     When teacher overrides the appraiser score to 8.0
     Then appraiser score is 8.0
     And the task answer score is recalculated
+
+  Scenario: Appraiser cannot see appraised student when task hides appraised
+    Given a course with 3 students
+    And a task with CHAIN appraising type
+    And task hides appraised student
+    And an appraiser assigned to student "No1" task answer
+    When appraiser requests tasks to appraise
+    Then appraised student is hidden in tasks to appraise
