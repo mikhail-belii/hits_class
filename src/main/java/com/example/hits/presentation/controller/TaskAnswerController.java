@@ -142,6 +142,14 @@ public class TaskAnswerController {
         peerEvaluationService.evaluateAppraiser(appraiserId, taskRate, userId);
     }
 
+    @PutMapping("/appraiser/{appraiserId}/override")
+    @Operation(summary = "Override peer evaluation score [FOR TEACHER+]")
+    public void overrideAppraiserEvaluation(@PathVariable UUID appraiserId,
+                                            @RequestBody TaskRateRequestModel taskRate,
+                                            @RequestAttribute("userId") UUID userId) {
+        peerEvaluationService.overrideAppraiserScore(appraiserId, taskRate.getRate(), userId);
+    }
+
     @GetMapping("/task-answer/{taskAnswerId}/appraisers")
     @Operation(summary = "Who evaluated my answer [FOR STUDENT owner, respects canSeeAppraiser]")
     public List<PeerEvaluationModel> getTaskAnswerAppraisers(@PathVariable UUID taskAnswerId,
