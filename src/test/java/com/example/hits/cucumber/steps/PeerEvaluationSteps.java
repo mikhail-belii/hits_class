@@ -59,6 +59,7 @@ public class PeerEvaluationSteps {
     private PostEntity post;
     private TaskAnswerStudentAppraiserEntity appraiser;
     private List<PeerEvaluationModel> tasksToAppraise;
+    private RuntimeException exception;
 
     @Before
     public void setupMocks() {
@@ -66,6 +67,7 @@ public class PeerEvaluationSteps {
                 jpaCriteriaScoreRepository, userRepository);
         Mockito.lenient().when(jpaTaskAnswerRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         Mockito.lenient().when(jpaAppraiserRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        exception = null;
     }
 
     @Given("a course with {int} students")
@@ -186,10 +188,20 @@ public class PeerEvaluationSteps {
 
     @Given("an appraiser assigned to student {string} task answer")
     public void appraiserAssignedToStudent(String studentName) {
+        appraiserAssignedToStudent(studentName, true);
+    }
+
+    @Given("an appraiser assigned to unsubmitted student {string} task answer")
+    public void appraiserAssignedToUnsubmittedStudentTaskAnswer(String studentName) {
+        appraiserAssignedToStudent(studentName, false);
+    }
+
+    private void appraiserAssignedToStudent(String studentName, boolean submitted) {
         var taskAnswer = jpaTaskAnswerRepository.findAllByPostEntityId(post.getId()).stream()
                 .filter(ta -> ta.getUserEntity().getLastName().equals(studentName))
                 .findFirst()
                 .orElseThrow();
+        taskAnswer.setSubmittedAt(submitted ? LocalDateTime.now().minusHours(1) : null);
 
         appraiser = new TaskAnswerStudentAppraiserEntity()
                 .setId(UUID.randomUUID())
@@ -286,6 +298,16 @@ public class PeerEvaluationSteps {
                 appraiser.getId(), new TaskRateRequestModel().setRate(3F), appraiser.getStudent().getId());
     }
 
+    @When("appraiser tries to evaluate task answer")
+    public void appraiserTriesToEvaluateTaskAnswer() {
+        try {
+            peerEvaluationService.evaluateAppraiser(
+                    appraiser.getId(), new TaskRateRequestModel().setRate(3F), appraiser.getStudent().getId());
+        } catch (RuntimeException e) {
+            exception = e;
+        }
+    }
+
     @Then("the appraiser score is set")
     public void appraiserScoreIsSet() {
         var captor = ArgumentCaptor.forClass(TaskAnswerStudentAppraiserEntity.class);
@@ -359,5 +381,10 @@ public class PeerEvaluationSteps {
     public void appraisedStudentIsHiddenInTasksToAppraise() {
         assertEquals(1, tasksToAppraise.size());
         assertNull(tasksToAppraise.getFirst().getStudent());
+    }
+
+    @Then("appraiser evaluation is rejected")
+    public void appraiserEvaluationIsRejected() {
+        assertNotNull(exception);
     }
 }

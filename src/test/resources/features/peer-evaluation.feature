@@ -46,3 +46,10 @@ Feature: Peer evaluation chain
     And an appraiser assigned to student "No1" task answer
     When appraiser requests tasks to appraise
     Then appraised student is hidden in tasks to appraise
+
+  Scenario: Appraiser cannot evaluate unsubmitted task answer
+    Given a course with 3 students
+    And a task with CHAIN appraising type
+    And an appraiser assigned to unsubmitted student "No1" task answer
+    When appraiser tries to evaluate task answer
+    Then appraiser evaluation is rejected

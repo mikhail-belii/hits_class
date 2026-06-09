@@ -138,6 +138,7 @@ public class PeerEvaluationService {
         }
 
         var post = appraiser.getTaskAnswerEntity().getPostEntity();
+        assertTaskAnswerSubmitted(appraiser.getTaskAnswerEntity());
         if (post.getAppraiserDeadline() != null && post.getAppraiserDeadline().isBefore(LocalDateTime.now())) {
             throw ExceptionUtility.badRequestException("Appraiser deadline has passed");
         }
@@ -174,6 +175,7 @@ public class PeerEvaluationService {
         }
 
         var post = appraiser.getTaskAnswerEntity().getPostEntity();
+        assertTaskAnswerSubmitted(appraiser.getTaskAnswerEntity());
         if (post.getAppraiserDeadline() != null && post.getAppraiserDeadline().isBefore(LocalDateTime.now())) {
             throw ExceptionUtility.badRequestException("Appraiser deadline has passed");
         }
@@ -330,6 +332,12 @@ public class PeerEvaluationService {
     private UserEntity getUser(UUID userId) {
         return userRepository.findById(userId)
                 .orElseThrow(ExceptionUtility::userNotFoundException);
+    }
+
+    private void assertTaskAnswerSubmitted(TaskAnswerEntity taskAnswer) {
+        if (taskAnswer.getSubmittedAt() == null) {
+            throw ExceptionUtility.badRequestException("Task answer is not submitted", "taskAnswerId");
+        }
     }
 
     private void assertCanEditCourse(CourseEntity course, UserEntity user) {
