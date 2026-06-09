@@ -18,6 +18,7 @@ import com.example.hits.presentation.dto.taskanswer.AvailablePeerEvaluationModel
 import com.example.hits.presentation.dto.taskanswer.PeerEvaluationUnavailableReason;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -36,6 +37,34 @@ public class PeerEvaluationAvailabilityService {
     private final UserRepository userRepository;
     private final PostRepository postRepository;
     private final JpaTaskAnswerStudentAppraiserRepository jpaAppraiserRepository;
+
+    @Transactional
+    public void selectWorkToAppraise(UUID taskAnswerId, UUID userId) {
+        var user = getUser(userId);
+        var taskAnswer = jpaTaskAnswerRepository.findById(taskAnswerId)
+                .orElseThrow(ExceptionUtility::taskAnswerNotFoundException);
+        var post = taskAnswer.getPostEntity();
+        if (post == null) {
+            throw ExceptionUtility.postNotFoundException();
+        }
+
+        var availableWork = getAvailableWorksToAppraise(post.getId(), userId).stream()
+                .filter(work -> taskAnswerId.equals(work.getTaskAnswerId()))
+                .findFirst()
+                .orElseThrow(() -> ExceptionUtility.badRequestException("Task answer is not available to appraise",
+                        "taskAnswerId"));
+
+        if (!Boolean.TRUE.equals(availableWork.getCanAppraise())) {
+            throw ExceptionUtility.badRequestException("Task answer is not available to appraise: "
+                    + availableWork.getUnavailableReason(), "taskAnswerId");
+        }
+
+        jpaAppraiserRepository.save(new TaskAnswerStudentAppraiserEntity()
+                .setId(UUID.randomUUID())
+                .setStudent(user)
+                .setTaskAnswerEntity(taskAnswer)
+                .setScore(0f));
+    }
 
     public List<AvailablePeerEvaluationModel> getAvailableWorksToAppraise(UUID postId, UUID userId) {
         var user = getUser(userId);

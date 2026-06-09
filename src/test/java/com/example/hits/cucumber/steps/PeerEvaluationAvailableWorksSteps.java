@@ -22,6 +22,7 @@ import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import java.time.LocalDate;
@@ -37,7 +38,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class PeerEvaluationAvailableWorksSteps {
@@ -55,6 +59,7 @@ public class PeerEvaluationAvailableWorksSteps {
     private Map<String, TaskAnswerEntity> answersByStudentName;
     private List<TaskAnswerStudentAppraiserEntity> appraiserEntities;
     private List<AvailablePeerEvaluationModel> availableWorks;
+    private RuntimeException exception;
 
     @Before
     public void setUp() {
@@ -79,6 +84,7 @@ public class PeerEvaluationAvailableWorksSteps {
         answersByStudentName = new LinkedHashMap<>();
         appraiserEntities = new ArrayList<>();
         availableWorks = List.of();
+        exception = null;
     }
 
     @Given("an ANY appraising task after submission deadline with students {string}, {string} and {string}")
@@ -150,12 +156,14 @@ public class PeerEvaluationAvailableWorksSteps {
                 .setCreatedAt(LocalDateTime.now());
 
         for (var entry : studentsByName.entrySet()) {
-            answersByStudentName.put(entry.getKey(), new TaskAnswerEntity()
+            var taskAnswer = new TaskAnswerEntity()
                     .setId(UUID.randomUUID())
                     .setPostEntity(post)
                     .setUserEntity(entry.getValue())
                     .setFileEntities(List.of())
-                    .setComments(List.of()));
+                    .setComments(List.of());
+            answersByStudentName.put(entry.getKey(), taskAnswer);
+            when(jpaTaskAnswerRepository.findById(taskAnswer.getId())).thenReturn(Optional.of(taskAnswer));
         }
 
         when(postRepository.findById(post.getId())).thenReturn(Optional.of(post));
@@ -193,6 +201,18 @@ public class PeerEvaluationAvailableWorksSteps {
                 studentsByName.get(studentName).getId());
     }
 
+    @When("student {string} selects student {string} answer to appraise")
+    public void studentSelectsStudentAnswerToAppraise(String appraiserName, String appraisedName) {
+        var appraiserId = studentsByName.get(appraiserName).getId();
+        var taskAnswerId = answersByStudentName.get(appraisedName).getId();
+
+        try {
+            taskAnswerGeneralService.selectWorkToAppraise(taskAnswerId, appraiserId);
+        } catch (RuntimeException e) {
+            exception = e;
+        }
+    }
+
     @Then("student {string} answer is available to appraise")
     public void studentAnswerIsAvailableToAppraise(String studentName) {
         var model = findModelForStudent(studentName);
@@ -205,6 +225,26 @@ public class PeerEvaluationAvailableWorksSteps {
         var model = findModelForStudent(studentName);
         assertEquals(false, model.getCanAppraise());
         assertEquals(PeerEvaluationUnavailableReason.valueOf(reason), model.getUnavailableReason());
+    }
+
+    @Then("student {string} is assigned to appraise student {string} answer")
+    public void studentIsAssignedToAppraiseStudentAnswer(String appraiserName, String appraisedName) {
+        assertNull(exception);
+
+        var captor = ArgumentCaptor.forClass(TaskAnswerStudentAppraiserEntity.class);
+        verify(jpaAppraiserRepository).save(captor.capture());
+
+        var savedAppraiser = captor.getValue();
+        assertNotNull(savedAppraiser.getId());
+        assertEquals(studentsByName.get(appraiserName).getId(), savedAppraiser.getStudent().getId());
+        assertEquals(answersByStudentName.get(appraisedName).getId(), savedAppraiser.getTaskAnswerEntity().getId());
+        assertEquals(0f, savedAppraiser.getScore());
+    }
+
+    @Then("peer evaluation selection is rejected")
+    public void peerEvaluationSelectionIsRejected() {
+        assertNotNull(exception);
+        verify(jpaAppraiserRepository, never()).save(any());
     }
 
     private void addStudent(String lastName) {

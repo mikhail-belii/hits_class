@@ -112,6 +112,13 @@ public class TaskAnswerController {
         return taskAnswerGeneralService.getAvailableWorksToAppraise(postId, userId);
     }
 
+    @PostMapping("/task-answer/{taskAnswerId}/select-to-appraise")
+    @Operation(summary = "Select task answer for self-selected peer evaluation [FOR STUDENT]")
+    public void selectWorkToAppraise(@PathVariable UUID taskAnswerId,
+                                     @RequestAttribute("userId") UUID userId) {
+        taskAnswerGeneralService.selectWorkToAppraise(taskAnswerId, userId);
+    }
+
     @GetMapping("/peer-evaluation/{evaluationId}")
     @Operation(summary = "Get peer evaluation detail [FOR STUDENT appraiser]")
     public PeerEvaluationModel getPeerEvaluationDetail(@PathVariable UUID evaluationId,

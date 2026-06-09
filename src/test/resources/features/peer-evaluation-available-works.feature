@@ -23,3 +23,15 @@ Feature: Peer evaluation available works
     When student "First" requests available peer evaluation works
     Then student "Second" answer is unavailable to appraise because RECIPROCAL_APPRAISING
     And student "Third" answer is available to appraise
+
+  Scenario: Student selects available work to appraise
+    Given an ANY appraising task after submission deadline with students "First", "Second" and "Third"
+    And all students submitted their answers
+    When student "First" selects student "Second" answer to appraise
+    Then student "First" is assigned to appraise student "Second" answer
+
+  Scenario: Student cannot select unavailable work to appraise
+    Given an ANY appraising task after submission deadline with students "First", "Second" and "Third"
+    And all students submitted their answers
+    When student "First" selects student "First" answer to appraise
+    Then peer evaluation selection is rejected

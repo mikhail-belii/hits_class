@@ -197,6 +197,10 @@ public class TaskAnswerGeneralService {
         return peerEvaluationAvailabilityService.getAvailableWorksToAppraise(postId, userId);
     }
 
+    public void selectWorkToAppraise(UUID taskAnswerId, UUID userId) {
+        peerEvaluationAvailabilityService.selectWorkToAppraise(taskAnswerId, userId);
+    }
+
     private PeerEvaluationModel toAppraiserModel(TaskAnswerStudentAppraiserEntity entity) {
         var post = entity.getTaskAnswerEntity().getPostEntity();
         var evaluatedStudent = entity.getTaskAnswerEntity().getUserEntity();
