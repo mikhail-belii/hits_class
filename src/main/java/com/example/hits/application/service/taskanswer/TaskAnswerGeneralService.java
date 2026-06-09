@@ -1,5 +1,6 @@
 package com.example.hits.application.service.taskanswer;
 
+import com.example.hits.application.service.peer.PeerEvaluationAvailabilityService;
 import com.example.hits.infrastructure.persistence.entity.CourseEntity;
 import com.example.hits.infrastructure.persistence.entity.CriteriaScoreEntity;
 import com.example.hits.infrastructure.persistence.entity.MarkCriteriaEntity;
@@ -25,6 +26,7 @@ import com.example.hits.application.mapper.SimpleUserMapper;
 import com.example.hits.infrastructure.persistence.entity.TaskAnswerStudentAppraiserEntity;
 import com.example.hits.presentation.dto.markcriteria.ScoredMarkCriteriaModel;
 import com.example.hits.presentation.dto.file.FileModel;
+import com.example.hits.presentation.dto.taskanswer.AvailablePeerEvaluationModel;
 import com.example.hits.presentation.dto.taskanswer.PeerEvaluationModel;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -48,6 +50,7 @@ public class TaskAnswerGeneralService {
     private final UserRepository userRepository;
     private final PostRepository postRepository;
     private final JpaTaskAnswerStudentAppraiserRepository jpaAppraiserRepository;
+    private final PeerEvaluationAvailabilityService peerEvaluationAvailabilityService;
 
     Map<TaskAnswerStatus, Integer> priority = Map.of(
             TaskAnswerStatus.NEW, 1,
@@ -190,6 +193,10 @@ public class TaskAnswerGeneralService {
                 .toList();
     }
 
+    public List<AvailablePeerEvaluationModel> getAvailableWorksToAppraise(UUID postId, UUID userId) {
+        return peerEvaluationAvailabilityService.getAvailableWorksToAppraise(postId, userId);
+    }
+
     private PeerEvaluationModel toAppraiserModel(TaskAnswerStudentAppraiserEntity entity) {
         var post = entity.getTaskAnswerEntity().getPostEntity();
         var evaluatedStudent = entity.getTaskAnswerEntity().getUserEntity();
@@ -199,7 +206,7 @@ public class TaskAnswerGeneralService {
                 ? entity.getCriteriaScores().stream()
                     .filter(cs -> cs.getMarkCriteriaEntity() != null)
                     .collect(Collectors.toMap(cs -> cs.getMarkCriteriaEntity().getId(),
-                                              cs -> cs.getScore(), (a, b) -> a))
+                            CriteriaScoreEntity::getScore, (a, b) -> a))
                 : Map.of();
 
         List<ScoredMarkCriteriaModel> criteriaScoresList;

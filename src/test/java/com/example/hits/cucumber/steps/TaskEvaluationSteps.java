@@ -1,5 +1,6 @@
 package com.example.hits.cucumber.steps;
 
+import com.example.hits.application.service.peer.PeerEvaluationAvailabilityService;
 import com.example.hits.application.service.taskanswer.TaskAnswerGeneralService;
 import com.example.hits.infrastructure.persistence.entity.*;
 import com.example.hits.infrastructure.persistence.repository.*;
@@ -25,6 +26,7 @@ public class TaskEvaluationSteps {
     private UserRepository userRepository;
     private PostRepository postRepository;
     private JpaTaskAnswerStudentAppraiserRepository jpaAppraiserRepository;
+    private PeerEvaluationAvailabilityService peerEvaluationAvailabilityService;
     private TaskAnswerGeneralService taskAnswerGeneralService;
 
     private PostEntity postEntity;
@@ -36,7 +38,13 @@ public class TaskEvaluationSteps {
     @Before
     public void setUp() {
         jpaTaskAnswerRepository = Mockito.mock(JpaTaskAnswerRepository.class);
-        taskAnswerGeneralService = new TaskAnswerGeneralService(jpaTaskAnswerRepository, userRepository, postRepository, jpaAppraiserRepository);
+        peerEvaluationAvailabilityService = Mockito.mock(PeerEvaluationAvailabilityService.class);
+        taskAnswerGeneralService = new TaskAnswerGeneralService(
+                jpaTaskAnswerRepository,
+                userRepository,
+                postRepository,
+                jpaAppraiserRepository,
+                peerEvaluationAvailabilityService);
     }
 
     @Given("a task answer scored by students but not the teachers")

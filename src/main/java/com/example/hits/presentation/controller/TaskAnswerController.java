@@ -1,6 +1,7 @@
 package com.example.hits.presentation.controller;
 
 import com.example.hits.presentation.dto.file.FileModel;
+import com.example.hits.presentation.dto.taskanswer.AvailablePeerEvaluationModel;
 import com.example.hits.presentation.dto.taskanswer.TaskAnswerCriteriaScoreModel;
 import com.example.hits.presentation.dto.taskanswer.TaskAnswerFullModel;
 import com.example.hits.presentation.dto.taskanswer.PeerEvaluationModel;
@@ -102,6 +103,13 @@ public class TaskAnswerController {
     public List<PeerEvaluationModel> getTasksToAppraise(@RequestAttribute("userId") UUID userId,
                                                            @RequestParam(required = false) UUID postId) {
         return taskAnswerGeneralService.getTasksToAppraise(userId, postId);
+    }
+
+    @GetMapping("/post/{postId}/available-to-appraise")
+    @Operation(summary = "Get all task answers availability for self-selected peer evaluation [FOR STUDENT]")
+    public List<AvailablePeerEvaluationModel> getAvailableWorksToAppraise(@PathVariable UUID postId,
+                                                                          @RequestAttribute("userId") UUID userId) {
+        return taskAnswerGeneralService.getAvailableWorksToAppraise(postId, userId);
     }
 
     @GetMapping("/peer-evaluation/{evaluationId}")
