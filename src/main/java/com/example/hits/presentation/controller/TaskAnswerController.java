@@ -1,6 +1,7 @@
 package com.example.hits.presentation.controller;
 
 import com.example.hits.presentation.dto.file.FileModel;
+import com.example.hits.presentation.dto.taskanswer.AvailablePeerEvaluationModel;
 import com.example.hits.presentation.dto.taskanswer.TaskAnswerCriteriaScoreModel;
 import com.example.hits.presentation.dto.taskanswer.TaskAnswerFullModel;
 import com.example.hits.presentation.dto.taskanswer.PeerEvaluationModel;
@@ -104,6 +105,20 @@ public class TaskAnswerController {
         return taskAnswerGeneralService.getTasksToAppraise(userId, postId);
     }
 
+    @GetMapping("/post/{postId}/available-to-appraise")
+    @Operation(summary = "Get all task answers availability for self-selected peer evaluation [FOR STUDENT]")
+    public List<AvailablePeerEvaluationModel> getAvailableWorksToAppraise(@PathVariable UUID postId,
+                                                                          @RequestAttribute("userId") UUID userId) {
+        return taskAnswerGeneralService.getAvailableWorksToAppraise(postId, userId);
+    }
+
+    @PostMapping("/task-answer/{taskAnswerId}/select-to-appraise")
+    @Operation(summary = "Select task answer for self-selected peer evaluation [FOR STUDENT]")
+    public void selectWorkToAppraise(@PathVariable UUID taskAnswerId,
+                                     @RequestAttribute("userId") UUID userId) {
+        taskAnswerGeneralService.selectWorkToAppraise(taskAnswerId, userId);
+    }
+
     @GetMapping("/peer-evaluation/{evaluationId}")
     @Operation(summary = "Get peer evaluation detail [FOR STUDENT appraiser]")
     public PeerEvaluationModel getPeerEvaluationDetail(@PathVariable UUID evaluationId,
@@ -125,6 +140,14 @@ public class TaskAnswerController {
                                           @RequestBody TaskRateRequestModel taskRate,
                                            @RequestAttribute("userId") UUID userId) {
         peerEvaluationService.evaluateAppraiser(appraiserId, taskRate, userId);
+    }
+
+    @PutMapping("/appraiser/{appraiserId}/override")
+    @Operation(summary = "Override peer evaluation score [FOR TEACHER+]")
+    public void overrideAppraiserEvaluation(@PathVariable UUID appraiserId,
+                                            @RequestBody TaskRateRequestModel taskRate,
+                                            @RequestAttribute("userId") UUID userId) {
+        peerEvaluationService.overrideAppraiserScore(appraiserId, taskRate.getRate(), userId);
     }
 
     @GetMapping("/task-answer/{taskAnswerId}/appraisers")

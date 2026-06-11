@@ -22,6 +22,8 @@ public interface TaskCreationFields {
 
     LocalDateTime getAppraiserDeadline();
 
+    Integer getStudentAppraisingNumber();
+
     TaskAnswerAppraisingType getTaskAnswerAppraisingType();
 
 }

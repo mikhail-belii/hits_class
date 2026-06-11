@@ -42,6 +42,8 @@ public class Post {
 
     private Float maxScore;
 
+    private Integer studentAppraisingNumber;
+
     private Float passThreshold;
 
     private LocalDateTime appraiserDeadline;

@@ -129,6 +129,8 @@ public class PostService {
             throw ExceptionUtility.badRequestException("Appraiser deadline cannot be in the past",
                     "appraiserDeadline");
         }
+
+        validateStudentAppraisingNumber(model.getStudentAppraisingNumber());
     }
 
     private void validateAppraisingUpdateConstraints(PostUpdateModel model, PostEntity postEntity) {
@@ -156,6 +158,15 @@ public class PostService {
         if (model.getAppraiserDeadline().isBefore(LocalDateTime.now())) {
             throw ExceptionUtility.badRequestException("Appraiser deadline cannot be in the past",
                     "appraiserDeadline");
+        }
+
+        validateStudentAppraisingNumber(model.getStudentAppraisingNumber());
+    }
+
+    private void validateStudentAppraisingNumber(Integer studentAppraisingNumber) {
+        if (studentAppraisingNumber != null && studentAppraisingNumber <= 0) {
+            throw ExceptionUtility.badRequestException("Student appraising number must be positive",
+                    "studentAppraisingNumber");
         }
     }
 
@@ -221,6 +232,7 @@ public class PostService {
         postEntity.setMultiplier(postUpdateModel.getMultiplier());
         postEntity.setPassThreshold(postUpdateModel.getPassThreshold());
         postEntity.setAppraiserDeadline(postUpdateModel.getAppraiserDeadline());
+        postEntity.setStudentAppraisingNumber(postUpdateModel.getStudentAppraisingNumber());
         postEntity.setTaskAnswerAppraisingType(postUpdateModel.getTaskAnswerAppraisingType());
         postEntity.setCanSeeAppraiser(postUpdateModel.getCanSeeAppraiser());
         postEntity.setCanSeeAppraised(postUpdateModel.getCanSeeAppraised());
@@ -340,6 +352,7 @@ public class PostService {
                 .setMultiplier(postCreateModel.getMultiplier())
                 .setPassThreshold(postCreateModel.getPassThreshold())
                 .setAppraiserDeadline(postCreateModel.getAppraiserDeadline())
+                .setStudentAppraisingNumber(postCreateModel.getStudentAppraisingNumber())
                 .setTaskAnswerAppraisingType(postCreateModel.getTaskAnswerAppraisingType())
                 .setCanSeeAppraiser(postCreateModel.getCanSeeAppraiser())
                 .setCanSeeAppraised(postCreateModel.getCanSeeAppraised());
@@ -375,7 +388,7 @@ public class PostService {
             }
 
             var attachedToAnotherPost = file.getPostEntity() != null
-                    && (currentPostId == null || !file.getPostEntity().getId().equals(currentPostId));
+                    && (!file.getPostEntity().getId().equals(currentPostId));
             if (attachedToAnotherPost || file.getTaskAnswerEntity() != null) {
                 throw ExceptionUtility.badRequestException("File is already attached");
             }

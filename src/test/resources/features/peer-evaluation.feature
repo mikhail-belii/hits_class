@@ -20,6 +20,7 @@ Feature: Peer evaluation chain
     And an appraiser assigned to student "No1" task answer with submitted scores 4 and 3
     When the appraiser evaluate task answer
     Then the appraiser score is set
+    And the appraiser submittedAt is set
     And the task answer score is recalculated
 
   Scenario: Submitting criteria does not finalize the evaluation
@@ -29,3 +30,26 @@ Feature: Peer evaluation chain
     When appraiser submits scores: "Accuracy"=4, "Clarity"=3
     Then appraiser score is calculated as 7.0
     And the appraiser submittedAt is not set
+
+  Scenario: Teacher overrides appraiser score
+    Given a course with 3 students
+    And a task with CHAIN appraising and criteria "Accuracy" range 0.0-5.0 and "Clarity" range 0.0-5.0
+    And an appraiser assigned to student "No1" task answer with submitted scores 4 and 3
+    When teacher overrides the appraiser score to 8.0
+    Then appraiser score is 8.0
+    And the task answer score is recalculated
+
+  Scenario: Appraiser cannot see appraised student when task hides appraised
+    Given a course with 3 students
+    And a task with CHAIN appraising type
+    And task hides appraised student
+    And an appraiser assigned to student "No1" task answer
+    When appraiser requests tasks to appraise
+    Then appraised student is hidden in tasks to appraise
+
+  Scenario: Appraiser cannot evaluate unsubmitted task answer
+    Given a course with 3 students
+    And a task with CHAIN appraising type
+    And an appraiser assigned to unsubmitted student "No1" task answer
+    When appraiser tries to evaluate task answer
+    Then appraiser evaluation is rejected

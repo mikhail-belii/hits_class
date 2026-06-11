@@ -53,6 +53,8 @@ public class PostFullModel {
 
     private LocalDateTime appraiserDeadline;
 
+    private Integer studentAppraisingNumber;
+
     private TaskAnswerAppraisingType taskAnswerAppraisingType;
 
     private Boolean canSeeAppraiser;

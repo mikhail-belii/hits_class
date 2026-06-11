@@ -43,6 +43,8 @@ public class PostShortModel {
 
     private LocalDateTime appraiserDeadline;
 
+    private Integer studentAppraisingNumber;
+
     private TaskAnswerAppraisingType taskAnswerAppraisingType;
 
     private Boolean canSeeAppraiser;

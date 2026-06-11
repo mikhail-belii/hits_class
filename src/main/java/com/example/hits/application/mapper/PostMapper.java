@@ -1,9 +1,11 @@
 package com.example.hits.application.mapper;
 
-import com.example.hits.domain.aggregate.ScoredMarkCriteria;
 import com.example.hits.domain.aggregate.ScoredPost;
 import com.example.hits.domain.entity.post.Post;
-import com.example.hits.infrastructure.persistence.entity.*;
+import com.example.hits.infrastructure.persistence.entity.FileEntity;
+import com.example.hits.infrastructure.persistence.entity.PostCommentEntity;
+import com.example.hits.infrastructure.persistence.entity.PostEntity;
+import com.example.hits.infrastructure.persistence.entity.TaskAnswerEntity;
 import com.example.hits.presentation.dto.file.FileModel;
 import com.example.hits.presentation.dto.post.PostFullModel;
 import com.example.hits.presentation.dto.post.PostShortModel;
@@ -37,6 +39,7 @@ public class PostMapper {
                 .setTaskMarkEvaluationType(postEntity.getTaskMarkEvaluationType())
                 .setPassThreshold(postEntity.getPassThreshold())
                 .setAppraiserDeadline(postEntity.getAppraiserDeadline())
+                .setStudentAppraisingNumber(postEntity.getStudentAppraisingNumber())
                 .setTaskAnswerAppraisingType(postEntity.getTaskAnswerAppraisingType())
                 .setCanSeeAppraiser(postEntity.getCanSeeAppraiser())
                 .setCanSeeAppraised(postEntity.getCanSeeAppraised());
@@ -61,6 +64,7 @@ public class PostMapper {
                                 .map(c -> c.toModel())
                                 .toList())
                 .setAppraiserDeadline(postEntity.getAppraiserDeadline())
+                .setStudentAppraisingNumber(postEntity.getStudentAppraisingNumber())
                 .setTaskAnswerAppraisingType(postEntity.getTaskAnswerAppraisingType())
                 .setCanSeeAppraiser(postEntity.getCanSeeAppraiser())
                 .setCanSeeAppraised(postEntity.getCanSeeAppraised());
@@ -89,6 +93,7 @@ public class PostMapper {
                                 .toList())
                 .setTaskAnswer(taskAnswerEntity != null ? taskAnswerEntity.toModel() : null)
                 .setAppraiserDeadline(postEntity.getAppraiserDeadline())
+                .setStudentAppraisingNumber(postEntity.getStudentAppraisingNumber())
                 .setTaskAnswerAppraisingType(postEntity.getTaskAnswerAppraisingType())
                 .setCanSeeAppraiser(postEntity.getCanSeeAppraiser())
                 .setCanSeeAppraised(postEntity.getCanSeeAppraised());

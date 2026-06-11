@@ -1,6 +1,7 @@
 package com.example.hits.cucumber.steps;
 
 import com.example.hits.application.service.peer.PeerEvaluationService;
+import com.example.hits.application.service.taskanswer.TaskAnswerGeneralService;
 import com.example.hits.domain.entity.post.PostType;
 import com.example.hits.domain.entity.post.TaskAnswerAppraisingType;
 import com.example.hits.domain.entity.post.TaskMarkEvaluationType;
@@ -12,6 +13,7 @@ import com.example.hits.infrastructure.persistence.repository.JpaTaskAnswerStude
 import com.example.hits.infrastructure.persistence.repository.UserRepository;
 import com.example.hits.presentation.request.taskanswer.CriteriaScoreRequest;
 import com.example.hits.presentation.request.taskanswer.TaskRateRequestModel;
+import com.example.hits.presentation.dto.taskanswer.PeerEvaluationModel;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -39,6 +41,9 @@ public class PeerEvaluationSteps {
     private PeerEvaluationService peerEvaluationService;
 
     @Autowired
+    private TaskAnswerGeneralService taskAnswerGeneralService;
+
+    @Autowired
     private JpaTaskAnswerRepository jpaTaskAnswerRepository;
 
     @Autowired
@@ -53,6 +58,8 @@ public class PeerEvaluationSteps {
     private CourseEntity course;
     private PostEntity post;
     private TaskAnswerStudentAppraiserEntity appraiser;
+    private List<PeerEvaluationModel> tasksToAppraise;
+    private RuntimeException exception;
 
     @Before
     public void setupMocks() {
@@ -60,6 +67,7 @@ public class PeerEvaluationSteps {
                 jpaCriteriaScoreRepository, userRepository);
         Mockito.lenient().when(jpaTaskAnswerRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         Mockito.lenient().when(jpaAppraiserRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        exception = null;
     }
 
     @Given("a course with {int} students")
@@ -180,10 +188,20 @@ public class PeerEvaluationSteps {
 
     @Given("an appraiser assigned to student {string} task answer")
     public void appraiserAssignedToStudent(String studentName) {
+        appraiserAssignedToStudent(studentName, true);
+    }
+
+    @Given("an appraiser assigned to unsubmitted student {string} task answer")
+    public void appraiserAssignedToUnsubmittedStudentTaskAnswer(String studentName) {
+        appraiserAssignedToStudent(studentName, false);
+    }
+
+    private void appraiserAssignedToStudent(String studentName, boolean submitted) {
         var taskAnswer = jpaTaskAnswerRepository.findAllByPostEntityId(post.getId()).stream()
                 .filter(ta -> ta.getUserEntity().getLastName().equals(studentName))
                 .findFirst()
                 .orElseThrow();
+        taskAnswer.setSubmittedAt(submitted ? LocalDateTime.now().minusHours(1) : null);
 
         appraiser = new TaskAnswerStudentAppraiserEntity()
                 .setId(UUID.randomUUID())
@@ -192,6 +210,14 @@ public class PeerEvaluationSteps {
                 .setScore(0f);
 
         when(jpaAppraiserRepository.findById(appraiser.getId())).thenReturn(Optional.of(appraiser));
+        when(jpaAppraiserRepository.findAllByStudentIdAndTaskAnswerEntity_PostEntityId(
+                appraiser.getStudent().getId(), post.getId()))
+                .thenReturn(List.of(appraiser));
+    }
+
+    @Given("task hides appraised student")
+    public void taskHidesAppraisedStudent() {
+        post.setCanSeeAppraised(false);
     }
 
     @When("appraiser submits scores: {string}={int}, {string}={int}")
@@ -270,10 +296,20 @@ public class PeerEvaluationSteps {
     public void appraiserFinalizesEvaluation() {
         peerEvaluationService.evaluateAppraiser(
                 appraiser.getId(), new TaskRateRequestModel().setRate(3F), appraiser.getStudent().getId());
-}
+    }
+
+    @When("appraiser tries to evaluate task answer")
+    public void appraiserTriesToEvaluateTaskAnswer() {
+        try {
+            peerEvaluationService.evaluateAppraiser(
+                    appraiser.getId(), new TaskRateRequestModel().setRate(3F), appraiser.getStudent().getId());
+        } catch (RuntimeException e) {
+            exception = e;
+        }
+    }
 
     @Then("the appraiser score is set")
-    public void appraiserSubmittedAtIsSet() {
+    public void appraiserScoreIsSet() {
         var captor = ArgumentCaptor.forClass(TaskAnswerStudentAppraiserEntity.class);
         verify(jpaAppraiserRepository).save(captor.capture());
         var result = captor.getValue();
@@ -286,6 +322,14 @@ public class PeerEvaluationSteps {
         verify(jpaAppraiserRepository).save(captor.capture());
         var saved = captor.getValue();
         assertNull(saved.getSubmittedAt(), "submittedAt should remain null after only submitting criteria");
+    }
+
+    @Then("the appraiser submittedAt is set")
+    public void appraiserSubmittedAtIsSet() {
+        var captor = ArgumentCaptor.forClass(TaskAnswerStudentAppraiserEntity.class);
+        verify(jpaAppraiserRepository).save(captor.capture());
+        var saved = captor.getValue();
+        assertNotNull(saved.getSubmittedAt(), "submittedAt should be set after finalizing evaluation");
     }
 
     @Then("the task answer score is recalculated")
@@ -326,5 +370,21 @@ public class PeerEvaluationSteps {
     @Then("appraiser score is {double}")
     public void appraiserScoreIs(double expectedScore) {
         assertEquals((float) expectedScore, appraiser.getScore(), 0.01f);
+    }
+
+    @When("appraiser requests tasks to appraise")
+    public void appraiserRequestsTasksToAppraise() {
+        tasksToAppraise = taskAnswerGeneralService.getTasksToAppraise(appraiser.getStudent().getId(), post.getId());
+    }
+
+    @Then("appraised student is hidden in tasks to appraise")
+    public void appraisedStudentIsHiddenInTasksToAppraise() {
+        assertEquals(1, tasksToAppraise.size());
+        assertNull(tasksToAppraise.getFirst().getStudent());
+    }
+
+    @Then("appraiser evaluation is rejected")
+    public void appraiserEvaluationIsRejected() {
+        assertNotNull(exception);
     }
 }
