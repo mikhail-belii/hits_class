@@ -90,7 +90,7 @@ public class PeerEvaluationService {
                     .setId(UUID.randomUUID())
                     .setStudent(appraiserStudent)
                     .setTaskAnswerEntity(targetTaskAnswer)
-                    .setScore(0f));
+                    .setScore(null));
         }
 
         jpaAppraiserRepository.saveAll(appraiserEntities);
@@ -128,10 +128,6 @@ public class PeerEvaluationService {
     public void submitAppraiserScore(UUID appraiserId, List<CriteriaScoreRequest> criteriaScores, UUID userId) {
         var appraiser = jpaAppraiserRepository.findById(appraiserId)
                 .orElseThrow(ExceptionUtility::appraiserNotFoundException);
-
-        if (appraiser.getSubmittedAt() != null) {
-            throw ExceptionUtility.badRequestException("Appraiser has already submitted their evaluation");
-        }
 
         if (!appraiser.getStudent().getId().equals(userId)) {
             throw ExceptionUtility.forbiddenRightsException();
@@ -261,10 +257,6 @@ public class PeerEvaluationService {
         var submittedAppraisers = appraisers.stream()
                 .filter(a -> a.getSubmittedAt() != null)
                 .toList();
-
-        if (submittedAppraisers.isEmpty()) {
-            return;
-        }
 
         float avgScore = (float) submittedAppraisers.stream()
                 .mapToDouble(a -> a.getScore() != null ? a.getScore() : 0f)

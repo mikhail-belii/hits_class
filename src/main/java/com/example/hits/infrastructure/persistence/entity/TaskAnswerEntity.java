@@ -23,7 +23,7 @@ public class TaskAnswerEntity {
     @Id
     private UUID id = UUID.randomUUID();
 
-    private Float score = 0f;
+    private Float score = null;
 
     private Float teacherScore = null;
 
@@ -55,5 +55,12 @@ public class TaskAnswerEntity {
     @ManyToOne
     @JoinColumn(name = "post_id")
     private PostEntity postEntity;
+
+    public Float getTeacherScoreOrScore() {
+        if (teacherScore == null) {
+            return score;
+        }
+        return teacherScore;
+    }
 
 }

@@ -11,4 +11,5 @@ public interface JpaTaskAnswerRepository extends JpaRepository<TaskAnswerEntity,
     Optional<TaskAnswerEntity> findByUserEntityIdAndPostEntityId(UUID userId, UUID postId);
     List<TaskAnswerEntity> findAllByUserEntityIdAndPostEntityCourseEntityId(UUID userId, UUID courseId);
     List<TaskAnswerEntity> findAllByPostEntityId(UUID postId);
+    List<TaskAnswerEntity> findAllByPostEntityCourseEntityId(UUID courseId);
 }

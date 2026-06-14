@@ -1,17 +1,18 @@
 package com.example.hits.application.service.course;
 
+import com.example.hits.application.mapper.UserMapper;
+import com.example.hits.application.mapper.UserMapperImpl;
 import com.example.hits.domain.aggregate.CourseEvaluationAggregate;
 import com.example.hits.domain.aggregate.TaskEvaluationAggregate;
-import com.example.hits.infrastructure.persistence.entity.CourseEntity;
-import com.example.hits.infrastructure.persistence.entity.UserEntity;
+import com.example.hits.infrastructure.persistence.entity.*;
 import com.example.hits.domain.repository.JpaCourseRepository;
 import com.example.hits.infrastructure.persistence.repository.CourseRepository;
+import com.example.hits.infrastructure.persistence.repository.JpaTaskAnswerRepository;
 import com.example.hits.infrastructure.persistence.repository.UserCourseRepository;
 import com.example.hits.infrastructure.persistence.repository.UserRepository;
 import com.example.hits.application.util.CourseUtility;
 import com.example.hits.application.util.ExceptionUtility;
 import com.example.hits.domain.entity.user.UserCourseRole;
-import com.example.hits.infrastructure.persistence.entity.UserCourseEntity;
 import com.example.hits.application.mapper.CourseMapper;
 import com.example.hits.application.mapper.UserCourseMapper;
 import com.example.hits.application.service.taskanswer.TaskAnswerGeneralService;
@@ -24,8 +25,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+
+import static com.example.hits.domain.entity.user.UserCourseRole.STUDENT;
 
 @Service
 @RequiredArgsConstructor
@@ -33,11 +35,13 @@ public class CourseService {
 
     private final UserRepository userRepository;
     private final JpaCourseRepository jpaCourseRepository;
+    private final JpaTaskAnswerRepository jpaTaskAnswerRepository;
     private final UserCourseRepository userCourseRepository;
     private final CourseCodeGenerator courseCodeGenerator;
     private final TaskAnswerGeneralService taskAnswerGeneralService;
     private final PeerEvaluationService peerEvaluationService;
     private final CourseRepository courseRepository;
+    private final UserMapper userMapper;
 
     @Transactional
     public CourseModel createCourse(UUID requestingUserId, CourseCreateModel courseCreateModel) {
@@ -83,7 +87,7 @@ public class CourseService {
         CourseEntity courseEntity = jpaCourseRepository.findById(courseId)
                 .orElseThrow(ExceptionUtility::courseNotFoundException);
         courseEntity.getCourseUsers().stream()
-                .filter(uc -> UserCourseRole.STUDENT.equals(uc.getUserRole()))
+                .filter(uc -> STUDENT.equals(uc.getUserRole()))
                 .forEach(uc -> evaluateUserCourseScore(uc.getId()));
     }
 
@@ -124,6 +128,73 @@ public class CourseService {
                 .stream()
                 .map(UserCourseMapper::toModel)
                 .toList();
+    }
+
+    public List<AppraiserTopCourseModel> getCourseAppraisersTop(UUID requestingUserId, UUID courseId) {
+        UserEntity requestingUserEntity = userRepository.findById(requestingUserId)
+                .orElseThrow(ExceptionUtility::userNotFoundException);
+        CourseEntity courseEntity = jpaCourseRepository.findById(courseId)
+                .orElseThrow(ExceptionUtility::courseNotFoundException);
+
+        if (CourseUtility.getUserCourse(courseEntity, requestingUserEntity).isEmpty()) {
+            throw ExceptionUtility.forbiddenRightsException();
+        }
+
+        HashMap<UUID, AppraiserTopCourseModel> appraiserTopCourseModelHashMap = new HashMap<>();
+        List<TaskAnswerEntity> courseTaskAnswers = jpaTaskAnswerRepository.findAllByPostEntityCourseEntityId(courseId);
+        List<UserCourseEntity> courseStudents = courseEntity.getCourseUsers().stream()
+                .filter(u -> STUDENT.equals(u.getUserRole()))
+                .toList();
+
+        for (TaskAnswerEntity taskAnswer : courseTaskAnswers) {
+            PostEntity post = taskAnswer.getPostEntity();
+            List<TaskAnswerStudentAppraiserEntity> aprraisers = taskAnswer.getStudentAppraiserEntities();
+            for (TaskAnswerStudentAppraiserEntity appraiser : aprraisers) {
+                UserEntity student = appraiser.getStudent();
+                if (appraiser.getScore() == null) {
+                    continue;
+                }
+                if (appraiserTopCourseModelHashMap.containsKey(student.getId())) {
+                    AppraiserTopCourseModel appraiserTopCourseModel = appraiserTopCourseModelHashMap.get(student.getId());
+                    appraiserTopCourseModel.setMatchPercentage(appraiserTopCourseModel.getMatchPercentage()
+                            + calculateAppraiserMatchPercentage(post.getMinScore(), post.getMaxScore(), appraiser.getScore(), taskAnswer.getTeacherScoreOrScore()));
+                    appraiserTopCourseModel.setAppraisedNumber(appraiserTopCourseModel.getAppraisedNumber() + 1);
+                } else {
+                    appraiserTopCourseModelHashMap.put(student.getId(), new AppraiserTopCourseModel()
+                            .setMatchPercentage(calculateAppraiserMatchPercentage(post.getMinScore(), post.getMaxScore(), appraiser.getScore(), taskAnswer.getTeacherScoreOrScore()))
+                            .setAppraisedNumber(1));
+                }
+            }
+        }
+
+        List<AppraiserTopCourseModel> appraiserTop = new ArrayList<>();
+
+        for (UserCourseEntity studentCourse : courseStudents) {
+            if (appraiserTopCourseModelHashMap.containsKey(studentCourse.getUserEntity().getId())) {
+                AppraiserTopCourseModel appraiserTopCourseModel = appraiserTopCourseModelHashMap.get(studentCourse.getUserEntity().getId());
+                appraiserTopCourseModel.setMatchPercentage(
+                        appraiserTopCourseModel.getMatchPercentage() / appraiserTopCourseModel.getAppraisedNumber());
+                appraiserTopCourseModel.setStudentModel(userMapper.toModel(studentCourse.getUserEntity()));
+                appraiserTop.add(appraiserTopCourseModel);
+            } else {
+                appraiserTop.add(new AppraiserTopCourseModel()
+                        .setMatchPercentage(0)
+                        .setAppraisedNumber(0)
+                        .setStudentModel(userMapper.toModel(studentCourse.getUserEntity())));
+            }
+        }
+
+        appraiserTop.sort((e1, e2) ->
+                e1.getMatchPercentage() - e2.getMatchPercentage() > 0f ? -1 : 1);
+
+        return appraiserTop;
+    }
+
+    private int calculateAppraiserMatchPercentage(Float minScore, Float maxScore, Float appraiserScore, Float finalScore) {
+        if (appraiserScore == null || finalScore == null || appraiserScore < minScore || finalScore < minScore) {
+            return 0;
+        }
+        return Math.round(100 * (1 - (Math.abs(finalScore - appraiserScore) / Math.max(finalScore - minScore, maxScore - finalScore))));
     }
 
     public CourseModel getConcreteCourse(UUID requestingUserId, UUID courseId) {
@@ -263,7 +334,7 @@ public class CourseService {
                 .setId(UUID.randomUUID())
                 .setCourseEntity(courseEntity)
                 .setUserEntity(joiningUserEntity)
-                .setUserRole(UserCourseRole.STUDENT)
+                .setUserRole(STUDENT)
                 .setCreatedAt(LocalDateTime.now());
     }
 

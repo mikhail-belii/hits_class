@@ -49,6 +49,15 @@ public class CourseController {
         courseService.archiveCourse(requestingUserId, isArchived, courseId);
     }
  
+    @GetMapping(value = "/{courseId}/appraisers-top")
+    @Operation(summary = "Get course appraisers top")
+    public List<AppraiserTopCourseModel> getCourseAppraisersTop(
+            @RequestAttribute("userId") UUID requestingUserId,
+            @PathVariable("courseId") UUID courseId
+    ) {
+        return courseService.getCourseAppraisersTop(requestingUserId, courseId);
+    }
+
     @GetMapping(value = "/{courseId}/users")
     @Operation(summary = "Get course users")
     public List<UserCourseModel> getCourseUsers(
