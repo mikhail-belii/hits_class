@@ -35,7 +35,7 @@ public class ScoredPost {
             score = teacherScore;
         }
         if (score == null) {
-            return null;
+            return 0F;
         }
         return switch (markEvaluationType) {
             case SUM -> MathUtility.getValueByDiapasons(minScore, score, maxScore);
