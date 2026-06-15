@@ -1,6 +1,7 @@
 package com.example.hits.application.mapper;
 
 import com.example.hits.domain.entity.taskanswer.TaskAnswer;
+import com.example.hits.domain.entity.taskanswer.TaskAnswerEvaluationStatus;
 import com.example.hits.infrastructure.persistence.entity.FileEntity;
 import com.example.hits.presentation.dto.file.FileModel;
 import com.example.hits.presentation.dto.taskanswer.TaskAnswerFullModel;
@@ -56,7 +57,7 @@ public class TaskAnswerMapper {
                 .setMaxScore(taskAnswerEntity.getPostEntity() != null ? taskAnswerEntity.getPostEntity().getMaxScore() : null)
                 .setSubmittedAt(taskAnswerEntity.getSubmittedAt())
                 .setStatus(parseStatus(taskAnswerEntity))
-                .setEvaluationStatus(taskAnswerEntity.getEvaluationStatus())
+                .setEvaluationStatus(score != null ? TaskAnswerEvaluationStatus.EVALUATED : taskAnswerEntity.getEvaluationStatus())
                 .setFiles(safeFiles(taskAnswerEntity).stream()
                         .map(file -> new FileModel(file.getId(), "answer"))
                         .toList())
@@ -86,7 +87,7 @@ public class TaskAnswerMapper {
                 .setMaxScore(taskAnswerEntity.getPostEntity() != null ? taskAnswerEntity.getPostEntity().getMaxScore() : null)
                 .setSubmittedAt(taskAnswerEntity.getSubmittedAt())
                 .setStatus(parseStatus(taskAnswerEntity))
-                .setEvaluationStatus(taskAnswerEntity.getEvaluationStatus())
+                .setEvaluationStatus(score != null ? TaskAnswerEvaluationStatus.EVALUATED : taskAnswerEntity.getEvaluationStatus())
                 .setFiles(safeFiles(taskAnswerEntity).stream()
                         .map(file -> new FileModel(file.getId(), "answer"))
                         .toList())
